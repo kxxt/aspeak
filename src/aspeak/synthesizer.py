@@ -7,13 +7,15 @@ from .urls import voice_list_url
 
 class Synthesizer:
     def __init__(self):
-        self._current_token = None
-        pass
+        self._current_token = Token()
 
     def _token(self):
-        if self._current_token is None or self._current_token.expired():
-            self._current_token = Token.new()
+        if self.expired():
+            self._current_token.renew()
         return self._current_token
+
+    def expired(self):
+        return self._current_token.expired()
 
     def _base_speech_config(self):
         return speechsdk.SpeechConfig(auth_token=self._token().token, region=self._token().region)
