@@ -29,11 +29,44 @@ options:
                         Output wav file path
 ```
 
-e.g.
+- If you don't specify `-o`, we will use your default speaker.
+- If you don't specify `-t` or `-s`, we will assume `-t` is provided.
+
+### Examples
+
+#### Speak "Hello, world!" to default speaker.
 
 ```sh
 $ aspeak -t "Hello, world!" -o output.wav
 ```
 
-- If you don't specify `-o`, we will use your default speaker.
-- If you don't specify `-t` or `-s`, we will read from stdin until `EOF`.
+#### Save synthesized speech to a file.
+
+```sh
+$ aspeak -t "Hello, world!" -o output.wav
+```
+
+#### Read text from file and speak it.
+
+```sh
+$ cat input.txt | aspeak
+```
+
+or
+
+```sh
+$ aspeak -f input.txt
+```
+
+#### Read from stdin and speak it.
+
+```sh
+$ aspeak
+```
+
+or (more verbose)
+
+```sh
+$ aspeak -f -
+```
+
