@@ -6,33 +6,40 @@ from .urls import voice_list_url
 
 
 class Synthesizer:
-    def __init__(self):
+    def __init__(self, audio_config=None):
         self._current_token = Token()
+        self._audio_config = audio_config or speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
+        self._synthesizer_cache = speechsdk.SpeechSynthesizer(speech_config=self._base_speech_config(),
+                                                              audio_config=self._audio_config)
 
+    @property
     def _token(self):
-        if self.expired():
+        if self.expired:
             self._current_token.renew()
         return self._current_token
 
+    @property
     def expired(self):
         return self._current_token.expired()
 
+    @property
+    def _synthesizer(self):
+        if self.expired:
+            self._current_token.renew()
+            self._synthesizer_cache = speechsdk.SpeechSynthesizer(speech_config=self._base_speech_config(),
+                                                                  audio_config=self._audio_config)
+        return self._synthesizer_cache
+
     def _base_speech_config(self):
-        return speechsdk.SpeechConfig(auth_token=self._token().token, region=self._token().region)
+        return speechsdk.SpeechConfig(auth_token=self._token.token, region=self._token.region)
 
     def get_voice_list(self):
-        r = requests.get(voice_list_url(self._token().region),
-                         headers={'Authorization': 'Bearer ' + self._token().token})
+        r = requests.get(voice_list_url(self._token.region),
+                         headers={'Authorization': 'Bearer ' + self._token.token})
         return r.json()
 
     def text_to_speech(self, text):
-        pass
-
-    def text_to_wav(self, text, filename):
-        pass
-
-    def ssml_to_wav(self, ssml, filename):
-        pass
+        return self._synthesizer.speak_text_async(text).get()
 
     def ssml_to_speech(self, ssml):
-        pass
+        return self._synthesizer.speak_ssml_async(ssml).get()
