@@ -6,11 +6,13 @@ from .urls import voice_list_url
 
 
 class Synthesizer:
-    def __init__(self, audio_config=None, locale='en-US'):
+    def __init__(self, audio_config=None, locale='en-US', voice=None):
         self._current_token = Token()
         self._audio_config = audio_config or speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
         self._cfg = self._base_speech_config()
         self._cfg.speech_synthesis_language = locale
+        if voice is not None:
+            self._cfg.speech_synthesis_voice_name = voice
         self._synthesizer_cache = speechsdk.SpeechSynthesizer(speech_config=self._cfg,
                                                               audio_config=self._audio_config)
 

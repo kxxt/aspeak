@@ -7,7 +7,7 @@ from . import Synthesizer
 parser = argparse.ArgumentParser(
     description='This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you.',
     prog='aspeak')
-parser.add_argument('-v', '--version', action='version', version='%(prog)s 0.2.1')
+parser.add_argument('-V', '--version', action='version', version='%(prog)s 0.2.1')
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-t', '--text', help='Text to speak. Left blank when reading from file/stdin.',
                    dest='text', nargs='?', default=argparse.SUPPRESS)
@@ -17,6 +17,7 @@ parser.add_argument('-f', '--file', help='Text/SSML file to speak, default to `-
                     default=argparse.SUPPRESS)
 parser.add_argument('-o', '--output', help='Output wav file path', dest='output_path', default=None)
 parser.add_argument('-l', '--locale', help='Locale to use, default to en-US', dest='locale', default='en-US')
+parser.add_argument('-v', '--voice', help='Voice to use, default to en-US-JessaRUS', dest='voice', default=None)
 
 
 def read_file(args):
@@ -32,7 +33,7 @@ def main():
         audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
     else:
         audio_config = speechsdk.audio.AudioOutputConfig(filename=args.output_path)
-    synthesizer = Synthesizer(audio_config, args.locale)
+    synthesizer = Synthesizer(audio_config, args.locale, args.voice)
     if hasattr(args, 'ssml'):
         if args.ssml is None:
             # --ssml is provided but empty
