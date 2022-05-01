@@ -74,7 +74,7 @@ $ aspeak -f -
 
 ## About This Application
 
-- I found Azure TTS can synthesize nearly authentic human voice, which is very interesting :happy:.
+- I found Azure TTS can synthesize nearly authentic human voice, which is very interesting :laughing:.
 - I wrote this program to learn Azure Cognitive Services.
 - And I use this program daily, because `espeak` and `festival` outputs terrible :fearful: audio.
     - But I respect :raised_hands: their maintainers' work, both are good open source software and they can be used off-line.
