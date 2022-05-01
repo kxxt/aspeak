@@ -1,26 +1,27 @@
+import argparse
 import azure.cognitiveservices.speech as speechsdk
+import sys
 
-speech_config = speechsdk.SpeechConfig(auth_token=input("Your Token:"), region="eastus")
-# audio_config = speechsdk.audio.AudioOutputConfig(filename="output.wav")
-audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
+from . import Synthesizer
 
-# The language of the voice that speaks.
-speech_config.speech_synthesis_voice_name='en-US-JennyNeural'
+parser = argparse.ArgumentParser(description='A simple text-to-speech client using azure TTS API.', prog='aspeak')
+parser.add_argument('-v', '--version', action='version', version='%(prog)s 0.1')
+parser.add_argument('-t', '--text', help='Text to speak.', dest='text', default=None)
+parser.add_argument('-s', '--ssml', help='SSML to speak.', dest='ssml', default=None)
+parser.add_argument('-o', '--output', help='Output wav file path', dest='output_path', default=None)
 
-speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)
-
-# Get text from the console and synthesize to the default speaker.
-print("Enter some text that you want to speak >")
-text = input()
-
-speech_synthesis_result = speech_synthesizer.speak_text_async(text).get()
-
-if speech_synthesis_result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
-    print("Speech synthesized for text [{}]".format(text))
-elif speech_synthesis_result.reason == speechsdk.ResultReason.Canceled:
-    cancellation_details = speech_synthesis_result.cancellation_details
-    print("Speech synthesis canceled: {}".format(cancellation_details.reason))
-    if cancellation_details.reason == speechsdk.CancellationReason.Error:
-        if cancellation_details.error_details:
-            print("Error details: {}".format(cancellation_details.error_details))
-            print("Did you set the speech resource key and region values?")
+if __name__ == '__main__':
+    args = parser.parse_args()
+    if args.output_path is None:
+        audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
+    else:
+        audio_config = speechsdk.audio.AudioOutputConfig(filename=args.output_path)
+    synthesizer = Synthesizer(audio_config)
+    if args.text is not None and args.ssml is not None:
+        parser.error('`--text` and `--ssml` are mutually exclusive.')
+    if args.ssml is not None:
+        synthesizer.ssml_to_speech(args.ssml)
+    elif args.text is not None:
+        synthesizer.text_to_speech(args.text)
+    else:
+        synthesizer.text_to_speech(sys.stdin.read())
