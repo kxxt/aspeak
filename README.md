@@ -2,7 +2,7 @@
 
 A simple text-to-speech client using azure TTS API(trial).
 
-**TL;DR**: This program uses trial auth token of Azure Congnitive Services to do speech synthesis for you.
+**TL;DR**: This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you.
 
 ## Installation
 
@@ -13,15 +13,18 @@ $ pip install aspeak
 ## Usage
 
 ```
-usage: aspeak [-h] [-v] [-t TEXT] [-s SSML] [-o OUTPUT_PATH]
+usage: aspeak [-h] [-v] [-t [TEXT] | -s [SSML]] [-f FILE] [-o OUTPUT_PATH]
 
-A simple text-to-speech client using azure TTS API(trial).
+This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you.
 
 options:
   -h, --help            show this help message and exit
   -v, --version         show program's version number and exit
-  -t TEXT, --text TEXT  Text to speak.
-  -s SSML, --ssml SSML  SSML to speak.
+  -t [TEXT], --text [TEXT]
+                        Text to speak. Left blank when reading from file/stdin.
+  -s [SSML], --ssml [SSML]
+                        SSML to speak. Left blank when reading from file/stdin.
+  -f FILE, --file FILE  Text/SSML file to speak, default to `-`(stdin).
   -o OUTPUT_PATH, --output OUTPUT_PATH
                         Output wav file path
 ```
