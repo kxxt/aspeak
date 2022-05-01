@@ -4,8 +4,7 @@ import json
 import re
 
 from . import errors
-
-TRAIL_URL = 'https://azure.microsoft.com/en-us/services/cognitive-services/text-to-speech/'
+from .urls import TRAIL_URL
 
 
 def _get_auth_token() -> str:
