@@ -28,7 +28,7 @@ $ pip install aspeak
 ## Usage
 
 ```
-usage: aspeak [-h] [-v] [-t [TEXT] | -s [SSML]] [-f FILE] [-o OUTPUT_PATH]
+usage: aspeak [-h] [-v] [-t [TEXT] | -s [SSML]] [-f FILE] [-o OUTPUT_PATH] [-l LOCALE]
 
 This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you.
 
@@ -42,6 +42,8 @@ options:
   -f FILE, --file FILE  Text/SSML file to speak, default to `-`(stdin).
   -o OUTPUT_PATH, --output OUTPUT_PATH
                         Output wav file path
+  -l LOCALE, --locale LOCALE
+                        Locale to use, default to en-US
 ```
 
 - If you don't specify `-o`, we will use your default speaker.
@@ -83,6 +85,12 @@ or (more verbose)
 
 ```sh
 $ aspeak -f -
+```
+
+#### Speak Chinese.
+
+```sh
+$ aspeak -t "你好，世界！" -l zh-CN
 ```
 
 ## About This Application
