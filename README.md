@@ -1,8 +1,10 @@
-# aspeak
+# :speaking_head: aspeak
 
-A simple text-to-speech client using azure TTS API(trial).
+A simple text-to-speech client using azure TTS API(trial). :laughing:
 
 **TL;DR**: This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you.
+
+You can try the Azure TTS API online: https://azure.microsoft.com/en-us/services/cognitive-services/text-to-speech
 
 ## Installation
 
@@ -69,4 +71,12 @@ or (more verbose)
 ```sh
 $ aspeak -f -
 ```
+
+## About This Application
+
+- I found Azure TTS can synthesize nearly authentic human voice, which is very interesting :happy:.
+- I wrote this program to learn Azure Cognitive Services.
+- And I use this program daily, because `espeak` and `festival` outputs terrible :fearful: audio.
+    - But I respect :raised_hands: their maintainers' work, both are good open source software and they can be used off-line.
+- I hope you like it :heart:.
 
