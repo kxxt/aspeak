@@ -6,10 +6,12 @@ from .urls import voice_list_url
 
 
 class Synthesizer:
-    def __init__(self, audio_config=None):
+    def __init__(self, audio_config=None, locale='en-US'):
         self._current_token = Token()
         self._audio_config = audio_config or speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
-        self._synthesizer_cache = speechsdk.SpeechSynthesizer(speech_config=self._base_speech_config(),
+        self._cfg = self._base_speech_config()
+        self._cfg.speech_synthesis_language = locale
+        self._synthesizer_cache = speechsdk.SpeechSynthesizer(speech_config=self._cfg,
                                                               audio_config=self._audio_config)
 
     @property
@@ -26,7 +28,7 @@ class Synthesizer:
     def _synthesizer(self):
         if self.expired:
             self._current_token.renew()
-            self._synthesizer_cache = speechsdk.SpeechSynthesizer(speech_config=self._base_speech_config(),
+            self._synthesizer_cache = speechsdk.SpeechSynthesizer(speech_config=self._cfg,
                                                                   audio_config=self._audio_config)
         return self._synthesizer_cache
 

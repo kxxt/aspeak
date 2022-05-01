@@ -16,6 +16,7 @@ group.add_argument('-s', '--ssml', help='SSML to speak. Left blank when reading 
 parser.add_argument('-f', '--file', help='Text/SSML file to speak, default to `-`(stdin).', dest='file',
                     default=argparse.SUPPRESS)
 parser.add_argument('-o', '--output', help='Output wav file path', dest='output_path', default=None)
+parser.add_argument('-l', '--locale', help='Locale to use, default to en-US', dest='locale', default='en-US')
 
 
 def read_file(args):
@@ -31,7 +32,7 @@ def main():
         audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
     else:
         audio_config = speechsdk.audio.AudioOutputConfig(filename=args.output_path)
-    synthesizer = Synthesizer(audio_config)
+    synthesizer = Synthesizer(audio_config, args.locale)
     if hasattr(args, 'ssml'):
         if args.ssml is None:
             # --ssml is provided but empty
