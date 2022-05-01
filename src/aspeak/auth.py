@@ -40,7 +40,7 @@ def _parse_info_from_token(token: str) -> dict:
     return json.loads(json_string)
 
 
-def get_token_info() -> dict:
+def get_token_info_dict() -> dict:
     """
     Get an auth token and its associated information in a dict.
     """
