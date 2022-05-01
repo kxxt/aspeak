@@ -4,7 +4,7 @@ import sys
 
 from . import Synthesizer
 
-parser = argparse.ArgumentParser(description='A simple text-to-speech client using azure TTS API.', prog='aspeak')
+parser = argparse.ArgumentParser(description='A simple text-to-speech client using azure TTS API(trial).', prog='aspeak')
 parser.add_argument('-v', '--version', action='version', version='%(prog)s 0.1')
 parser.add_argument('-t', '--text', help='Text to speak.', dest='text', default=None)
 parser.add_argument('-s', '--ssml', help='SSML to speak.', dest='ssml', default=None)
