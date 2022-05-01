@@ -4,8 +4,9 @@ import sys
 
 from . import Synthesizer
 
-parser = argparse.ArgumentParser(description='A simple text-to-speech client using azure TTS API(trial).',
-                                 prog='aspeak')
+parser = argparse.ArgumentParser(
+    description='This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you.',
+    prog='aspeak')
 parser.add_argument('-v', '--version', action='version', version='%(prog)s 0.2.0')
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-t', '--text', help='Text to speak. Left blank when reading from file/stdin.',
