@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser(
     description='This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you.',
     prog='aspeak')
 group = parser.add_mutually_exclusive_group()
-group.add_argument('-V', '--version', action='version', version='%(prog)s 0.2.1')
+group.add_argument('-V', '--version', action='version', version='%(prog)s 0.3.0')
 subgroup = group.add_mutually_exclusive_group()
 subgroup.add_argument('-t', '--text', help='Text to speak. Left blank when reading from file/stdin.',
                       dest='text', nargs='?', default=argparse.SUPPRESS)
