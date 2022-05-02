@@ -29,7 +29,7 @@ $ pip install --upgrade aspeak
 ## Usage
 
 ```
-usage: aspeak [-h] [-V | -L | [-t [TEXT] | -s [SSML]]] [-p PITCH] [-r RATE] [-f FILE] [-o OUTPUT_PATH] [-l LOCALE] [-v VOICE]
+usage: aspeak [-h] [-V | -L | [-t [TEXT] | -s [SSML]]] [-p PITCH] [-r RATE] [-S STYLE] [-f FILE] [-o OUTPUT_PATH] [-l LOCALE] [-v VOICE]
 
 This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you
 
@@ -53,6 +53,8 @@ Options for --text:
   -p PITCH, --pitch PITCH
                         Set pitch, default to 0
   -r RATE, --rate RATE  Set speech rate, default to 0.04
+  -S STYLE, --style STYLE
+                        Set speech style, default to "general"
 ```
 
 - If you don't specify `-o`, we will use your default speaker.
@@ -147,10 +149,10 @@ $ aspeak -t "你好，世界！" -l zh-CN
 $ aspeak -t "你好，世界！" -v zh-CN-YunjianNeural
 ```
 
-#### Custom pitch and rate
+#### Custom pitch, rate and style
 
 ```sh
-$ aspeak -t "你好，世界！" -v zh-CN-XiaoxiaoNeural -p 1.5 -r 0.5
+$ aspeak -t "你好，世界！" -v zh-CN-XiaoxiaoNeural -p 1.5 -r 0.5 -S sad
 ```
 
 ## About This Application
