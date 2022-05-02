@@ -29,26 +29,27 @@ $ pip install aspeak
 ## Usage
 
 ```
-usage: aspeak [-h] [-V | [-t [TEXT] | -s [SSML]]] [-p PITCH] [-r RATE] [-f FILE] [-o OUTPUT_PATH] [-l LOCALE] [-v VOICE]
+usage: aspeak [-h] [-V | -L | [-t [TEXT] | -s [SSML]]] [-p PITCH] [-r RATE] [-f FILE] [-o OUTPUT_PATH] [-l LOCALE] [-v VOICE]
 
-This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you.
+This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you
 
 options:
   -h, --help            show this help message and exit
   -V, --version         show program's version number and exit
+  -L, --list-voices     list available voices, you can combine this argument with -v and -l
   -t [TEXT], --text [TEXT]
-                        Text to speak. Left blank when reading from file/stdin.
+                        Text to speak. Left blank when reading from file/stdin
   -s [SSML], --ssml [SSML]
-                        SSML to speak. Left blank when reading from file/stdin.
-  -f FILE, --file FILE  Text/SSML file to speak, default to `-`(stdin).
+                        SSML to speak. Left blank when reading from file/stdin
+  -f FILE, --file FILE  Text/SSML file to speak, default to `-`(stdin)
   -o OUTPUT_PATH, --output OUTPUT_PATH
                         Output wav file path
   -l LOCALE, --locale LOCALE
                         Locale to use, default to en-US
   -v VOICE, --voice VOICE
-                        Voice to use.
+                        Voice to use
 
-Text options:
+Options for --text:
   -p PITCH, --pitch PITCH
                         Set pitch, default to 0
   -r RATE, --rate RATE  Set speech rate, default to 0.04
@@ -65,6 +66,44 @@ Text options:
 ```sh
 $ aspeak -t "Hello, world!" -o output.wav
 ```
+
+#### List all available voices.
+
+```sh
+$ aspeak -L
+```
+
+#### List all available voices for Chinese.
+
+```sh
+$ aspeak -L -l zh-CN
+```
+
+#### Get information about a voice.
+
+```sh
+$ aspeak -L -v en-US-SaraNeural
+```
+
+<details>
+
+<summary>
+    Output
+</summary>
+
+```
+Microsoft Server Speech Text to Speech Voice (en-US, SaraNeural)
+Display Name: Sara
+Local Name: Sara @ en-US
+Locale: English (United States)
+Gender: Female
+ID: en-US-SaraNeural
+Styles: ['cheerful', 'angry', 'sad']
+Voice Type: Neural
+Status: GA
+```
+
+</details>
 
 #### Save synthesized speech to a file.
 
