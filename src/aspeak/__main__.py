@@ -7,26 +7,27 @@ from .ssml import create_ssml
 from .voices import format_voice
 
 parser = argparse.ArgumentParser(
-    description='This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you.',
+    description='This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you',
     prog='aspeak')
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-V', '--version', action='version', version='%(prog)s 0.3.2')
-group.add_argument('-L', '--list-voices', action='store_true', help='list available voices', dest='list_voices')
+group.add_argument('-L', '--list-voices', action='store_true',
+                   help='list available voices, you can combine this argument with -v and -l', dest='list_voices')
 subgroup = group.add_mutually_exclusive_group()
-subgroup.add_argument('-t', '--text', help='Text to speak. Left blank when reading from file/stdin.',
+subgroup.add_argument('-t', '--text', help='Text to speak. Left blank when reading from file/stdin',
                       dest='text', nargs='?', default=argparse.SUPPRESS)
-subgroup.add_argument('-s', '--ssml', help='SSML to speak. Left blank when reading from file/stdin.',
+subgroup.add_argument('-s', '--ssml', help='SSML to speak. Left blank when reading from file/stdin',
                       dest='ssml', nargs='?', default=argparse.SUPPRESS)
-text_group = parser.add_argument_group('Text options')
+text_group = parser.add_argument_group('Options for --text')
 text_group.add_argument('-p', '--pitch', help='Set pitch, default to 0', dest='pitch',
                         type=float, default=argparse.SUPPRESS)
 text_group.add_argument('-r', '--rate', help='Set speech rate, default to 0.04', dest='rate',
                         type=float, default=argparse.SUPPRESS)
-parser.add_argument('-f', '--file', help='Text/SSML file to speak, default to `-`(stdin).', dest='file',
+parser.add_argument('-f', '--file', help='Text/SSML file to speak, default to `-`(stdin)', dest='file',
                     default=argparse.SUPPRESS)
 parser.add_argument('-o', '--output', help='Output wav file path', dest='output_path', default=None)
 parser.add_argument('-l', '--locale', help='Locale to use, default to en-US', dest='locale', default=argparse.SUPPRESS)
-parser.add_argument('-v', '--voice', help='Voice to use.', dest='voice', default=argparse.SUPPRESS)
+parser.add_argument('-v', '--voice', help='Voice to use', dest='voice', default=argparse.SUPPRESS)
 
 
 def read_file(args):
