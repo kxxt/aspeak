@@ -10,7 +10,7 @@
     <img src="https://img.shields.io/github/contributors/kxxt/aspeak" />
 </a>
 <a href="https://github.com/kxxt/aspeak/pulse" alt="Activity">
-        <img src="https://img.shields.io/github/commit-activity/m/kxxt/aspeak" />
+    <img src="https://img.shields.io/github/commit-activity/m/kxxt/aspeak" />
 </a>
 
 
