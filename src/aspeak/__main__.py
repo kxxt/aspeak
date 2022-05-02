@@ -23,6 +23,8 @@ text_group.add_argument('-p', '--pitch', help='Set pitch, default to 0', dest='p
                         type=float, default=argparse.SUPPRESS)
 text_group.add_argument('-r', '--rate', help='Set speech rate, default to 0.04', dest='rate',
                         type=float, default=argparse.SUPPRESS)
+text_group.add_argument('-S', '--style', help='Set speech style, default to "general"', dest='style',
+                        default=argparse.SUPPRESS)
 parser.add_argument('-f', '--file', help='Text/SSML file to speak, default to `-`(stdin)', dest='file',
                     default=argparse.SUPPRESS)
 parser.add_argument('-o', '--output', help='Output wav file path', dest='output_path', default=None)
@@ -44,13 +46,14 @@ def preprocess_text(text, args):
     :param args: args
     :return: (is_ssml, text_or_ssml)
     """
-    if hasattr(args, 'pitch') or hasattr(args, 'rate'):
+    if hasattr(args, 'pitch') or hasattr(args, 'rate') or hasattr(args, 'style'):
         if args.voice is None:
             parser.error('Voice must be specified when using pitch or rate.')
         pitch = args.pitch if hasattr(args, 'pitch') else 0.0
         rate = args.rate if hasattr(args, 'rate') else 0.04
         voice = args.voice if hasattr(args, 'voice') else None
-        ssml = create_ssml(text, voice, rate, pitch)
+        style = args.style if hasattr(args, 'style') else 'general'
+        ssml = create_ssml(text, voice, rate, pitch, style)
         return True, ssml
     return False, text
 
@@ -86,8 +89,8 @@ def main():
         list_voices(synthesizer, args)
         return
     if hasattr(args, 'ssml'):
-        if hasattr(args, 'rate') or hasattr(args, 'pitch'):
-            parser.error('You can only use --rate and --pitch with --text. Please set these settings in your SSML.')
+        if hasattr(args, 'rate') or hasattr(args, 'pitch') or hasattr(args, 'style'):
+            parser.error('You can only use --rate/--pitch/--style with --text. Please set these settings in your SSML.')
         if args.ssml is None:
             # --ssml is provided but empty
             synthesizer.ssml_to_speech(read_file(args))
