@@ -1,4 +1,5 @@
 # :speaking_head: aspeak
+
 [![GitHub stars](https://img.shields.io/github/stars/kxxt/aspeak)](https://github.com/kxxt/aspeak/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/kxxt/aspeak)](https://github.com/kxxt/aspeak/issues)
 [![GitHub forks](https://img.shields.io/github/forks/kxxt/aspeak)](https://github.com/kxxt/aspeak/network)
@@ -28,7 +29,7 @@ $ pip install aspeak
 ## Usage
 
 ```
-usage: aspeak [-h] [-V | [-t [TEXT] | -s [SSML]]] [-f FILE] [-o OUTPUT_PATH] [-l LOCALE] [-v VOICE]
+usage: aspeak [-h] [-V | [-t [TEXT] | -s [SSML]]] [-p PITCH] [-r RATE] [-f FILE] [-o OUTPUT_PATH] [-l LOCALE] [-v VOICE]
 
 This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you.
 
@@ -46,10 +47,16 @@ options:
                         Locale to use, default to en-US
   -v VOICE, --voice VOICE
                         Voice to use.
+
+Text options:
+  -p PITCH, --pitch PITCH
+                        Set pitch, default to 0
+  -r RATE, --rate RATE  Set speech rate, default to 0.04
 ```
 
 - If you don't specify `-o`, we will use your default speaker.
 - If you don't specify `-t` or `-s`, we will assume `-t` is provided.
+- You must specify voice if you want to use `-p` or `-r` option.
 
 ### Examples
 
@@ -101,11 +108,18 @@ $ aspeak -t "你好，世界！" -l zh-CN
 $ aspeak -t "你好，世界！" -v zh-CN-YunjianNeural
 ```
 
+#### Custom pitch and rate
+
+```sh
+$ aspeak -t "你好，世界！" -v zh-CN-XiaoxiaoNeural -p 1.5 -r 0.5
+```
+
 ## About This Application
 
 - I found Azure TTS can synthesize nearly authentic human voice, which is very interesting :laughing:.
 - I wrote this program to learn Azure Cognitive Services.
 - And I use this program daily, because `espeak` and `festival` outputs terrible :fearful: audio.
-    - But I respect :raised_hands: their maintainers' work, both are good open source software and they can be used off-line.
+    - But I respect :raised_hands: their maintainers' work, both are good open source software and they can be used
+      off-line.
 - I hope you like it :heart:.
 
