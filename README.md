@@ -23,7 +23,7 @@ You can try the Azure TTS API online: https://azure.microsoft.com/en-us/services
 ## Installation
 
 ```sh
-$ pip install aspeak
+$ pip install --upgrade aspeak
 ```
 
 ## Usage
