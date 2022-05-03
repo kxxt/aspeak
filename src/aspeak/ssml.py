@@ -1,7 +1,8 @@
+from typing import Union
 from xml.sax.saxutils import escape
 
 
-def create_ssml(text, voice, rate, pitch, style="general"):
+def create_ssml(text: str, voice: Union[str, None], rate: float, pitch: float, style: str = "general"):
     """
     Create SSML for text to be spoken.
     """
