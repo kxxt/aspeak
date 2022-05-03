@@ -164,3 +164,7 @@ $ aspeak -t "你好，世界！" -v zh-CN-XiaoxiaoNeural -p 1.5 -r 0.5 -S sad
       off-line.
 - I hope you like it :heart:.
 
+## Alternative Applications
+
+- https://github.com/skygongque/tts
+- https://github.com/LuckyHookin/edge-TTS-record/
