@@ -13,6 +13,8 @@ class Synthesizer:
         self._current_token = Token()
         self._audio_config = audio_config or speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
         self._cfg = self._base_speech_config()
+        self._voice = voice
+        self._locale = locale
         self._cfg.speech_synthesis_language = locale
         if voice is not None:
             self._cfg.speech_synthesis_voice_name = voice
@@ -22,7 +24,7 @@ class Synthesizer:
     @property
     def _token(self) -> Token:
         if self.expired:
-            self._current_token.renew()
+            self.renew()
         return self._current_token
 
     @property
@@ -30,12 +32,24 @@ class Synthesizer:
         return self._current_token.expired()
 
     @property
+    def _config(self) -> speechsdk.SpeechConfig:
+        if self.expired:
+            self.renew()
+        return self._cfg
+
+    @property
     def _synthesizer(self) -> speechsdk.SpeechSynthesizer:
         if self.expired:
-            self._current_token.renew()
-            self._synthesizer_cache = speechsdk.SpeechSynthesizer(speech_config=self._cfg,
-                                                                  audio_config=self._audio_config)
+            self.renew()
         return self._synthesizer_cache
+
+    def renew(self) -> None:
+        self._current_token.renew()
+        self._cfg = self._base_speech_config()
+        self._cfg.speech_synthesis_language = self._locale
+        if self._voice is not None:
+            self._cfg.speech_synthesis_voice_name = self._voice
+        self._synthesizer_cache = speechsdk.SpeechSynthesizer(speech_config=self._cfg, audio_config=self._audio_config)
 
     def _base_speech_config(self) -> speechsdk.SpeechConfig:
         return speechsdk.SpeechConfig(auth_token=self._token.token, region=self._token.region)
