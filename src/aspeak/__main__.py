@@ -76,6 +76,25 @@ def list_voices(synthesizer, args):
         print(format_voice(v))
 
 
+COLOR_RED = '\033[91m'
+COLOR_CLEAR = '\033[0m'
+
+
+def handle_result(r: speechsdk.SpeechSynthesisResult):
+    if r.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
+        exit(0)
+    elif r.reason == speechsdk.ResultReason.Canceled:
+        cancellation_details = r.cancellation_details
+        print(f"{COLOR_RED}Error{COLOR_CLEAR}: Speech synthesis canceled: {cancellation_details.reason}",
+              file=sys.stderr)
+        if cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print(cancellation_details.error_details, file=sys.stderr)
+        exit(2)
+    else:
+        print(f"{COLOR_RED}Error{COLOR_CLEAR}: Unexpected result reason: {r.reason}", file=sys.stderr)
+        exit(3)
+
+
 def main():
     args = parser.parse_args()
     if args.output_path is None:
@@ -84,33 +103,38 @@ def main():
         audio_config = speechsdk.audio.AudioOutputConfig(filename=args.output_path)
     locale = args.locale if hasattr(args, 'locale') else 'en-US'
     voice = args.voice if hasattr(args, 'voice') else None
-    synthesizer = Synthesizer(audio_config, locale, voice)
-    if args.list_voices:
-        list_voices(synthesizer, args)
-        return
-    if hasattr(args, 'ssml'):
-        if hasattr(args, 'rate') or hasattr(args, 'pitch') or hasattr(args, 'style'):
-            parser.error('You can only use --rate/--pitch/--style with --text. Please set these settings in your SSML.')
-        if args.ssml is None:
-            # --ssml is provided but empty
-            synthesizer.ssml_to_speech(read_file(args))
+    try:
+        synthesizer = Synthesizer(audio_config, locale, voice)
+        if args.list_voices:
+            list_voices(synthesizer, args)
+            return
+        if hasattr(args, 'ssml'):
+            if hasattr(args, 'rate') or hasattr(args, 'pitch') or hasattr(args, 'style'):
+                parser.error(
+                    'You can only use --rate/--pitch/--style with --text. Please set these settings in your SSML.')
+            if args.ssml is None:
+                # --ssml is provided but empty
+                handle_result(synthesizer.ssml_to_speech(read_file(args)))
+            else:
+                # --ssml is provided and not empty
+                if hasattr(args, 'file'):
+                    parser.error('You can only specify one input source.')
+                handle_result(synthesizer.ssml_to_speech(args.text))
+        elif hasattr(args, 'text'):
+            if args.text is None:
+                # --text is provided but empty
+                handle_result(speech_function_selector(synthesizer, preprocess_text(read_file(args), args)))
+            else:
+                # --text is provided and not empty
+                if hasattr(args, 'file'):
+                    parser.error('You can only specify one input source.')
+                handle_result(speech_function_selector(synthesizer, preprocess_text(args.text, args)))
         else:
-            # --ssml is provided and not empty
-            if hasattr(args, 'file'):
-                parser.error('You can only specify one input source.')
-            synthesizer.ssml_to_speech(args.text)
-    elif hasattr(args, 'text'):
-        if args.text is None:
-            # --text is provided but empty
-            speech_function_selector(synthesizer, preprocess_text(read_file(args), args))
-        else:
-            # --text is provided and not empty
-            if hasattr(args, 'file'):
-                parser.error('You can only specify one input source.')
-            speech_function_selector(synthesizer, preprocess_text(args.text, args))
-    else:
-        # Neither --text nor --ssml is provided, pretend --text is provided and empty
-        synthesizer.text_to_speech(read_file(args))
+            # Neither --text nor --ssml is provided, pretend --text is provided and empty
+            handle_result(synthesizer.text_to_speech(read_file(args)))
+    except Exception as e:
+        print(f"{COLOR_RED}Error{COLOR_CLEAR}: {e}")
+        exit(4)
 
 
 if __name__ == '__main__':
