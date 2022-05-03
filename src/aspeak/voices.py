@@ -1,4 +1,4 @@
-def format_voice(voice):
+def format_voice(voice: dict) -> str:
     return f"""{voice["Name"]}
 Display Name: {voice["DisplayName"]}
 Local Name: {voice["LocalName"]} @ {voice["Locale"]}
