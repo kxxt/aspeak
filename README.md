@@ -125,6 +125,14 @@ or
 $ aspeak -f input.txt
 ```
 
+maybe you prefer:
+
+```sh
+$ aspeak -l zh-CN << EOF
+我能吞下玻璃而不伤身体。
+EOF
+```
+
 #### Read from stdin and speak it.
 
 ```sh
