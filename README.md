@@ -66,7 +66,7 @@ Options for --text:
 #### Speak "Hello, world!" to default speaker.
 
 ```sh
-$ aspeak -t "Hello, world!" -o output.wav
+$ aspeak -t "Hello, world!"
 ```
 
 #### List all available voices.
