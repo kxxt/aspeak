@@ -9,19 +9,18 @@ from .urls import voice_list_url
 
 class Synthesizer:
     def __init__(self, audio_config: speechsdk.audio.AudioOutputConfig = None, locale: str = 'en-US',
-                 voice: Union[str, None] = None, mp3: bool = False):
+                 voice: Union[str, None] = None, audio_format: speechsdk.SpeechSynthesisOutputFormat = None):
         self._current_token = Token()
         self._audio_config = audio_config or speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
         self._cfg = self._base_speech_config()
         self._voice = voice
         self._locale = locale
-        self._mp3 = mp3
         self._cfg.speech_synthesis_language = locale
-        if mp3:
-            self._cfg.set_speech_synthesis_output_format(
-                speechsdk.SpeechSynthesisOutputFormat.Audio24Khz160KBitRateMonoMp3)
+        self._format = audio_format
         if voice is not None:
             self._cfg.speech_synthesis_voice_name = voice
+        if self._format is not None:
+            self._cfg.set_speech_synthesis_output_format(self._format)
         self._synthesizer_cache = speechsdk.SpeechSynthesizer(speech_config=self._cfg,
                                                               audio_config=self._audio_config)
 
@@ -53,9 +52,8 @@ class Synthesizer:
         self._cfg.speech_synthesis_language = self._locale
         if self._voice is not None:
             self._cfg.speech_synthesis_voice_name = self._voice
-        if self._mp3:
-            self._cfg.set_speech_synthesis_output_format(
-                speechsdk.SpeechSynthesisOutputFormat.Audio24Khz160KBitRateMonoMp3)
+        if self._format is not None:
+            self._cfg.set_speech_synthesis_output_format(self._format)
         self._synthesizer_cache = speechsdk.SpeechSynthesizer(speech_config=self._cfg, audio_config=self._audio_config)
 
     def _base_speech_config(self) -> speechsdk.SpeechConfig:
