@@ -29,7 +29,7 @@ $ pip install --upgrade aspeak
 ## Usage
 
 ```
-usage: aspeak [-h] [-V | -L | [-t [TEXT] | -s [SSML]]] [-p PITCH] [-r RATE] [-S STYLE] [-f FILE] [-e ENCODING] [-o OUTPUT_PATH] [--mp3] [-l LOCALE] [-v VOICE]
+usage: aspeak [-h] [-V | -L | -Q | [-t [TEXT] | -s [SSML]]] [-p PITCH] [-r RATE] [-S STYLE] [-f FILE] [-e ENCODING] [-o OUTPUT_PATH] [--mp3 | -F FORMAT] [-l LOCALE] [-v VOICE]
 
 This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you
 
@@ -37,6 +37,8 @@ options:
   -h, --help            show this help message and exit
   -V, --version         show program's version number and exit
   -L, --list-voices     list available voices, you can combine this argument with -v and -l
+  -Q, --list-qualities-and-formats
+                        list available qualities and formats
   -t [TEXT], --text [TEXT]
                         Text to speak. Left blank when reading from file/stdin
   -s [SSML], --ssml [SSML]
@@ -47,6 +49,8 @@ options:
   -o OUTPUT_PATH, --output OUTPUT_PATH
                         Output file path, wav format by default
   --mp3                 Use mp3 format instead of wav. (Only works when outputting to a file)
+  -F FORMAT, --format FORMAT
+                        Set output audio format (experts only)
   -l LOCALE, --locale LOCALE
                         Locale to use, default to en-US
   -v VOICE, --voice VOICE
@@ -176,6 +180,61 @@ $ aspeak -t "你好，世界！" -v zh-CN-YunjianNeural
 
 ```sh
 $ aspeak -t "你好，世界！" -v zh-CN-XiaoxiaoNeural -p 1.5 -r 0.5 -S sad
+```
+
+### Examples for Advanced Users
+
+#### List available audio formats
+
+```sh
+$ aspeak -Q
+```
+
+<details>
+
+<summary>Output</summary>
+
+```
+Available formats:
+- Audio24Khz96KBitRateMonoMp3
+- Audio16Khz128KBitRateMonoMp3
+- Webm24Khz16Bit24KbpsMonoOpus
+- Audio48Khz96KBitRateMonoMp3
+- Raw16Khz16BitMonoTrueSilk
+- Riff16Khz16BitMonoPcm
+- Audio24Khz16Bit24KbpsMonoOpus
+- Raw16Khz16BitMonoPcm
+- Raw8Khz8BitMonoMULaw
+- Ogg24Khz16BitMonoOpus
+- Audio24Khz160KBitRateMonoMp3
+- Audio16Khz64KBitRateMonoMp3
+- Riff48Khz16BitMonoPcm
+- Audio16Khz16Bit32KbpsMonoOpus
+- Raw24Khz16BitMonoTrueSilk
+- Raw8Khz16BitMonoPcm
+- Riff8Khz8BitMonoMULaw
+- Ogg48Khz16BitMonoOpus
+- Raw48Khz16BitMonoPcm
+- Webm16Khz16BitMonoOpus
+- Raw24Khz16BitMonoPcm
+- Riff8Khz8BitMonoALaw
+- Audio48Khz192KBitRateMonoMp3
+- Webm24Khz16BitMonoOpus
+- Riff24Khz16BitMonoPcm
+- Audio16Khz32KBitRateMonoMp3
+- Raw8Khz8BitMonoALaw
+- Audio24Khz48KBitRateMonoMp3
+- Riff8Khz16BitMonoPcm
+- Audio24Khz16Bit48KbpsMonoOpus
+- Ogg16Khz16BitMonoOpus
+```
+
+</details>
+
+#### Use a custom audio format for output
+
+```sh
+$ python -m aspeak -t "Hello World" -F Riff48Khz16BitMonoPcm -o high-quality.wav
 ```
 
 ## About This Application
