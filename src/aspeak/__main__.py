@@ -5,6 +5,7 @@ import sys
 from . import Synthesizer
 from .ssml import create_ssml
 from .voices import format_voice
+from .formats import get_available_formats
 
 parser = argparse.ArgumentParser(
     description='This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you',
@@ -13,6 +14,9 @@ group = parser.add_mutually_exclusive_group()
 group.add_argument('-V', '--version', action='version', version='%(prog)s 1.1.4')
 group.add_argument('-L', '--list-voices', action='store_true',
                    help='list available voices, you can combine this argument with -v and -l', dest='list_voices')
+group.add_argument('-Q', '--list-qualities-and-formats', action='store_true',
+                   help='list available qualities and formats',
+                   dest='list_qualities_and_formats')
 subgroup = group.add_mutually_exclusive_group()
 subgroup.add_argument('-t', '--text', help='Text to speak. Left blank when reading from file/stdin',
                       dest='text', nargs='?', default=argparse.SUPPRESS)
@@ -30,8 +34,11 @@ parser.add_argument('-f', '--file', help='Text/SSML file to speak, default to `-
 parser.add_argument('-e', '--encoding', help='Text/SSML file encoding, default to "utf-8"(Not for stdin!)',
                     dest='encoding', default='utf-8')
 parser.add_argument('-o', '--output', help='Output file path, wav format by default', dest='output_path', default=None)
-parser.add_argument('--mp3', help='Use mp3 format instead of wav. (Only works when outputting to a file)',
-                    action='store_true', dest='mp3')
+format_group = parser.add_mutually_exclusive_group()
+format_group.add_argument('--mp3', help='Use mp3 format instead of wav. (Only works when outputting to a file)',
+                          action='store_true', dest='mp3')
+format_group.add_argument('-F', '--format', help='Set output audio format (experts only)', dest='format',
+                          default=argparse.SUPPRESS)
 parser.add_argument('-l', '--locale', help='Locale to use, default to en-US', dest='locale', default=argparse.SUPPRESS)
 parser.add_argument('-v', '--voice', help='Voice to use', dest='voice', default=argparse.SUPPRESS)
 
@@ -80,6 +87,13 @@ def list_voices(synthesizer, args):
         print(format_voice(v))
 
 
+def list_qualities_and_formats():
+    formats = get_available_formats()
+    print("Available formats:")
+    for f in formats:
+        print(f'- {f}')
+
+
 COLOR_RED = '\033[91m'
 COLOR_CLEAR = '\033[0m'
 
@@ -112,6 +126,9 @@ def main():
         synthesizer = Synthesizer(audio_config, locale, voice, mp3)
         if args.list_voices:
             list_voices(synthesizer, args)
+            return
+        if args.list_qualities_and_formats:
+            list_qualities_and_formats()
             return
         if hasattr(args, 'ssml'):
             if hasattr(args, 'rate') or hasattr(args, 'pitch') or hasattr(args, 'style'):
