@@ -30,7 +30,8 @@ parser.add_argument('-f', '--file', help='Text/SSML file to speak, default to `-
 parser.add_argument('-e', '--encoding', help='Text/SSML file encoding, default to "utf-8"(Not for stdin!)',
                     dest='encoding', default='utf-8')
 parser.add_argument('-o', '--output', help='Output file path, wav format by default', dest='output_path', default=None)
-parser.add_argument('--mp3', help='Use mp3 format instead of wav', action='store_true', dest='mp3')
+parser.add_argument('--mp3', help='Use mp3 format instead of wav. (Only works when outputting to a file)',
+                    action='store_true', dest='mp3')
 parser.add_argument('-l', '--locale', help='Locale to use, default to en-US', dest='locale', default=argparse.SUPPRESS)
 parser.add_argument('-v', '--voice', help='Voice to use', dest='voice', default=argparse.SUPPRESS)
 
