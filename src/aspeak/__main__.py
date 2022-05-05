@@ -35,7 +35,7 @@ parser.add_argument('-v', '--voice', help='Voice to use', dest='voice', default=
 def read_file(args):
     if not hasattr(args, 'file') or args.file == '-':
         return sys.stdin.read()
-    with open(args.file, 'r') as f:
+    with open(args.file, 'r', encoding='utf-8') as f:
         return f.read()
 
 
