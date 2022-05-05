@@ -27,8 +27,8 @@ text_group.add_argument('-S', '--style', help='Set speech style, default to "gen
                         default=argparse.SUPPRESS)
 parser.add_argument('-f', '--file', help='Text/SSML file to speak, default to `-`(stdin)', dest='file',
                     default=argparse.SUPPRESS)
-parser.add_argument('-e', '--encoding', help='Text/SSML file encoding, default to "utf-8"', dest='encoding',
-                    default='utf-8')
+parser.add_argument('-e', '--encoding', help='Text/SSML file encoding, default to "utf-8"(Not for stdin!)',
+                    dest='encoding', default='utf-8')
 parser.add_argument('-o', '--output', help='Output wav file path', dest='output_path', default=None)
 parser.add_argument('-l', '--locale', help='Locale to use, default to en-US', dest='locale', default=argparse.SUPPRESS)
 parser.add_argument('-v', '--voice', help='Voice to use', dest='voice', default=argparse.SUPPRESS)
