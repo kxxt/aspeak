@@ -29,7 +29,7 @@ $ pip install --upgrade aspeak
 ## Usage
 
 ```
-usage: aspeak [-h] [-V | -L | [-t [TEXT] | -s [SSML]]] [-p PITCH] [-r RATE] [-S STYLE] [-f FILE] [-o OUTPUT_PATH] [-l LOCALE] [-v VOICE]
+usage: aspeak [-h] [-V | -L | [-t [TEXT] | -s [SSML]]] [-p PITCH] [-r RATE] [-S STYLE] [-f FILE] [-e ENCODING] [-o OUTPUT_PATH] [-l LOCALE] [-v VOICE]
 
 This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you
 
@@ -42,6 +42,8 @@ options:
   -s [SSML], --ssml [SSML]
                         SSML to speak. Left blank when reading from file/stdin
   -f FILE, --file FILE  Text/SSML file to speak, default to `-`(stdin)
+  -e ENCODING, --encoding ENCODING
+                        Text/SSML file encoding, default to "utf-8"
   -o OUTPUT_PATH, --output OUTPUT_PATH
                         Output wav file path
   -l LOCALE, --locale LOCALE
@@ -123,6 +125,12 @@ or
 
 ```sh
 $ aspeak -f input.txt
+```
+
+with custom encoding:
+
+```sh
+$ aspeak -f input.txt -e gbk
 ```
 
 #### Read from stdin and speak it.
