@@ -116,6 +116,12 @@ Status: GA
 $ aspeak -t "Hello, world!" -o output.wav
 ```
 
+If you prefer mp3, you can use `--mp3` option.
+
+```sh
+$ aspeak -t "Hello, world!" -o output.mp3 --mp3
+```
+
 #### Read text from file and speak it.
 
 ```sh
