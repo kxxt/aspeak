@@ -29,7 +29,7 @@ $ pip install --upgrade aspeak
 ## Usage
 
 ```
-usage: aspeak [-h] [-V | -L | [-t [TEXT] | -s [SSML]]] [-p PITCH] [-r RATE] [-S STYLE] [-f FILE] [-e ENCODING] [-o OUTPUT_PATH] [-l LOCALE] [-v VOICE]
+usage: aspeak [-h] [-V | -L | [-t [TEXT] | -s [SSML]]] [-p PITCH] [-r RATE] [-S STYLE] [-f FILE] [-e ENCODING] [-o OUTPUT_PATH] [--mp3] [-l LOCALE] [-v VOICE]
 
 This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you
 
@@ -45,7 +45,8 @@ options:
   -e ENCODING, --encoding ENCODING
                         Text/SSML file encoding, default to "utf-8"(Not for stdin!)
   -o OUTPUT_PATH, --output OUTPUT_PATH
-                        Output wav file path
+                        Output file path, wav format by default
+  --mp3                 Use mp3 format instead of wav. (Only works when outputting to a file)
   -l LOCALE, --locale LOCALE
                         Locale to use, default to en-US
   -v VOICE, --voice VOICE
