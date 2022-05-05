@@ -122,8 +122,13 @@ def main():
     locale = args.locale if hasattr(args, 'locale') else 'en-US'
     voice = args.voice if hasattr(args, 'voice') else None
     mp3 = args.output_path is not None and args.mp3  # mp3 is only supported when outputting to file
+    if mp3:
+        audio_format = speechsdk.SpeechSynthesisOutputFormat.Audio24Khz160KBitRateMonoMp3
+    else:
+        audio_format = getattr(speechsdk.SpeechSynthesisOutputFormat, args.format) if hasattr(args, 'format') \
+            else speechsdk.SpeechSynthesisOutputFormat.Riff24Khz16BitMonoPcm
     try:
-        synthesizer = Synthesizer(audio_config, locale, voice, mp3)
+        synthesizer = Synthesizer(audio_config, locale, voice, audio_format)
         if args.list_voices:
             list_voices(synthesizer, args)
             return
