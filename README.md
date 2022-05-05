@@ -43,7 +43,7 @@ options:
                         SSML to speak. Left blank when reading from file/stdin
   -f FILE, --file FILE  Text/SSML file to speak, default to `-`(stdin)
   -e ENCODING, --encoding ENCODING
-                        Text/SSML file encoding, default to "utf-8"
+                        Text/SSML file encoding, default to "utf-8"(Not for stdin!)
   -o OUTPUT_PATH, --output OUTPUT_PATH
                         Output wav file path
   -l LOCALE, --locale LOCALE
