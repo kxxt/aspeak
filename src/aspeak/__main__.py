@@ -36,12 +36,18 @@ parser.add_argument('-e', '--encoding', help='Text/SSML file encoding, default t
                     dest='encoding', default='utf-8')
 parser.add_argument('-o', '--output', help='Output file path, wav format by default', dest='output_path', default=None)
 format_group = parser.add_mutually_exclusive_group()
-format_group.add_argument('--mp3', help='Use mp3 format instead of wav. (Only works when outputting to a file)',
+format_group.add_argument('--mp3', help='Use mp3 format for output. (Only works when outputting to a file)',
                           action='store_true', dest='mp3')
+format_group.add_argument('--ogg', help='Use ogg format for output. (Only works when outputting to a file)',
+                          action='store_true', dest='ogg')
+format_group.add_argument('--webm', help='Use webm format for output. (Only works when outputting to a file)',
+                          action='store_true', dest='webm')
+format_group.add_argument('--wav', help='Use wav format for output', action='store_true', dest='wav')
 format_group.add_argument('-F', '--format', help='Set output audio format (experts only)', dest='format',
                           default=argparse.SUPPRESS)
 parser.add_argument('-l', '--locale', help='Locale to use, default to en-US', dest='locale', default=argparse.SUPPRESS)
 parser.add_argument('-v', '--voice', help='Voice to use', dest='voice', default=argparse.SUPPRESS)
+parser.add_argument('-q', '--quality', help='Output quality, default to 0', dest='quality', type=int, default=0)
 
 
 def read_file(args):
@@ -92,13 +98,21 @@ def list_qualities_and_formats():
     print('Available qualities:')
     for ext, info in QUALITIES.items():
         print(f"Qualities for {ext}:")
-        for k,v in info.items():
+        for k, v in info.items():
             print(f"{k:2}: {v.name}")
     print()
     formats = get_available_formats()
     print("Available formats:")
     for f in formats:
         print(f'- {f}')
+
+
+def validate_quality(args, parser):
+    if hasattr(args, 'format') and args.quality != 0:
+        parser.error("You can't use --quality with --format.")
+    for ext in {"mp3", "ogg", "wav", "webm"}:
+        if getattr(args, ext) and not args.quality in QUALITIES[ext]:
+            parser.error(f"Invalid quality {args.quality} for {ext}.")
 
 
 COLOR_RED = '\033[91m'
@@ -128,12 +142,26 @@ def main():
         audio_config = speechsdk.audio.AudioOutputConfig(filename=args.output_path)
     locale = args.locale if hasattr(args, 'locale') else 'en-US'
     voice = args.voice if hasattr(args, 'voice') else None
-    mp3 = args.output_path is not None and args.mp3  # mp3 is only supported when outputting to file
-    if mp3:
-        audio_format = speechsdk.SpeechSynthesisOutputFormat.Audio24Khz160KBitRateMonoMp3
+
+
+    file_ext = "wav"  # The output file format
+    for ext in {"mp3", "ogg", "webm"}:
+        # mp3, ogg, webm are only supported when outputting to file
+        if args.output_path is None and getattr(args, ext):
+            parser.error(f"{ext} format is only supported when outputting to a file.")
+        if getattr(args, ext):
+            file_ext = ext
+    if file_ext == "wav":
+        # Set --wav to true in case that no format argument is provided
+        args.wav = True
+
+    validate_quality(args, parser)
+
+    if hasattr(args, 'format'):
+        audio_format = getattr(speechsdk.SpeechSynthesisOutputFormat, args.format)
     else:
-        audio_format = getattr(speechsdk.SpeechSynthesisOutputFormat, args.format) if hasattr(args, 'format') \
-            else speechsdk.SpeechSynthesisOutputFormat.Riff24Khz16BitMonoPcm
+        audio_format = QUALITIES[file_ext][0]
+
     try:
         synthesizer = Synthesizer(audio_config, locale, voice, audio_format)
         if args.list_voices:
