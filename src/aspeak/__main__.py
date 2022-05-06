@@ -136,13 +136,17 @@ def handle_result(r: speechsdk.SpeechSynthesisResult):
 
 def main():
     args = parser.parse_args()
+
+    if args.list_qualities_and_formats:
+        list_qualities_and_formats()
+        return
+
     if args.output_path is None:
         audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
     else:
         audio_config = speechsdk.audio.AudioOutputConfig(filename=args.output_path)
     locale = args.locale if hasattr(args, 'locale') else 'en-US'
     voice = args.voice if hasattr(args, 'voice') else None
-
 
     file_ext = "wav"  # The output file format
     for ext in {"mp3", "ogg", "webm"}:
@@ -166,9 +170,6 @@ def main():
         synthesizer = Synthesizer(audio_config, locale, voice, audio_format)
         if args.list_voices:
             list_voices(synthesizer, args)
-            return
-        if args.list_qualities_and_formats:
-            list_qualities_and_formats()
             return
         if hasattr(args, 'ssml'):
             if hasattr(args, 'rate') or hasattr(args, 'pitch') or hasattr(args, 'style'):
