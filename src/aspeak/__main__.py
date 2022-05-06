@@ -6,6 +6,7 @@ from . import Synthesizer
 from .ssml import create_ssml
 from .voices import format_voice
 from .formats import get_available_formats
+from .quality import QUALITIES
 
 parser = argparse.ArgumentParser(
     description='This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you',
@@ -88,6 +89,12 @@ def list_voices(synthesizer, args):
 
 
 def list_qualities_and_formats():
+    print('Available qualities:')
+    for ext, info in QUALITIES.items():
+        print(f"Qualities for {ext}:")
+        for k,v in info.items():
+            print(f"{k:2}: {v.name}")
+    print()
     formats = get_available_formats()
     print("Available formats:")
     for f in formats:
