@@ -164,7 +164,7 @@ def main():
     if hasattr(args, 'format'):
         audio_format = getattr(speechsdk.SpeechSynthesisOutputFormat, args.format)
     else:
-        audio_format = QUALITIES[file_ext][0]
+        audio_format = QUALITIES[file_ext][args.quality]
 
     try:
         synthesizer = Synthesizer(audio_config, locale, voice, audio_format)
