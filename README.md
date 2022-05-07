@@ -299,7 +299,7 @@ $ aspeak -t "你好，世界！" -v zh-CN-XiaoxiaoNeural -p 1.5 -r 0.5 -S sad
 **Note**: When outputing to default speaker, using a non-wav format may lead to white noises.
 
 ```sh
-$ python -m aspeak -t "Hello World" -F Riff48Khz16BitMonoPcm -o high-quality.wav
+$ aspeak -t "Hello World" -F Riff48Khz16BitMonoPcm -o high-quality.wav
 ```
 
 ## About This Application
