@@ -29,7 +29,8 @@ $ pip install --upgrade aspeak
 ## Usage
 
 ```
-usage: aspeak [-h] [-V | -L | -Q | [-t [TEXT] | -s [SSML]]] [-p PITCH] [-r RATE] [-S STYLE] [-f FILE] [-e ENCODING] [-o OUTPUT_PATH] [--mp3 | -F FORMAT] [-l LOCALE] [-v VOICE]
+usage: aspeak [-h] [-V | -L | -Q | [-t [TEXT] | -s [SSML]]] [-p PITCH] [-r RATE] [-S STYLE] [-f FILE] [-e ENCODING] [-o OUTPUT_PATH] [--mp3 | --ogg | --webm | --wav | -F FORMAT]
+              [-l LOCALE] [-v VOICE] [-q QUALITY]
 
 This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you
 
@@ -48,13 +49,18 @@ options:
                         Text/SSML file encoding, default to "utf-8"(Not for stdin!)
   -o OUTPUT_PATH, --output OUTPUT_PATH
                         Output file path, wav format by default
-  --mp3                 Use mp3 format instead of wav. (Only works when outputting to a file)
+  --mp3                 Use mp3 format for output. (Only works when outputting to a file)
+  --ogg                 Use ogg format for output. (Only works when outputting to a file)
+  --webm                Use webm format for output. (Only works when outputting to a file)
+  --wav                 Use wav format for output
   -F FORMAT, --format FORMAT
                         Set output audio format (experts only)
   -l LOCALE, --locale LOCALE
                         Locale to use, default to en-US
   -v VOICE, --voice VOICE
                         Voice to use
+  -q QUALITY, --quality QUALITY
+                        Output quality, default to 0
 
 Options for --text:
   -p PITCH, --pitch PITCH
@@ -73,7 +79,7 @@ Options for --text:
 #### Speak "Hello, world!" to default speaker.
 
 ```sh
-$ aspeak -t "Hello, world!"
+$ aspeak -t "Hello, world"
 ```
 
 #### List all available voices.
@@ -117,13 +123,95 @@ Status: GA
 #### Save synthesized speech to a file.
 
 ```sh
-$ aspeak -t "Hello, world!" -o output.wav
+$ aspeak -t "Hello, world" -o output.wav
 ```
 
-If you prefer mp3, you can use `--mp3` option.
+If you prefer mp3/ogg/webm, you can use `--mp3`/`--ogg`/`--webm` option.
 
 ```sh
-$ aspeak -t "Hello, world!" -o output.mp3 --mp3
+$ aspeak -t "Hello, world" -o output.mp3 --mp3
+$ aspeak -t "Hello, world" -o output.ogg --ogg
+$ aspeak -t "Hello, world" -o output.webm --webm
+```
+
+#### List available quality levels and formats
+
+```sh
+$ aspeak -Q
+```
+
+<details>
+
+<summary>Output</summary>
+
+```
+Available qualities:
+Qualities for wav:
+-2: Riff8Khz16BitMonoPcm
+-1: Riff16Khz16BitMonoPcm
+ 0: Riff24Khz16BitMonoPcm
+ 1: Riff24Khz16BitMonoPcm
+Qualities for mp3:
+-3: Audio16Khz32KBitRateMonoMp3
+-2: Audio16Khz64KBitRateMonoMp3
+-1: Audio16Khz128KBitRateMonoMp3
+ 0: Audio24Khz48KBitRateMonoMp3
+ 1: Audio24Khz96KBitRateMonoMp3
+ 2: Audio24Khz160KBitRateMonoMp3
+ 3: Audio48Khz96KBitRateMonoMp3
+ 4: Audio48Khz192KBitRateMonoMp3
+Qualities for ogg:
+-1: Ogg16Khz16BitMonoOpus
+ 0: Ogg24Khz16BitMonoOpus
+ 1: Ogg48Khz16BitMonoOpus
+Qualities for webm:
+-1: Webm16Khz16BitMonoOpus
+ 0: Webm24Khz16BitMonoOpus
+ 1: Webm24Khz16Bit24KbpsMonoOpus
+
+Available formats:
+- Riff8Khz16BitMonoPcm
+- Riff16Khz16BitMonoPcm
+- Audio16Khz128KBitRateMonoMp3
+- Raw24Khz16BitMonoPcm
+- Raw48Khz16BitMonoPcm
+- Raw16Khz16BitMonoPcm
+- Audio24Khz160KBitRateMonoMp3
+- Ogg24Khz16BitMonoOpus
+- Audio16Khz64KBitRateMonoMp3
+- Raw8Khz8BitMonoALaw
+- Audio24Khz16Bit48KbpsMonoOpus
+- Ogg16Khz16BitMonoOpus
+- Riff8Khz8BitMonoALaw
+- Riff8Khz8BitMonoMULaw
+- Audio48Khz192KBitRateMonoMp3
+- Raw8Khz16BitMonoPcm
+- Audio24Khz48KBitRateMonoMp3
+- Raw24Khz16BitMonoTrueSilk
+- Audio24Khz16Bit24KbpsMonoOpus
+- Audio24Khz96KBitRateMonoMp3
+- Webm24Khz16BitMonoOpus
+- Ogg48Khz16BitMonoOpus
+- Riff48Khz16BitMonoPcm
+- Webm24Khz16Bit24KbpsMonoOpus
+- Raw8Khz8BitMonoMULaw
+- Audio16Khz16Bit32KbpsMonoOpus
+- Audio16Khz32KBitRateMonoMp3
+- Riff24Khz16BitMonoPcm
+- Raw16Khz16BitMonoTrueSilk
+- Audio48Khz96KBitRateMonoMp3
+- Webm16Khz16BitMonoOpus
+```
+
+</details>
+
+#### Increase/Decrease audio qualities
+
+```sh
+# Less than default quality.
+$ aspeak -t "Hello, world" -o output.mp3 --mp3 -q=-1
+# Best quality for mp3
+$ aspeak -t "Hello, world" -o output.mp3 --mp3 -q=3
 ```
 
 #### Read text from file and speak it.
@@ -184,54 +272,9 @@ $ aspeak -t "你好，世界！" -v zh-CN-XiaoxiaoNeural -p 1.5 -r 0.5 -S sad
 
 ### Examples for Advanced Users
 
-#### List available audio formats
-
-```sh
-$ aspeak -Q
-```
-
-<details>
-
-<summary>Output</summary>
-
-```
-Available formats:
-- Audio24Khz96KBitRateMonoMp3
-- Audio16Khz128KBitRateMonoMp3
-- Webm24Khz16Bit24KbpsMonoOpus
-- Audio48Khz96KBitRateMonoMp3
-- Raw16Khz16BitMonoTrueSilk
-- Riff16Khz16BitMonoPcm
-- Audio24Khz16Bit24KbpsMonoOpus
-- Raw16Khz16BitMonoPcm
-- Raw8Khz8BitMonoMULaw
-- Ogg24Khz16BitMonoOpus
-- Audio24Khz160KBitRateMonoMp3
-- Audio16Khz64KBitRateMonoMp3
-- Riff48Khz16BitMonoPcm
-- Audio16Khz16Bit32KbpsMonoOpus
-- Raw24Khz16BitMonoTrueSilk
-- Raw8Khz16BitMonoPcm
-- Riff8Khz8BitMonoMULaw
-- Ogg48Khz16BitMonoOpus
-- Raw48Khz16BitMonoPcm
-- Webm16Khz16BitMonoOpus
-- Raw24Khz16BitMonoPcm
-- Riff8Khz8BitMonoALaw
-- Audio48Khz192KBitRateMonoMp3
-- Webm24Khz16BitMonoOpus
-- Riff24Khz16BitMonoPcm
-- Audio16Khz32KBitRateMonoMp3
-- Raw8Khz8BitMonoALaw
-- Audio24Khz48KBitRateMonoMp3
-- Riff8Khz16BitMonoPcm
-- Audio24Khz16Bit48KbpsMonoOpus
-- Ogg16Khz16BitMonoOpus
-```
-
-</details>
-
 #### Use a custom audio format for output
+
+**Note**: When outputing to default speaker, using a non-wav format may lead to white noises.
 
 ```sh
 $ python -m aspeak -t "Hello World" -F Riff48Khz16BitMonoPcm -o high-quality.wav
