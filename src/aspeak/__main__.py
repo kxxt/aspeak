@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser(
     description='This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you',
     prog='aspeak')
 group = parser.add_mutually_exclusive_group()
-group.add_argument('-V', '--version', action='version', version='%(prog)s 1.2.1')
+group.add_argument('-V', '--version', action='version', version='%(prog)s 1.3.0')
 group.add_argument('-L', '--list-voices', action='store_true',
                    help='list available voices, you can combine this argument with -v and -l', dest='list_voices')
 group.add_argument('-Q', '--list-qualities-and-formats', action='store_true',
