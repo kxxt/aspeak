@@ -26,6 +26,28 @@ You can try the Azure TTS API online: https://azure.microsoft.com/en-us/services
 $ pip install --upgrade aspeak
 ```
 
+## Limitations
+
+Since we are using Azure Cognitive Services, there are some limitations:
+
+| Quota | Free (F0)<sup>3</sup> |
+|--|--|
+| **Max number of transactions per certain time period per Speech service resource** | |
+| Real-time API. Prebuilt neural voices and custom neural voices. | 20 transactions per 60 seconds |
+| Adjustable | No<sup>4</sup> |
+| **HTTP-specific quotas** | |
+| Max audio length produced per request | 10 min |
+| Max total number of distinct `<voice>` and `<audio>` tags in SSML | 50 |
+| **Websocket specific quotas** | |
+| Max audio length produced per turn | 10 min |
+| Max total number of distinct `<voice>` and `<audio>` tags in SSML | 50 |
+| Max SSML message size per turn | 64 KB |
+
+This table is copied
+from [Azure Cognitive Services documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-services-quotas-and-limits#general)
+
+And the limitations may be subject to change. The table above might become outdated in the future. Please refer to the latest [Azure Cognitive Services documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-services-quotas-and-limits#general) for the latest information.
+
 ## Usage
 
 ```
