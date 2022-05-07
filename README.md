@@ -48,6 +48,8 @@ from [Azure Cognitive Services documentation](https://docs.microsoft.com/en-us/a
 
 And the limitations may be subject to change. The table above might become outdated in the future. Please refer to the latest [Azure Cognitive Services documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-services-quotas-and-limits#general) for the latest information.
 
+**Attention**: If the result audio is longer than 10 minutes, the audio will be truncated to 10 minutes and the program will not report an error.
+
 ## Usage
 
 ```
