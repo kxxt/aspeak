@@ -46,9 +46,12 @@ Since we are using Azure Cognitive Services, there are some limitations:
 This table is copied
 from [Azure Cognitive Services documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-services-quotas-and-limits#general)
 
-And the limitations may be subject to change. The table above might become outdated in the future. Please refer to the latest [Azure Cognitive Services documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-services-quotas-and-limits#general) for the latest information.
+And the limitations may be subject to change. The table above might become outdated in the future. Please refer to the
+latest [Azure Cognitive Services documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-services-quotas-and-limits#general)
+for the latest information.
 
-**Attention**: If the result audio is longer than 10 minutes, the audio will be truncated to 10 minutes and the program will not report an error.
+**Attention**: If the result audio is longer than 10 minutes, the audio will be truncated to 10 minutes and the program
+will not report an error.
 
 ## Usage
 
@@ -96,7 +99,18 @@ Options for --text:
 
 - If you don't specify `-o`, we will use your default speaker.
 - If you don't specify `-t` or `-s`, we will assume `-t` is provided.
-- You must specify voice if you want to use `-p` or `-r` option.
+- You must specify voice if you want to use `-p`/`-r`/`-S` option.
+
+### Special Note for Pitch and Rate
+
+- Pitch is a float value.
+    - It is usually between -0.5 and 0.5.
+    - The default value is 0.
+- Rate is also a float value.
+    - It is usually between -1 and 2.
+    - The default value is 0.04.
+    - This value is different from the speaking speed field on the trial page.
+    - The value 0.04 is the normal speech rate, corresponding to default speaking speed on the trial page.
 
 ### Examples
 
