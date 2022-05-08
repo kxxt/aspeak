@@ -194,7 +194,7 @@ def main():
                 handle_result(speech_function_selector(synthesizer, preprocess_text(args.text, args)))
         else:
             # Neither --text nor --ssml is provided, pretend --text is provided and empty
-            handle_result(synthesizer.text_to_speech(read_file(args)))
+            handle_result(speech_function_selector(synthesizer, preprocess_text(read_file(args), args)))
     except Exception as e:
         print(f"{COLOR_RED}Error{COLOR_CLEAR}: {e}")
         exit(4)
