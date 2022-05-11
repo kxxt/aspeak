@@ -1,0 +1,2 @@
+class SpeechServiceProvider:
+    pass
