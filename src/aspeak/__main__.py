@@ -188,7 +188,7 @@ def main():
         if hasattr(args, 'ssml'):
             if hasattr(args, 'rate') or hasattr(args, 'pitch') or hasattr(args, 'style'):
                 parser.error(
-                    'You can only use --rate/--pitch/--style with --text. Please set these settings in your SSML.')
+                    'You can only use text options with --text. Please set these settings in your SSML.')
             if args.ssml is None:
                 # --ssml is provided but empty
                 handle_result(synthesizer.ssml_to_speech(read_file(args)))
