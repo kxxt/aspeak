@@ -26,7 +26,7 @@ subgroup.add_argument('-s', '--ssml', help='SSML to speak. Left blank when readi
 text_group = parser.add_argument_group('Options for --text')
 text_group.add_argument('-p', '--pitch', help='Set pitch, default to 0', dest='pitch',
                         type=float, default=argparse.SUPPRESS)
-text_group.add_argument('-r', '--rate', help='Set speech rate, default to 0.04', dest='rate',
+text_group.add_argument('-r', '--rate', help='Set speech rate, default to 0', dest='rate',
                         type=float, default=argparse.SUPPRESS)
 text_group.add_argument('-S', '--style', help='Set speech style, default to "general"', dest='style',
                         default=argparse.SUPPRESS)
@@ -68,7 +68,7 @@ def preprocess_text(text, args):
         if args.voice is None:
             parser.error('Voice must be specified when using pitch or rate.')
         pitch = args.pitch if hasattr(args, 'pitch') else 0.0
-        rate = args.rate if hasattr(args, 'rate') else 0.04
+        rate = args.rate if hasattr(args, 'rate') else 0.0
         voice = args.voice if hasattr(args, 'voice') else None
         style = args.style if hasattr(args, 'style') else 'general'
         ssml = create_ssml(text, voice, rate, pitch, style)
