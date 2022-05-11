@@ -31,12 +31,13 @@ text_group.add_argument('-r', '--rate', help='Set speech rate, default to 0', de
 text_group.add_argument('-S', '--style', help='Set speech style, default to "general"', dest='style',
                         default=argparse.SUPPRESS)
 text_group.add_argument('-R', '--role',
-                        help='Set speech role. This only works for some Chinese voices! Available values are Girl, Boy,'
-                             ' YoungAdultFemale, YoungAdultMale, OlderAdultFemale, '
+                        help='Specifies the speaking role-play. This only works for some Chinese voices! Available '
+                             'values are Girl, Boy, YoungAdultFemale, YoungAdultMale, OlderAdultFemale, '
                              'OlderAdultMale, SeniorFemale, SeniorMale.',
                         dest='role', type=str, default=argparse.SUPPRESS)
 text_group.add_argument('-d', '--style-degree', dest='style_degree', type=float, default=argparse.SUPPRESS,
-                        help='Set speech style degree, range: [0.01, 2]. This only works for some Chinese voices!')
+                        help='Specifies the intensity of the speaking style. range: [0.01, 2]. '
+                             'This only works for some Chinese voices!')
 parser.add_argument('-f', '--file', help='Text/SSML file to speak, default to `-`(stdin)', dest='file',
                     default=argparse.SUPPRESS)
 parser.add_argument('-e', '--encoding', help='Text/SSML file encoding, default to "utf-8"(Not for stdin!)',
