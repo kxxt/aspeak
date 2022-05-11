@@ -56,8 +56,8 @@ will not report an error.
 ## Usage
 
 ```
-usage: aspeak [-h] [-V | -L | -Q | [-t [TEXT] | -s [SSML]]] [-p PITCH] [-r RATE] [-S STYLE] [-f FILE] [-e ENCODING] [-o OUTPUT_PATH] [--mp3 | --ogg | --webm | --wav | -F FORMAT]
-              [-l LOCALE] [-v VOICE] [-q QUALITY]
+usage: aspeak [-h] [-V | -L | -Q | [-t [TEXT] | -s [SSML]]] [-p PITCH] [-r RATE] [-S STYLE] [-R ROLE] [-d STYLE_DEGREE] [-f FILE] [-e ENCODING] [-o OUTPUT_PATH]
+              [--mp3 | --ogg | --webm | --wav | -F FORMAT] [-l LOCALE] [-v VOICE] [-q QUALITY]
 
 This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you
 
@@ -92,9 +92,13 @@ options:
 Options for --text:
   -p PITCH, --pitch PITCH
                         Set pitch, default to 0
-  -r RATE, --rate RATE  Set speech rate, default to 0.04
+  -r RATE, --rate RATE  Set speech rate, default to 0
   -S STYLE, --style STYLE
                         Set speech style, default to "general"
+  -R ROLE, --role ROLE  Set speech role. This only works for some Chinese voices! Available values are Girl, Boy, YoungAdultFemale, YoungAdultMale, OlderAdultFemale, OlderAdultMale,
+                        SeniorFemale, SeniorMale.
+  -d STYLE_DEGREE, --style-degree STYLE_DEGREE
+                        Set speech style degree, range: [0.01, 2]. This only works for some Chinese voices!
 ```
 
 - If you don't specify `-o`, we will use your default speaker.
@@ -108,9 +112,8 @@ Options for --text:
     - The default value is 0.
 - Rate is also a float value.
     - It is usually between -1 and 2.
-    - The default value is 0.04.
-    - This value is different from the speaking speed field on the trial page.
-    - The value 0.04 is the normal speech rate, corresponding to default speaking speed on the trial page.
+    - The default value is 0.
+    - Note that this value is different from the speaking speed field on the trial page.
 
 ### Examples
 
@@ -308,7 +311,7 @@ $ aspeak -t "你好，世界！" -v zh-CN-YunjianNeural
 $ aspeak -t "你好，世界！" -v zh-CN-XiaoxiaoNeural -p 1.5 -r 0.5 -S sad
 ```
 
-### Examples for Advanced Users
+### Advanced Usage
 
 #### Use a custom audio format for output
 
@@ -317,6 +320,23 @@ $ aspeak -t "你好，世界！" -v zh-CN-XiaoxiaoNeural -p 1.5 -r 0.5 -S sad
 ```sh
 $ aspeak -t "Hello World" -F Riff48Khz16BitMonoPcm -o high-quality.wav
 ```
+
+#### Custom style degree and role
+
+According to the
+[Azure documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=csharp#adjust-speaking-styles)
+, style degree specifies the intensity of the speaking style.
+It is a floating point number between 0.01 and 2, inclusive.
+
+At the time of writing, style degree adjustments are supported for Chinese (Mandarin, Simplified) neural voices.
+
+According to the
+[Azure documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=csharp#adjust-speaking-styles)
+, `role` specifies the speaking role-play. The voice acts as a different age and gender, but the voice name isn't
+changed.
+
+At the time of writing, role adjustments are supported for these Chinese (Mandarin, Simplified) neural voices:
+`zh-CN-XiaomoNeural`, `zh-CN-XiaoxuanNeural`, `zh-CN-YunxiNeural`, and `zh-CN-YunyeNeural`.
 
 ## About This Application
 
