@@ -30,6 +30,13 @@ text_group.add_argument('-r', '--rate', help='Set speech rate, default to 0', de
                         type=float, default=argparse.SUPPRESS)
 text_group.add_argument('-S', '--style', help='Set speech style, default to "general"', dest='style',
                         default=argparse.SUPPRESS)
+text_group.add_argument('-R', '--role',
+                        help='Set speech role. This only works for some Chinese voices! Available values are Girl, Boy,'
+                             ' YoungAdultFemale, YoungAdultMale, OlderAdultFemale, '
+                             'OlderAdultMale, SeniorFemale, SeniorMale.',
+                        dest='role', type=str, default=argparse.SUPPRESS)
+text_group.add_argument('-d', '--style-degree', dest='style_degree', type=float, default=argparse.SUPPRESS,
+                        help='Set speech style degree, range: [0.01, 2]. This only works for some Chinese voices!')
 parser.add_argument('-f', '--file', help='Text/SSML file to speak, default to `-`(stdin)', dest='file',
                     default=argparse.SUPPRESS)
 parser.add_argument('-e', '--encoding', help='Text/SSML file encoding, default to "utf-8"(Not for stdin!)',
@@ -57,6 +64,10 @@ def read_file(args):
         return f.read()
 
 
+def has_text_options(args):
+    return any(hasattr(args, option) for option in {'pitch', 'rate', 'style', 'role', 'style_degree'})
+
+
 def preprocess_text(text, args):
     """
     Preprocess text.
@@ -64,14 +75,16 @@ def preprocess_text(text, args):
     :param args: args
     :return: (is_ssml, text_or_ssml)
     """
-    if hasattr(args, 'pitch') or hasattr(args, 'rate') or hasattr(args, 'style'):
+    if has_text_options(args):
         if args.voice is None:
-            parser.error('Voice must be specified when using pitch or rate.')
+            parser.error('Voice must be specified when using options for --text')
         pitch = args.pitch if hasattr(args, 'pitch') else 0.0
         rate = args.rate if hasattr(args, 'rate') else 0.0
         voice = args.voice if hasattr(args, 'voice') else None
         style = args.style if hasattr(args, 'style') else 'general'
-        ssml = create_ssml(text, voice, rate, pitch, style)
+        role = args.role if hasattr(args, 'role') else None
+        style_degree = args.style_degree if hasattr(args, 'style_degree') else None
+        ssml = create_ssml(text, voice, rate, pitch, style, style_degree, role)
         return True, ssml
     return False, text
 
