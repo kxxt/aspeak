@@ -41,7 +41,7 @@ text_group.add_argument('-d', '--style-degree', dest='style_degree', type=float,
 parser.add_argument('-f', '--file', help='Text/SSML file to speak, default to `-`(stdin)', dest='file',
                     default=argparse.SUPPRESS)
 parser.add_argument('-e', '--encoding', help='Text/SSML file encoding, default to "utf-8"(Not for stdin!)',
-                    dest='encoding', default='utf-8')
+                    dest='encoding', default=argparse.SUPPRESS)
 parser.add_argument('-o', '--output', help='Output file path, wav format by default', dest='output_path', default=None)
 format_group = parser.add_mutually_exclusive_group()
 format_group.add_argument('--mp3', help='Use mp3 format for output. (Only works when outputting to a file)',
@@ -55,7 +55,8 @@ format_group.add_argument('-F', '--format', help='Set output audio format (exper
                           default=argparse.SUPPRESS)
 parser.add_argument('-l', '--locale', help='Locale to use, default to en-US', dest='locale', default=argparse.SUPPRESS)
 parser.add_argument('-v', '--voice', help='Voice to use', dest='voice', default=argparse.SUPPRESS)
-parser.add_argument('-q', '--quality', help='Output quality, default to 0', dest='quality', type=int, default=0)
+parser.add_argument('-q', '--quality', help='Output quality, default to 0', dest='quality', type=int,
+                    default=argparse.SUPPRESS)
 
 
 def read_file(args):
@@ -63,6 +64,15 @@ def read_file(args):
         return sys.stdin.read()
     with open(args.file, 'r', encoding=args.encoding) as f:
         return f.read()
+
+
+def ineffective_args_for_listing(args):
+    result = [option for option in
+              {'pitch', 'rate', 'style', 'role', 'style_degree', 'quality', 'format', 'encoding', 'file', 'text',
+               'ssml'} if hasattr(args, option)]
+    if args.output_path is not None:
+        result.append('output_path')
+    return ', '.join(result)
 
 
 def has_text_options(args):
@@ -122,6 +132,8 @@ def list_qualities_and_formats():
 
 
 def validate_quality(args, parser):
+    if not hasattr(args, 'quality'):
+        return
     if hasattr(args, 'format') and args.quality != 0:
         parser.error("You can't use --quality with --format.")
     for ext in {"mp3", "ogg", "wav", "webm"}:
@@ -152,7 +164,21 @@ def main():
     args = parser.parse_args()
 
     if args.list_qualities_and_formats:
+        ineffective_args = ineffective_args_for_listing(args)
+        if hasattr(args, 'locale'):
+            parser.error('--locale can not be used with --list-qualities-and-formats')
+        if hasattr(args, 'voice'):
+            parser.error('--voice can not be used with --list-qualities-and-formats')
+        if ineffective_args:
+            parser.error(f"You can't use argument(s) {ineffective_args} with --list-qualities-and-formats.")
         list_qualities_and_formats()
+        return
+
+    if args.list_voices:
+        ineffective_args = ineffective_args_for_listing(args)
+        if ineffective_args:
+            parser.error(f"You can't use argument(s) {ineffective_args} with --list-voices.")
+        list_voices(Synthesizer(), args)
         return
 
     if args.output_path is None:
@@ -161,6 +187,8 @@ def main():
         audio_config = speechsdk.audio.AudioOutputConfig(filename=args.output_path)
     locale = args.locale if hasattr(args, 'locale') else 'en-US'
     voice = args.voice if hasattr(args, 'voice') else None
+    args.quality = args.quality if hasattr(args, 'quality') else 0
+    args.encoding = args.encoding if hasattr(args, 'encoding') else 'utf-8'
 
     file_ext = "wav"  # The output file format
     for ext in {"mp3", "ogg", "webm"}:
@@ -182,9 +210,6 @@ def main():
 
     try:
         synthesizer = Synthesizer(audio_config, locale, voice, audio_format)
-        if args.list_voices:
-            list_voices(synthesizer, args)
-            return
         if hasattr(args, 'ssml'):
             if hasattr(args, 'rate') or hasattr(args, 'pitch') or hasattr(args, 'style'):
                 parser.error(
