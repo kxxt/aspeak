@@ -61,6 +61,9 @@ parser.usage = '''usage: aspeak [-h] [-V | -L | -Q | [-t [TEXT] [-p PITCH] [-r R
               [-f FILE] [-e ENCODING] [-o OUTPUT_PATH] [-l LOCALE] [-v VOICE]
               [--mp3 [-q QUALITY] | --ogg [-q QUALITY] | --webm [-q QUALITY] | --wav [-q QUALITY] | -F FORMAT] 
 '''
+parser.epilog = 'Attention: If the result audio is longer than 10 minutes, the audio will be truncated to 10 minutes ' \
+                'and the program will not report an error. Please refer to the documentation for other limitations at' \
+                ' https://github.com/kxxt/aspeak/blob/main/README.md#limitations'
 
 
 def read_file(args):
