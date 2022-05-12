@@ -56,8 +56,9 @@ will not report an error.
 ## Usage
 
 ```
-usage: aspeak [-h] [-V | -L | -Q | [-t [TEXT] | -s [SSML]]] [-p PITCH] [-r RATE] [-S STYLE] [-R ROLE] [-d STYLE_DEGREE] [-f FILE] [-e ENCODING] [-o OUTPUT_PATH]
-              [--mp3 | --ogg | --webm | --wav | -F FORMAT] [-l LOCALE] [-v VOICE] [-q QUALITY]
+usage: usage: aspeak [-h] [-V | -L | -Q | [-t [TEXT] [-p PITCH] [-r RATE] [-S STYLE] [-R ROLE] [-d STYLE_DEGREE] | -s [SSML]]] 
+              [-f FILE] [-e ENCODING] [-o OUTPUT_PATH] [-l LOCALE] [-v VOICE]
+              [--mp3 [-q QUALITY] | --ogg [-q QUALITY] | --webm [-q QUALITY] | --wav [-q QUALITY] | -F FORMAT] 
 
 This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you
 
@@ -95,10 +96,13 @@ Options for --text:
   -r RATE, --rate RATE  Set speech rate, default to 0
   -S STYLE, --style STYLE
                         Set speech style, default to "general"
-  -R ROLE, --role ROLE  Set speech role. This only works for some Chinese voices! Available values are Girl, Boy, YoungAdultFemale, YoungAdultMale, OlderAdultFemale, OlderAdultMale,
-                        SeniorFemale, SeniorMale.
+  -R ROLE, --role ROLE  Specifies the speaking role-play. This only works for some Chinese voices! Available values are Girl, Boy, YoungAdultFemale, YoungAdultMale, OlderAdultFemale,
+                        OlderAdultMale, SeniorFemale, SeniorMale.
   -d STYLE_DEGREE, --style-degree STYLE_DEGREE
-                        Set speech style degree, range: [0.01, 2]. This only works for some Chinese voices!
+                        Specifies the intensity of the speaking style. range: [0.01, 2]. This only works for some Chinese voices!
+
+Attention: If the result audio is longer than 10 minutes, the audio will be truncated to 10 minutes and the program will not report an error. Please refer to the documentation for
+other limitations at https://github.com/kxxt/aspeak/blob/main/README.md#limitations
 ```
 
 - If you don't specify `-o`, we will use your default speaker.
