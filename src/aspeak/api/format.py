@@ -17,8 +17,13 @@ class FileFormat(Enum):
 
 
 class AudioFormat:
-    def __init__(self, audio_format: speechsdk.SpeechSynthesisOutputFormat):
-        self._format = audio_format
+    def __init__(self, file_format: FileFormat, quality: int = 0):
+        """
+        Initialize an instance of AudioFormat from the file format and quality.
+        :param file_format: Enum of type FileFormat
+        :param quality: Quality of the audio, execute `aspeak -Q` to see the available qualities for each file format.
+        """
+        self._format = QUALITIES[file_format.value][quality]
 
     @property
     def format(self) -> speechsdk.SpeechSynthesisOutputFormat:
@@ -27,25 +32,6 @@ class AudioFormat:
         :return: audio format of type speechsdk.SpeechSynthesisOutputFormat
         """
         return self._format
-
-    @classmethod
-    def from_enum(cls, file_format: FileFormat) -> 'AudioFormat':
-        """
-        Get the audio format from the file format.
-        :param file_format: Enum of type FileFormat
-        :return: Corresponding audio format instance
-        """
-        return cls(QUALITIES[file_format.value][0])
-
-    @classmethod
-    def from_enum_and_quality(cls, file_format: FileFormat, quality: int) -> 'AudioFormat':
-        """
-        Get the audio format from the file format and quality.
-        :param file_format: Enum of type FileFormat
-        :param quality: Quality of the audio, execute `aspeak -Q` to see the available qualities for each file format.
-        :return: Corresponding audio format instance
-        """
-        return cls(QUALITIES[file_format.value][quality])
 
 
 def parse_format(audio_format: Union[AudioFormat, speechsdk.SpeechSynthesisOutputFormat, None]) \
