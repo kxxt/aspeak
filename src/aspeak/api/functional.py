@@ -5,7 +5,6 @@ import azure.cognitiveservices.speech as speechsdk
 from .provider import SpeechServiceProvider
 from .format import AudioFormat, parse_format
 from ..ssml import create_ssml
-from ..quality import QUALITIES
 
 
 def pure_text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.AudioOutputConfig, text: str,
