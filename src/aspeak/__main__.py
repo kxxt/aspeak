@@ -2,7 +2,7 @@ import argparse
 import azure.cognitiveservices.speech as speechsdk
 import sys
 
-from . import Synthesizer
+from .synthesizer import Synthesizer
 from .ssml import create_ssml
 from .voices import format_voice
 from .formats import get_available_formats
