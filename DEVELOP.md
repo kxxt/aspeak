@@ -41,6 +41,7 @@ def pure_text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio
                         locale: Union[str, None] = None, voice: Union[str, None] = None,
                         audio_format: Union[AudioFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None) \
         -> speechsdk.SpeechSynthesisResult:
+    ...
 ```
 - `locale` format: e.g. `en-US`, `zh-CN`
 - `voice` format: e.g. `en-US-JennyNeural`, execute `aspeak -L` to see available voices.
@@ -60,5 +61,17 @@ def text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.Audi
                    role: Union[str, None] = None,
                    audio_format: Union[AudioFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None) \
         -> speechsdk.SpeechSynthesisResult:
+    ...
+```
+
+### `ssml_to_speech`
+
+This function is used to synthesize the speech from the SSML. Using SSML directly is the most flexible approach.
+
+```python
+def ssml_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.AudioOutputConfig, ssml: str,
+                   audio_format: Union[AudioFormat, speechsdk.SpeechSynthesisOutputFormat, None]) \
+        -> speechsdk.SpeechSynthesisResult:
+    ...
 ```
 
