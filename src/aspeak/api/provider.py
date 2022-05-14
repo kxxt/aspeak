@@ -4,11 +4,20 @@ from ..token import Token
 
 
 class SpeechServiceProvider:
+    """
+    The SpeechServiceProvider class is a service provider for Azure Cognitive Services Text-to-speech
+    that automatically renews trial auth tokens.
+    """
+
     def __init__(self):
         self._current_token = Token()
 
     @property
     def token(self) -> Token:
+        """
+        Returns the current valid token instance.
+        :return: token instance of type Token
+        """
         if self._expired:
             self.renew()
         return self._current_token
@@ -18,6 +27,10 @@ class SpeechServiceProvider:
         return self._current_token.expired()
 
     def renew(self) -> None:
+        """
+        Manually renew the current token. Usually you do not need to call this method.
+        :return: None
+        """
         self._current_token.renew()
 
     def text_to_speech(self, text: str, cfg: speechsdk.SpeechConfig,
