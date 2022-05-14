@@ -27,7 +27,7 @@ output = AudioOutputConfig(use_default_speaker=True)
 
 if __name__ == '__main__':
     # Call the `text_to_speech` function to synthesize the speech.
-    text_to_speech(provider, output, 'Hello world!')
+    text_to_speech(provider, output, 'Hello world!', 'en-US-JennyNeural')
 ```
 
 ## API
