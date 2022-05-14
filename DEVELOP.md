@@ -125,7 +125,7 @@ You can specify a custom audio format in the following ways:
 1. Specify a file format and use the default quality setting.
 ```python
 from aspeak import AudioFormat, FileFormat
-audio_format = AudioFormat.from_enum(FileFormat.WAV)
+audio_format = AudioFormat(FileFormat.WAV)
 ```
 
 2. Specify a file format and a quality setting.
@@ -134,7 +134,7 @@ audio_format = AudioFormat.from_enum(FileFormat.WAV)
    - To get available quality levels, execute `aspeak -Q`.
 ```python
 from aspeak import AudioFormat, FileFormat
-audio_format = AudioFormat.from_enum(FileFormat.WAV, quality=1)
+audio_format = AudioFormat(FileFormat.WAV, quality=1)
 ```
 
 3. (For expert) You can use formats defined in `speechsdk.SpeechSynthesisOutputFormat`.
