@@ -47,7 +47,7 @@ def pure_text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio
 ```
 - `locale` format: e.g. `en-US`, `zh-CN`
 - `voice` format: e.g. `en-US-JennyNeural`, execute `aspeak -L` to see available voices.
-- `audio_format`: See [AudioFormat](#AudioFormat)
+- `audio_format`: See [Custom Audio Format](#custom-audio-format)
 
 If you specify the `voice`, there is no need to specify the `locale`.
 
@@ -66,6 +66,7 @@ def text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.Audi
     ...
 ```
 
+- `voice` format: e.g. `en-US-JennyNeural`, execute `aspeak -L` to see available voices.
 - `rate`: The speaking rate of the voice.
   - You can use a float value or a valid string value.
   - If you use a float value (say `0.5`), the value will be multiplied by 100% and become `50.00%`.
@@ -101,6 +102,7 @@ It is a floating point number between 0.01 and 2, inclusive.
 changed.
   - At the time of writing, role adjustments are supported for these Chinese (Mandarin, Simplified) neural voices:
 `zh-CN-XiaomoNeural`, `zh-CN-XiaoxuanNeural`, `zh-CN-YunxiNeural`, and `zh-CN-YunyeNeural`.
+- `audio_format`: See [Custom Audio Format](#custom-audio-format)
 
 
 ### `ssml_to_speech`
