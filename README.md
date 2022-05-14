@@ -53,6 +53,10 @@ for the latest information.
 **Attention**: If the result audio is longer than 10 minutes, the audio will be truncated to 10 minutes and the program
 will not report an error.
 
+## Using `aspeak` as a Python library
+
+See [DEVELOP.md](DEVELOP.md) for more details. You can find examples in `src/examples`.
+
 ## Usage
 
 ```
