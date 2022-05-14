@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Union
 
 import azure.cognitiveservices.speech as speechsdk
 
@@ -30,3 +31,14 @@ class AudioFormat:
     @classmethod
     def from_enum_and_quality(cls, file_format: FileFormat, quality: int) -> 'AudioFormat':
         return cls(QUALITIES[file_format.value][quality])
+
+
+def parse_format(audio_format: Union[AudioFormat, speechsdk.SpeechSynthesisOutputFormat, None]) \
+        -> speechsdk.SpeechSynthesisOutputFormat:
+    if isinstance(audio_format, AudioFormat):
+        return audio_format.format
+    if isinstance(audio_format, speechsdk.SpeechSynthesisOutputFormat):
+        return audio_format
+    if audio_format is None:
+        return QUALITIES['wav'][0]
+    raise ValueError(f'Invalid audio format: {audio_format}')
