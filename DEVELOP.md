@@ -4,6 +4,8 @@ You can use `aspeak` as a Python library, or as a command line tool.
 
 For documentations & examples about the command line interface, see [README.md](README.md).
 
+You can see examples in [`src/examples/`](src/examples) directory. 
+
 ## Quick Start
 
 ```python
@@ -110,5 +112,32 @@ def ssml_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.Audi
                    audio_format: Union[AudioFormat, speechsdk.SpeechSynthesisOutputFormat, None]) \
         -> speechsdk.SpeechSynthesisResult:
     ...
+```
+
+### Custom Audio Format
+
+**Attention:** When outputing to default speaker, using a non-wav format may lead to white noises.
+
+You can specify a custom audio format in the following ways:
+
+1. Specify a file format and use the default quality setting.
+```python
+from aspeak import AudioFormat, FileFormat
+audio_format = AudioFormat.from_enum(FileFormat.WAV)
+```
+
+2. Specify a file format and a quality setting.
+   - `quality` is an integer.
+   - The default quality level is 0. You can increase/decrease the quality level.
+   - To get available quality levels, execute `aspeak -Q`.
+```python
+from aspeak import AudioFormat, FileFormat
+audio_format = AudioFormat.from_enum(FileFormat.WAV, quality=1)
+```
+
+3. (For expert) You can use formats defined in `speechsdk.SpeechSynthesisOutputFormat`.
+```python
+import azure.cognitiveservices.speech as speechsdk
+audio_format = speechsdk.SpeechSynthesisOutputFormat.Webm24Khz16BitMonoOpus
 ```
 
