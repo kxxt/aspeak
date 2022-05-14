@@ -31,3 +31,34 @@ if __name__ == '__main__':
 ```
 
 ## API
+
+### `pure_text_to_speech`
+
+This function is used to synthesize the speech directly from the text, without conversion to SSML.
+
+```python
+def pure_text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.AudioOutputConfig, text: str,
+                        locale: Union[str, None] = None, voice: Union[str, None] = None,
+                        audio_format: Union[AudioFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None) \
+        -> speechsdk.SpeechSynthesisResult:
+```
+- `locale` format: e.g. `en-US`, `zh-CN`
+- `voice` format: e.g. `en-US-JennyNeural`, execute `aspeak -L` to see available voices.
+- `audio_format`: See [AudioFormat](#AudioFormat)
+
+If you specify the `voice`, there is no need to specify the `locale`.
+
+### `text_to_speech`
+
+This function is used to synthesize the speech from the text,
+with conversion to SSML, which provides more options to customize.
+
+```python
+def text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.AudioOutputConfig, text: str, voice: str,
+                   rate: Union[str, float] = 0.0, pitch: Union[str, float] = 0.0, style: str = "general",
+                   style_degree: Union[float, None] = None,
+                   role: Union[str, None] = None,
+                   audio_format: Union[AudioFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None) \
+        -> speechsdk.SpeechSynthesisResult:
+```
+
