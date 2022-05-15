@@ -1,10 +1,8 @@
 from typing import Union
 
 import azure.cognitiveservices.speech as speechsdk
-import requests
 
 from .token import Token
-from .urls import voice_list_url
 
 
 class Synthesizer:
@@ -58,11 +56,6 @@ class Synthesizer:
 
     def _base_speech_config(self) -> speechsdk.SpeechConfig:
         return speechsdk.SpeechConfig(auth_token=self._token.token, region=self._token.region)
-
-    def get_voice_list(self) -> list:
-        r = requests.get(voice_list_url(self._token.region),
-                         headers={'Authorization': 'Bearer ' + self._token.token})
-        return r.json()
 
     def text_to_speech(self, text: str) -> speechsdk.SpeechSynthesisResult:
         return self._synthesizer.speak_text_async(text).get()

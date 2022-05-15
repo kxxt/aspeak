@@ -4,7 +4,7 @@ import sys
 
 from .synthesizer import Synthesizer
 from .ssml import create_ssml
-from .cli.voices import format_voice
+from .cli.voices import format_voice, get_voice_list
 from .formats import get_available_formats
 from .quality import QUALITIES
 from .version import version
@@ -119,7 +119,7 @@ def speech_function_selector(synthesizer, preprocessed):
 
 
 def list_voices(synthesizer, args):
-    voices = synthesizer.get_voice_list()
+    voices = get_voice_list(synthesizer._token)
     if hasattr(args, 'voice'):
         voices = [v for v in voices if v["ShortName"] == args.voice]
     if hasattr(args, 'locale'):
