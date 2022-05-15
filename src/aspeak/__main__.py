@@ -9,6 +9,7 @@ from .quality import QUALITIES
 from .cli import parser
 from .cli.constants import COLOR_RED, COLOR_CLEAR
 from .cli.validation import validate_quality
+from .cli.result_handler import handle_result
 
 
 def read_file(args):
@@ -58,21 +59,6 @@ def speech_function_selector(synthesizer, preprocessed):
         return synthesizer.ssml_to_speech(text_or_ssml)
     else:
         return synthesizer.text_to_speech(text_or_ssml)
-
-
-def handle_result(r: speechsdk.SpeechSynthesisResult):
-    if r.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
-        exit(0)
-    elif r.reason == speechsdk.ResultReason.Canceled:
-        cancellation_details = r.cancellation_details
-        print(f"{COLOR_RED}Error{COLOR_CLEAR}: Speech synthesis canceled: {cancellation_details.reason}",
-              file=sys.stderr)
-        if cancellation_details.reason == speechsdk.CancellationReason.Error:
-            print(cancellation_details.error_details, file=sys.stderr)
-        exit(2)
-    else:
-        print(f"{COLOR_RED}Error{COLOR_CLEAR}: Unexpected result reason: {r.reason}", file=sys.stderr)
-        exit(3)
 
 
 def main():
