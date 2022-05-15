@@ -7,6 +7,7 @@ from .cli.voices import format_voice, get_voice_list
 from .cli.utils import list_qualities_and_formats
 from .quality import QUALITIES
 from .cli import parser
+from .cli.constants import COLOR_RED, COLOR_CLEAR
 
 
 def read_file(args):
@@ -76,10 +77,6 @@ def validate_quality(args, parser):
     for ext in {"mp3", "ogg", "wav", "webm"}:
         if getattr(args, ext) and args.quality not in QUALITIES[ext]:
             parser.error(f"Invalid quality {args.quality} for {ext}.")
-
-
-COLOR_RED = '\033[91m'
-COLOR_CLEAR = '\033[0m'
 
 
 def handle_result(r: speechsdk.SpeechSynthesisResult):
