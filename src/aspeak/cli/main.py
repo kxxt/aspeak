@@ -1,7 +1,8 @@
 import azure.cognitiveservices.speech as speechsdk
 import sys
+from functools import partial
 
-from ..synthesizer import Synthesizer
+from ..api import SpeechServiceProvider, text_to_speech, pure_text_to_speech, ssml_to_speech
 from ..ssml import create_ssml
 from .voices import list_voices
 from .utils import list_qualities_and_formats
@@ -24,28 +25,29 @@ def preprocess_text(text, args):
     Preprocess text.
     :param text: plain text
     :param args: args
-    :return: (is_ssml, text_or_ssml)
+    :return: (is_ssml, text_or_ssml, extra_options)
     """
     if has_text_options(args):
         if args.voice is None:
             parser.error('Voice must be specified when using options for --text')
         pitch = args.pitch if hasattr(args, 'pitch') else 0.0
         rate = args.rate if hasattr(args, 'rate') else 0.0
-        voice = args.voice if hasattr(args, 'voice') else None
+        voice = args.voice
         style = args.style if hasattr(args, 'style') else 'general'
         role = args.role if hasattr(args, 'role') else None
         style_degree = args.style_degree if hasattr(args, 'style_degree') else None
         ssml = create_ssml(text, voice, rate, pitch, style, style_degree, role)
-        return True, ssml
-    return False, text
+        return True, ssml, None
+    return False, text, {'locale': args.locale, 'voice': args.voice}
 
 
-def speech_function_selector(synthesizer, preprocessed):
-    is_ssml, text_or_ssml = preprocessed
+def speech_function_selector(funcs, preprocessed, audio_format):
+    _ssml_to_speech, _pure_text_to_speech = funcs
+    is_ssml, text_or_ssml, options = preprocessed
     if is_ssml:
-        return synthesizer.ssml_to_speech(text_or_ssml)
+        return _ssml_to_speech(text_or_ssml, audio_format)
     else:
-        return synthesizer.text_to_speech(text_or_ssml)
+        return _pure_text_to_speech(text_or_ssml, audio_format=audio_format, **options)
 
 
 def main():
@@ -73,8 +75,9 @@ def main():
         audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
     else:
         audio_config = speechsdk.audio.AudioOutputConfig(filename=args.output_path)
-    locale = args.locale if hasattr(args, 'locale') else 'en-US'
-    voice = args.voice if hasattr(args, 'voice') else None
+
+    args.locale = args.locale if hasattr(args, 'locale') else None
+    args.voice = args.voice if hasattr(args, 'voice') else None
     args.quality = args.quality if hasattr(args, 'quality') else 0
     args.encoding = args.encoding if hasattr(args, 'encoding') else 'utf-8'
 
@@ -97,31 +100,36 @@ def main():
         audio_format = QUALITIES[file_ext][args.quality]
 
     try:
-        synthesizer = Synthesizer(audio_config, locale, voice, audio_format)
+        provider = SpeechServiceProvider()
+        _text_to_speech = partial(text_to_speech, provider, audio_config)
+        _ssml_to_speech = partial(ssml_to_speech, provider, audio_config)
+        _pure_text_to_speech = partial(pure_text_to_speech, provider, audio_config)
+        funcs = _ssml_to_speech, _pure_text_to_speech
         if hasattr(args, 'ssml'):
             if hasattr(args, 'rate') or hasattr(args, 'pitch') or hasattr(args, 'style'):
                 parser.error(
                     'You can only use text options with --text. Please set these settings in your SSML.')
             if args.ssml is None:
                 # --ssml is provided but empty
-                handle_result(synthesizer.ssml_to_speech(read_file(args)))
+                result = _ssml_to_speech(read_file(args), audio_format)
             else:
                 # --ssml is provided and not empty
                 if hasattr(args, 'file'):
                     parser.error('You can only specify one input source.')
-                handle_result(synthesizer.ssml_to_speech(args.text))
+                result = _ssml_to_speech(args.text, audio_format)
         elif hasattr(args, 'text'):
             if args.text is None:
                 # --text is provided but empty
-                handle_result(speech_function_selector(synthesizer, preprocess_text(read_file(args), args)))
+                result = speech_function_selector(funcs, preprocess_text(read_file(args), args), audio_format)
             else:
                 # --text is provided and not empty
                 if hasattr(args, 'file'):
                     parser.error('You can only specify one input source.')
-                handle_result(speech_function_selector(synthesizer, preprocess_text(args.text, args)))
+                result = speech_function_selector(funcs, preprocess_text(args.text, args), audio_format)
         else:
             # Neither --text nor --ssml is provided, pretend --text is provided and empty
-            handle_result(speech_function_selector(synthesizer, preprocess_text(read_file(args), args)))
+            result = speech_function_selector(funcs, preprocess_text(read_file(args), args), audio_format)
+        handle_result(result)
     except Exception as e:
         print(f"{COLOR_RED}Error{COLOR_CLEAR}: {e}")
         exit(4)
