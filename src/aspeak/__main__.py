@@ -7,12 +7,13 @@ from .ssml import create_ssml
 from .cli.voices import format_voice
 from .formats import get_available_formats
 from .quality import QUALITIES
+from .version import version
 
 parser = argparse.ArgumentParser(
     description='This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you',
     prog='aspeak')
 group = parser.add_mutually_exclusive_group()
-group.add_argument('-V', '--version', action='version', version='%(prog)s 2.0.0.dev2')
+group.add_argument('-V', '--version', action='version', version=f'%(prog)s {version}')
 group.add_argument('-L', '--list-voices', action='store_true',
                    help='list available voices, you can combine this argument with -v and -l', dest='list_voices')
 group.add_argument('-Q', '--list-qualities-and-formats', action='store_true',
