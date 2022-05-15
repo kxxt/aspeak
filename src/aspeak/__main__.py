@@ -1,4 +1,3 @@
-import argparse
 import azure.cognitiveservices.speech as speechsdk
 import sys
 
