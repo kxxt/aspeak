@@ -32,9 +32,7 @@ text_group.add_argument('-r', '--rate', help='Set speech rate, default to 0', de
 text_group.add_argument('-S', '--style', help='Set speech style, default to "general"', dest='style',
                         default=argparse.SUPPRESS)
 text_group.add_argument('-R', '--role',
-                        help='Specifies the speaking role-play. This only works for some Chinese voices! Available '
-                             'values are Girl, Boy, YoungAdultFemale, YoungAdultMale, OlderAdultFemale, '
-                             'OlderAdultMale, SeniorFemale, SeniorMale.',
+                        help='Specifies the speaking role-play. This only works for some Chinese voices!',
                         dest='role', type=str, default=argparse.SUPPRESS,
                         choices=['Girl', 'Boy', 'YoungAdultFemale', 'YoungAdultMale', 'OlderAdultFemale',
                                  'OlderAdultMale', 'SeniorFemale', 'SeniorMale'])
