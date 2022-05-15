@@ -35,9 +35,14 @@ def rate(s: str):
         # Percentage values
         return s
     if s in {"default", "x-slow", "slow", "medium", "fast", "x-fast"}:
+        # enum values
         return s
     if (result := try_parse_float(s)) and result[0]:
+        # float values that will be converted to percentages
         return result[1]
+    if s.endswith('f') and try_parse_float(s[:-1])[0]:
+        # raw float values
+        return s[:-1]
     raise error(s)
 
 
