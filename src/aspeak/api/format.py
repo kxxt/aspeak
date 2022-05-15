@@ -34,10 +34,12 @@ class AudioFormat:
         return self._format
 
 
-def parse_format(audio_format: Union[AudioFormat, speechsdk.SpeechSynthesisOutputFormat, None]) \
+def parse_format(audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None]) \
         -> speechsdk.SpeechSynthesisOutputFormat:
     if isinstance(audio_format, AudioFormat):
         return audio_format.format
+    if isinstance(audio_format, FileFormat):
+        return QUALITIES[audio_format.value][0]
     if isinstance(audio_format, speechsdk.SpeechSynthesisOutputFormat):
         return audio_format
     if audio_format is None:

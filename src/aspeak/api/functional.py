@@ -3,13 +3,14 @@ from typing import Union
 import azure.cognitiveservices.speech as speechsdk
 
 from .provider import SpeechServiceProvider
-from .format import AudioFormat, parse_format
+from .format import AudioFormat, FileFormat, parse_format
 from ..ssml import create_ssml
 
 
 def pure_text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.AudioOutputConfig, text: str,
                         locale: Union[str, None] = None, voice: Union[str, None] = None,
-                        audio_format: Union[AudioFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None) \
+                        audio_format: Union[
+                            AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None) \
         -> speechsdk.SpeechSynthesisResult:
     """
     Execute a text-to-speech request without SSML.
@@ -34,7 +35,7 @@ def text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.Audi
                    rate: Union[str, float] = 0.0, pitch: Union[str, float] = 0.0, style: str = "general",
                    style_degree: Union[float, None] = None,
                    role: Union[str, None] = None,
-                   audio_format: Union[AudioFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None) \
+                   audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None) \
         -> speechsdk.SpeechSynthesisResult:
     """
     Execute a text-to-speech request with generated SSML from text and various options.
@@ -57,7 +58,7 @@ def text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.Audi
 
 
 def ssml_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.AudioOutputConfig, ssml: str,
-                   audio_format: Union[AudioFormat, speechsdk.SpeechSynthesisOutputFormat, None]) \
+                   audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None]) \
         -> speechsdk.SpeechSynthesisResult:
     """
     Execute a text-to-speech request with SSML.
