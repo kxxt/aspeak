@@ -1,5 +1,6 @@
 import argparse
 from ..version import version
+from .range import Range
 
 parser = argparse.ArgumentParser(
     description='This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you',
@@ -29,8 +30,8 @@ text_group.add_argument('-R', '--role',
                         choices=['Girl', 'Boy', 'YoungAdultFemale', 'YoungAdultMale', 'OlderAdultFemale',
                                  'OlderAdultMale', 'SeniorFemale', 'SeniorMale'])
 text_group.add_argument('-d', '--style-degree', dest='style_degree', type=float, default=argparse.SUPPRESS,
-                        help='Specifies the intensity of the speaking style. range: [0.01, 2]. '
-                             'This only works for some Chinese voices!')
+                        help='Specifies the intensity of the speaking style.'
+                             'This only works for some Chinese voices!', choices=[Range(0.01, 2)])
 parser.add_argument('-f', '--file', help='Text/SSML file to speak, default to `-`(stdin)', dest='file',
                     default=argparse.SUPPRESS)
 parser.add_argument('-e', '--encoding', help='Text/SSML file encoding, default to "utf-8"(Not for stdin!)',
