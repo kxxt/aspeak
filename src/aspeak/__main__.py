@@ -3,7 +3,7 @@ import sys
 
 from .synthesizer import Synthesizer
 from .ssml import create_ssml
-from .cli.voices import format_voice, get_voice_list
+from .cli.voices import list_voices
 from .cli.utils import list_qualities_and_formats
 from .quality import QUALITIES
 from .cli import parser
@@ -57,16 +57,6 @@ def speech_function_selector(synthesizer, preprocessed):
         return synthesizer.ssml_to_speech(text_or_ssml)
     else:
         return synthesizer.text_to_speech(text_or_ssml)
-
-
-def list_voices(synthesizer, args):
-    voices = get_voice_list(synthesizer._token)
-    if hasattr(args, 'voice'):
-        voices = [v for v in voices if v["ShortName"] == args.voice]
-    if hasattr(args, 'locale'):
-        voices = [v for v in voices if v['Locale'] == args.locale]
-    for v in voices:
-        print(format_voice(v))
 
 
 def validate_quality(args, parser):

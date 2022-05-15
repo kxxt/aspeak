@@ -20,3 +20,13 @@ def get_voice_list(token: Token) -> list:
     r = requests.get(voice_list_url(token.region),
                      headers={'Authorization': 'Bearer ' + token.token})
     return r.json()
+
+
+def list_voices(synthesizer, args):
+    voices = get_voice_list(synthesizer._token)
+    if hasattr(args, 'voice'):
+        voices = [v for v in voices if v["ShortName"] == args.voice]
+    if hasattr(args, 'locale'):
+        voices = [v for v in voices if v['Locale'] == args.locale]
+    for v in voices:
+        print(format_voice(v))
