@@ -1,3 +1,6 @@
+import azure.cognitiveservices.speech as speechsdk
+
+
 def try_parse_float(s: str):
     try:
         return True, float(s)
@@ -28,9 +31,19 @@ def pitch(s: str):
 
 
 def rate(s: str):
-    return s
+    if s.endswith('%') and try_parse_float(s[:-1])[0]:
+        # Percentage values
+        return s
+    if s in {"default", "x-slow", "slow", "medium", "fast", "x-fast"}:
+        return s
+    if (result := try_parse_float(s)) and result[0]:
+        return result[1]
+    raise error(s)
 
 
+# `format` will appear in the cli error messages, so we need to keep this name, although it shallows the builtin.
 # noinspection PyShadowingBuiltins
 def format(s: str):
-    return s
+    if s in speechsdk.SpeechSynthesisOutputFormat.__members__:
+        return s
+    raise error(s)
