@@ -1,6 +1,7 @@
 import argparse
 from ..version import version
 from .range import Range
+from .value_parsers import pitch
 
 parser = argparse.ArgumentParser(
     description='This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you',
@@ -19,7 +20,7 @@ subgroup.add_argument('-s', '--ssml', help='SSML to speak. Left blank when readi
                       dest='ssml', nargs='?', default=argparse.SUPPRESS)
 text_group = parser.add_argument_group('Options for --text')
 text_group.add_argument('-p', '--pitch', help='Set pitch, default to 0', dest='pitch',
-                        type=float, default=argparse.SUPPRESS)
+                        type=pitch, default=argparse.SUPPRESS)
 text_group.add_argument('-r', '--rate', help='Set speech rate, default to 0', dest='rate',
                         type=float, default=argparse.SUPPRESS)
 text_group.add_argument('-S', '--style', help='Set speech style, default to "general"', dest='style',
