@@ -4,7 +4,7 @@ import sys
 
 from .synthesizer import Synthesizer
 from .ssml import create_ssml
-from .voices import format_voice
+from .cli.voices import format_voice
 from .formats import get_available_formats
 from .quality import QUALITIES
 
