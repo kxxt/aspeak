@@ -8,7 +8,7 @@ from .cli.utils import list_qualities_and_formats
 from .quality import QUALITIES
 from .cli import parser
 from .cli.constants import COLOR_RED, COLOR_CLEAR
-from .cli.validation import validate_quality
+from .cli.validation import validate_quality, get_ineffective_args_for_listing, has_text_options
 from .cli.result_handler import handle_result
 
 
@@ -17,19 +17,6 @@ def read_file(args):
         return sys.stdin.read()
     with open(args.file, 'r', encoding=args.encoding) as f:
         return f.read()
-
-
-def ineffective_args_for_listing(args):
-    result = [option for option in
-              {'pitch', 'rate', 'style', 'role', 'style_degree', 'quality', 'format', 'encoding', 'file', 'text',
-               'ssml'} if hasattr(args, option)]
-    if args.output_path is not None:
-        result.append('output_path')
-    return ', '.join(result)
-
-
-def has_text_options(args):
-    return any(hasattr(args, option) for option in {'pitch', 'rate', 'style', 'role', 'style_degree'})
 
 
 def preprocess_text(text, args):
@@ -65,7 +52,7 @@ def main():
     args = parser.parse_args()
 
     if args.list_qualities_and_formats:
-        ineffective_args = ineffective_args_for_listing(args)
+        ineffective_args = get_ineffective_args_for_listing(args)
         if hasattr(args, 'locale'):
             parser.error('--locale can not be used with --list-qualities-and-formats')
         if hasattr(args, 'voice'):
@@ -76,7 +63,7 @@ def main():
         return
 
     if args.list_voices:
-        ineffective_args = ineffective_args_for_listing(args)
+        ineffective_args = get_ineffective_args_for_listing(args)
         if ineffective_args:
             parser.error(f"You can't use argument(s) {ineffective_args} with --list-voices.")
         list_voices(Synthesizer(), args)
