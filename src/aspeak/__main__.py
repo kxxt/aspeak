@@ -34,7 +34,9 @@ text_group.add_argument('-R', '--role',
                         help='Specifies the speaking role-play. This only works for some Chinese voices! Available '
                              'values are Girl, Boy, YoungAdultFemale, YoungAdultMale, OlderAdultFemale, '
                              'OlderAdultMale, SeniorFemale, SeniorMale.',
-                        dest='role', type=str, default=argparse.SUPPRESS)
+                        dest='role', type=str, default=argparse.SUPPRESS,
+                        choices=['Girl', 'Boy', 'YoungAdultFemale', 'YoungAdultMale', 'OlderAdultFemale',
+                                 'OlderAdultMale', 'SeniorFemale', 'SeniorMale'])
 text_group.add_argument('-d', '--style-degree', dest='style_degree', type=float, default=argparse.SUPPRESS,
                         help='Specifies the intensity of the speaking style. range: [0.01, 2]. '
                              'This only works for some Chinese voices!')
