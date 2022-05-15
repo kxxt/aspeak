@@ -66,7 +66,7 @@ def main():
         ineffective_args = get_ineffective_args_for_listing(args)
         if ineffective_args:
             parser.error(f"You can't use argument(s) {ineffective_args} with --list-voices.")
-        list_voices(Synthesizer(), args)
+        list_voices(args)
         return
 
     if args.output_path is None:

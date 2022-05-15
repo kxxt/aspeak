@@ -22,8 +22,8 @@ def get_voice_list(token: Token) -> list:
     return r.json()
 
 
-def list_voices(synthesizer, args):
-    voices = get_voice_list(synthesizer._token)
+def list_voices(args):
+    voices = get_voice_list(Token())
     if hasattr(args, 'voice'):
         voices = [v for v in voices if v["ShortName"] == args.voice]
     if hasattr(args, 'locale'):
