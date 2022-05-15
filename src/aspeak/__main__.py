@@ -5,7 +5,7 @@ import sys
 from .synthesizer import Synthesizer
 from .ssml import create_ssml
 from .cli.voices import format_voice, get_voice_list
-from .formats import get_available_formats
+from .cli.utils import list_qualities_and_formats
 from .quality import QUALITIES
 from .cli import parser
 
@@ -67,19 +67,6 @@ def list_voices(synthesizer, args):
         voices = [v for v in voices if v['Locale'] == args.locale]
     for v in voices:
         print(format_voice(v))
-
-
-def list_qualities_and_formats():
-    print('Available qualities:')
-    for ext, info in QUALITIES.items():
-        print(f"Qualities for {ext}:")
-        for k, v in info.items():
-            print(f"{k:2}: {v.name}")
-    print()
-    formats = get_available_formats()
-    print("Available formats:")
-    for f in formats:
-        print(f'- {f}')
 
 
 def validate_quality(args, parser):
