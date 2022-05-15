@@ -8,6 +8,7 @@ from .cli.utils import list_qualities_and_formats
 from .quality import QUALITIES
 from .cli import parser
 from .cli.constants import COLOR_RED, COLOR_CLEAR
+from .cli.validation import validate_quality
 
 
 def read_file(args):
@@ -57,16 +58,6 @@ def speech_function_selector(synthesizer, preprocessed):
         return synthesizer.ssml_to_speech(text_or_ssml)
     else:
         return synthesizer.text_to_speech(text_or_ssml)
-
-
-def validate_quality(args, parser):
-    if not hasattr(args, 'quality'):
-        return
-    if hasattr(args, 'format') and args.quality != 0:
-        parser.error("You can't use --quality with --format.")
-    for ext in {"mp3", "ogg", "wav", "webm"}:
-        if getattr(args, ext) and args.quality not in QUALITIES[ext]:
-            parser.error(f"Invalid quality {args.quality} for {ext}.")
 
 
 def handle_result(r: speechsdk.SpeechSynthesisResult):
