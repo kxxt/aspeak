@@ -1,6 +1,7 @@
-import azure.cognitiveservices.speech as speechsdk
 import sys
 from functools import partial
+
+import azure.cognitiveservices.speech as speechsdk
 
 from ..api import SpeechServiceProvider, text_to_speech, pure_text_to_speech, ssml_to_speech
 from ..ssml import create_ssml
