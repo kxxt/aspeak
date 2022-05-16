@@ -18,8 +18,8 @@ from .result_handler import handle_result
 def read_file(args):
     if not hasattr(args, 'file') or args.file == '-':
         return sys.stdin.read()
-    with open(args.file, 'r', encoding=args.encoding) as f:
-        return f.read()
+    with open(args.file, 'r', encoding=args.encoding) as file:
+        return file.read()
 
 
 def preprocess_text(text, args):
@@ -132,6 +132,6 @@ def main():
             # Neither --text nor --ssml is provided, pretend --text is provided and empty
             result = speech_function_selector(funcs, preprocess_text(read_file(args), args), audio_format)
         handle_result(result)
-    except AspeakError as e:
-        print(f"{COLOR_RED}Error{COLOR_CLEAR}: {e}")
+    except AspeakError as exception:
+        print(f"{COLOR_RED}Error{COLOR_CLEAR}: {exception}")
         sys.exit(4)

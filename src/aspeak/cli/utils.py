@@ -6,10 +6,10 @@ def list_qualities_and_formats():
     print('Available qualities:')
     for ext, info in QUALITIES.items():
         print(f"Qualities for {ext}:")
-        for k, v in info.items():
-            print(f"{k:2}: {v.name}")
+        for key, val in info.items():
+            print(f"{key:2}: {val.name}")
     print()
     formats = get_available_formats()
     print("Available formats:")
-    for f in formats:
-        print(f'- {f}')
+    for format_ in formats:
+        print(f'- {format_}')

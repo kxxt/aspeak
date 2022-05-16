@@ -11,16 +11,16 @@ def _get_auth_token() -> str:
     """
     Get a trial auth token from the trial webpage.
     """
-    r = requests.get(TRAIL_URL)
-    if r.status_code != 200:
-        raise errors.TokenRetrievalError(status_code=r.status_code)
-    text = r.text
+    response = requests.get(TRAIL_URL)
+    if response.status_code != 200:
+        raise errors.TokenRetrievalError(status_code=response.status_code)
+    text = response.text
 
     # We don't need bs4, because a little of regex is enough.
 
     match = re.search(r'\s+var\s+localizedResources\s+=\s+\{((.|\n)*?)\};', text, re.M)
     retrieval_error = errors.TokenRetrievalError(message='Could not extract token from webpage.',
-                                                 status_code=r.status_code)
+                                                 status_code=response.status_code)
     if match is None:
         raise retrieval_error
     token = re.search(r'\s+token:\s*"([^"]+)"', match.group(1), re.M)
