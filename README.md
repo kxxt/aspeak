@@ -115,13 +115,43 @@ other limitations at https://github.com/kxxt/aspeak/blob/main/README.md#limitati
 
 ### Special Note for Pitch and Rate
 
-- Pitch is a float value.
-    - It is usually between -0.5 and 0.5.
-    - The default value is 0.
-- Rate is also a float value.
-    - It is usually between -1 and 2.
-    - The default value is 0.
-    - Note that this value is different from the speaking speed field on the trial page.
+- `rate`: The speaking rate of the voice.
+  - If you use a float value (say `0.5`), the value will be multiplied by 100% and become `50.00%`.
+  - You can use the following values as well: `x-slow`, `slow`, `medium`, `fast`, `x-fast`, `default`.
+  - You can also use percentage values directly: `+10%`.
+  - You can also use a relative float value (with `f` postfix), `1.2f`: 
+    - According to the [Azure documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=csharp#adjust-prosody),
+    - A relative value, expressed as a number that acts as a multiplier of the default. 
+    - For example, a value of `1f` results in no change in the rate. A value of `0.5f` results in a halving of the rate. A value of `3f` results in a tripling of the rate.
+- `pitch`: The pitch of the voice.
+  - If you use a float value (say `-0.5`), the value will be multiplied by 100% and become `-50.00%`.
+  - You can also use the following values as well: `x-low`, `low`, `medium`, `high`, `x-high`, `default`.
+  - You can also use percentage values directly: `+10%`.
+  - You can also use a relative value, (e.g. `-2st` or `+80Hz`): 
+    - According to the [Azure documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=csharp#adjust-prosody),
+    - A relative value, expressed as a number preceded by "+" or "-" and followed by "Hz" or "st" that specifies an amount to change the pitch.
+    - The "st" indicates the change unit is semitone, which is half of a tone (a half step) on the standard diatonic scale.
+  - You can also use an absolute value: e.g. `600Hz`
+
+**Note**: Unreasonable high/low values will be clipped to reasonable values by Azure Cognitive Services. 
+
+
+### About Custom Style Degree and Role
+
+According to the
+[Azure documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=csharp#adjust-speaking-styles)
+, style degree specifies the intensity of the speaking style.
+It is a floating point number between 0.01 and 2, inclusive.
+
+At the time of writing, style degree adjustments are supported for Chinese (Mandarin, Simplified) neural voices.
+
+According to the
+[Azure documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=csharp#adjust-speaking-styles)
+, `role` specifies the speaking role-play. The voice acts as a different age and gender, but the voice name isn't
+changed.
+
+At the time of writing, role adjustments are supported for these Chinese (Mandarin, Simplified) neural voices:
+`zh-CN-XiaomoNeural`, `zh-CN-XiaoxuanNeural`, `zh-CN-YunxiNeural`, and `zh-CN-YunyeNeural`.
 
 ### Examples
 
@@ -332,23 +362,6 @@ $ aspeak -t "你好，世界！" -v zh-CN-XiaoxiaoNeural -p=+1st -r=-7% -S lyric
 ```sh
 $ aspeak -t "Hello World" -F Riff48Khz16BitMonoPcm -o high-quality.wav
 ```
-
-#### Custom style degree and role
-
-According to the
-[Azure documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=csharp#adjust-speaking-styles)
-, style degree specifies the intensity of the speaking style.
-It is a floating point number between 0.01 and 2, inclusive.
-
-At the time of writing, style degree adjustments are supported for Chinese (Mandarin, Simplified) neural voices.
-
-According to the
-[Azure documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=csharp#adjust-speaking-styles)
-, `role` specifies the speaking role-play. The voice acts as a different age and gender, but the voice name isn't
-changed.
-
-At the time of writing, role adjustments are supported for these Chinese (Mandarin, Simplified) neural voices:
-`zh-CN-XiaomoNeural`, `zh-CN-XiaoxuanNeural`, `zh-CN-YunxiNeural`, and `zh-CN-YunyeNeural`.
 
 ## About This Application
 
