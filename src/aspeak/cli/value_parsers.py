@@ -48,6 +48,7 @@ def rate(s: str):
 
 # `format` will appear in the cli error messages, so we need to keep this name, although it shallows the builtin.
 # noinspection PyShadowingBuiltins
+# pylint: disable=redefined-builtin
 def format(s: str):
     if s in speechsdk.SpeechSynthesisOutputFormat.__members__:
         return s

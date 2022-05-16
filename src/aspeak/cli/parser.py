@@ -1,6 +1,7 @@
 import argparse
 from ..version import version
 from .range import Range
+# pylint: disable=redefined-builtin
 from .value_parsers import pitch, rate, format
 
 parser = argparse.ArgumentParser(
