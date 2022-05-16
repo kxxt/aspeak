@@ -1,4 +1,4 @@
-class Range(object):
+class Range:
     # pylint: disable=line-too-long
     """
     A range of values for argparse.
