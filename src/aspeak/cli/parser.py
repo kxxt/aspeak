@@ -54,7 +54,7 @@ parser.add_argument('-v', '--voice', help='Voice to use', dest='voice', default=
 parser.add_argument('-q', '--quality', help='Output quality, default to 0', dest='quality', type=int,
                     default=argparse.SUPPRESS)
 # pylint: disable=line-too-long
-parser.usage = '''usage: aspeak [-h] [-V | -L | -Q | [-t [TEXT] [-p PITCH] [-r RATE] [-S STYLE] [-R ROLE] [-d STYLE_DEGREE] | -s [SSML]]]
+parser.usage = '''aspeak [-h] [-V | -L | -Q | [-t [TEXT] [-p PITCH] [-r RATE] [-S STYLE] [-R ROLE] [-d STYLE_DEGREE] | -s [SSML]]]
               [-f FILE] [-e ENCODING] [-o OUTPUT_PATH] [-l LOCALE] [-v VOICE]
               [--mp3 [-q QUALITY] | --ogg [-q QUALITY] | --webm [-q QUALITY] | --wav [-q QUALITY] | -F FORMAT] 
 '''
