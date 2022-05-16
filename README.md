@@ -60,7 +60,7 @@ See [DEVELOP.md](DEVELOP.md) for more details. You can find examples in `src/exa
 ## Usage
 
 ```
-usage: usage: aspeak [-h] [-V | -L | -Q | [-t [TEXT] [-p PITCH] [-r RATE] [-S STYLE] [-R ROLE] [-d STYLE_DEGREE] | -s [SSML]]] 
+usage: usage: aspeak [-h] [-V | -L | -Q | [-t [TEXT] [-p PITCH] [-r RATE] [-S STYLE] [-R ROLE] [-d STYLE_DEGREE] | -s [SSML]]]
               [-f FILE] [-e ENCODING] [-o OUTPUT_PATH] [-l LOCALE] [-v VOICE]
               [--mp3 [-q QUALITY] | --ogg [-q QUALITY] | --webm [-q QUALITY] | --wav [-q QUALITY] | -F FORMAT] 
 
@@ -100,10 +100,10 @@ Options for --text:
   -r RATE, --rate RATE  Set speech rate, default to 0
   -S STYLE, --style STYLE
                         Set speech style, default to "general"
-  -R ROLE, --role ROLE  Specifies the speaking role-play. This only works for some Chinese voices! Available values are Girl, Boy, YoungAdultFemale, YoungAdultMale, OlderAdultFemale,
-                        OlderAdultMale, SeniorFemale, SeniorMale.
-  -d STYLE_DEGREE, --style-degree STYLE_DEGREE
-                        Specifies the intensity of the speaking style. range: [0.01, 2]. This only works for some Chinese voices!
+  -R {Girl,Boy,YoungAdultFemale,YoungAdultMale,OlderAdultFemale,OlderAdultMale,SeniorFemale,SeniorMale}, --role {Girl,Boy,YoungAdultFemale,YoungAdultMale,OlderAdultFemale,OlderAdultMale,SeniorFemale,SeniorMale}
+                        Specifies the speaking role-play. This only works for some Chinese voices!
+  -d {values in range 0.01-2 (inclusive)}, --style-degree {values in range 0.01-2 (inclusive)}
+                        Specifies the intensity of the speaking style.This only works for some Chinese voices!
 
 Attention: If the result audio is longer than 10 minutes, the audio will be truncated to 10 minutes and the program will not report an error. Please refer to the documentation for
 other limitations at https://github.com/kxxt/aspeak/blob/main/README.md#limitations
@@ -111,7 +111,7 @@ other limitations at https://github.com/kxxt/aspeak/blob/main/README.md#limitati
 
 - If you don't specify `-o`, we will use your default speaker.
 - If you don't specify `-t` or `-s`, we will assume `-t` is provided.
-- You must specify voice if you want to use `-p`/`-r`/`-S` option.
+- You must specify voice if you want to use special options for `--text`.
 
 ### Special Note for Pitch and Rate
 
@@ -317,6 +317,10 @@ $ aspeak -t "你好，世界！" -v zh-CN-YunjianNeural
 
 ```sh
 $ aspeak -t "你好，世界！" -v zh-CN-XiaoxiaoNeural -p 1.5 -r 0.5 -S sad
+$ aspeak -t "你好，世界！" -v zh-CN-XiaoxiaoNeural -p=-10% -r=+5% -S cheerful
+$ aspeak -t "你好，世界！" -v zh-CN-XiaoxiaoNeural -p=+40Hz -r=1.2f -S fearful
+$ aspeak -t "你好，世界！" -v zh-CN-XiaoxiaoNeural -p=high -r=x-slow -S calm
+$ aspeak -t "你好，世界！" -v zh-CN-XiaoxiaoNeural -p=+1st -r=-7% -S lyrical
 ```
 
 ### Advanced Usage
