@@ -1,7 +1,7 @@
-import requests
 import base64
 import json
 import re
+import requests
 
 from . import errors
 from .urls import TRAIL_URL
