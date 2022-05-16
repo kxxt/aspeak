@@ -7,6 +7,7 @@ from .format import AudioFormat, FileFormat, parse_format
 from ..ssml import create_ssml
 
 
+# pylint: disable=too-many-arguments
 def pure_text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.AudioOutputConfig, text: str,
                         locale: Union[str, None] = None, voice: Union[str, None] = None,
                         audio_format: Union[
@@ -31,6 +32,7 @@ def pure_text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio
     return provider.text_to_speech(text, cfg, output)
 
 
+# pylint: disable=too-many-arguments
 def text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.AudioOutputConfig, text: str, voice: str,
                    rate: Union[str, float] = 0.0, pitch: Union[str, float] = 0.0, style: str = "general",
                    style_degree: Union[float, None] = None,
