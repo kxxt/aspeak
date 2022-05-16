@@ -60,7 +60,7 @@ See [DEVELOP.md](DEVELOP.md) for more details. You can find examples in `src/exa
 ## Usage
 
 ```
-usage: usage: aspeak [-h] [-V | -L | -Q | [-t [TEXT] [-p PITCH] [-r RATE] [-S STYLE] [-R ROLE] [-d STYLE_DEGREE] | -s [SSML]]]
+usage: aspeak [-h] [-V | -L | -Q | [-t [TEXT] [-p PITCH] [-r RATE] [-S STYLE] [-R ROLE] [-d STYLE_DEGREE] | -s [SSML]]]
               [-f FILE] [-e ENCODING] [-o OUTPUT_PATH] [-l LOCALE] [-v VOICE]
               [--mp3 [-q QUALITY] | --ogg [-q QUALITY] | --webm [-q QUALITY] | --wav [-q QUALITY] | -F FORMAT] 
 
@@ -96,8 +96,10 @@ options:
 
 Options for --text:
   -p PITCH, --pitch PITCH
-                        Set pitch, default to 0
-  -r RATE, --rate RATE  Set speech rate, default to 0
+                        Set pitch, default to 0. Valid values include floats(will be converted to percentages), percentages such as 20% and -10%, absolute values like 300Hz, and
+                        relative values like -20Hz, +2st and string values like x-low. See the documentation for more details.
+  -r RATE, --rate RATE  Set speech rate, default to 0. Valid values include floats(will be converted to percentages), percentages like -20%, floats with postfix "f" (e.g. 2f means
+                        doubling the default speech rate), and string values like x-slow. See the documentation for more details.
   -S STYLE, --style STYLE
                         Set speech style, default to "general"
   -R {Girl,Boy,YoungAdultFemale,YoungAdultMale,OlderAdultFemale,OlderAdultMale,SeniorFemale,SeniorMale}, --role {Girl,Boy,YoungAdultFemale,YoungAdultMale,OlderAdultFemale,OlderAdultMale,SeniorFemale,SeniorMale}
@@ -105,8 +107,9 @@ Options for --text:
   -d {values in range 0.01-2 (inclusive)}, --style-degree {values in range 0.01-2 (inclusive)}
                         Specifies the intensity of the speaking style.This only works for some Chinese voices!
 
-Attention: If the result audio is longer than 10 minutes, the audio will be truncated to 10 minutes and the program will not report an error. Please refer to the documentation for
-other limitations at https://github.com/kxxt/aspeak/blob/main/README.md#limitations
+Attention: If the result audio is longer than 10 minutes, the audio will be truncated to 10 minutes and the program will not report an error. Unreasonable high/low values for pitch
+and rate will be clipped to reasonable values by Azure Cognitive Services.Please refer to the documentation for other limitations at
+https://github.com/kxxt/aspeak/blob/main/README.md#limitations
 ```
 
 - If you don't specify `-o`, we will use your default speaker.
