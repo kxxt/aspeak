@@ -17,9 +17,9 @@ Status: {voice["Status"]}
 
 
 def get_voice_list(token: Token) -> list:
-    r = requests.get(voice_list_url(token.region),
-                     headers={'Authorization': 'Bearer ' + token.token})
-    return r.json()
+    response = requests.get(voice_list_url(token.region),
+                            headers={'Authorization': 'Bearer ' + token.token})
+    return response.json()
 
 
 def list_voices(args):
@@ -28,5 +28,5 @@ def list_voices(args):
         voices = [v for v in voices if v["ShortName"] == args.voice]
     if hasattr(args, 'locale'):
         voices = [v for v in voices if v['Locale'] == args.locale]
-    for v in voices:
-        print(format_voice(v))
+    for voice in voices:
+        print(format_voice(voice))
