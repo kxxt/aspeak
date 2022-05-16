@@ -48,8 +48,7 @@ def speech_function_selector(funcs, preprocessed, audio_format):
     is_ssml, text_or_ssml, options = preprocessed
     if is_ssml:
         return _ssml_to_speech(text_or_ssml, audio_format)
-    else:
-        return _pure_text_to_speech(text_or_ssml, audio_format=audio_format, **options)
+    return _pure_text_to_speech(text_or_ssml, audio_format=audio_format, **options)
 
 
 def main():
