@@ -96,6 +96,29 @@ def main_list_voices(args):
     list_voices(args)
 
 
+def setup_defaults(args):
+    if args.output_path is None:
+        args.audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
+    else:
+        args.audio_config = speechsdk.audio.AudioOutputConfig(filename=args.output_path)
+
+    args.locale = args.locale if hasattr(args, 'locale') else None
+    args.voice = args.voice if hasattr(args, 'voice') else None
+    args.quality = args.quality if hasattr(args, 'quality') else 0
+    args.encoding = args.encoding if hasattr(args, 'encoding') else 'utf-8'
+
+    args.file_type = "wav"  # The output file format
+    for ext in ["mp3", "ogg", "webm"]:
+        # mp3, ogg, webm are only supported when outputting to file
+        if args.output_path is None and getattr(args, ext):
+            parser.error(f"{ext} format is only supported when outputting to a file.")
+        if getattr(args, ext):
+            args.file_type = ext
+    if args.file_type == "wav":
+        # Set --wav to true in case that no format argument is provided
+        args.wav = True
+
+
 def main():
     args = parser.parse_args()
 
@@ -107,39 +130,19 @@ def main():
         main_list_voices(args)
         return
 
-    if args.output_path is None:
-        audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
-    else:
-        audio_config = speechsdk.audio.AudioOutputConfig(filename=args.output_path)
-
-    args.locale = args.locale if hasattr(args, 'locale') else None
-    args.voice = args.voice if hasattr(args, 'voice') else None
-    args.quality = args.quality if hasattr(args, 'quality') else 0
-    args.encoding = args.encoding if hasattr(args, 'encoding') else 'utf-8'
-
-    file_ext = "wav"  # The output file format
-    for ext in ["mp3", "ogg", "webm"]:
-        # mp3, ogg, webm are only supported when outputting to file
-        if args.output_path is None and getattr(args, ext):
-            parser.error(f"{ext} format is only supported when outputting to a file.")
-        if getattr(args, ext):
-            file_ext = ext
-    if file_ext == "wav":
-        # Set --wav to true in case that no format argument is provided
-        args.wav = True
-
+    setup_defaults(args)
     validate_quality(args, parser)
 
     if hasattr(args, 'format'):
         audio_format = getattr(speechsdk.SpeechSynthesisOutputFormat, args.format)
     else:
-        audio_format = QUALITIES[file_ext][args.quality]
+        audio_format = QUALITIES[args.file_type][args.quality]
 
     try:
         provider = SpeechServiceProvider()
-        _text_to_speech = partial(text_to_speech, provider, audio_config)
-        _ssml_to_speech = partial(ssml_to_speech, provider, audio_config)
-        _pure_text_to_speech = partial(pure_text_to_speech, provider, audio_config)
+        _text_to_speech = partial(text_to_speech, provider, args.audio_config)
+        _ssml_to_speech = partial(ssml_to_speech, provider, args.audio_config)
+        _pure_text_to_speech = partial(pure_text_to_speech, provider, args.audio_config)
         funcs = _ssml_to_speech, _pure_text_to_speech
         if hasattr(args, 'ssml'):
             result = main_ssml(_ssml_to_speech, args, audio_format)
