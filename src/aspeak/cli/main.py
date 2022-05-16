@@ -82,7 +82,7 @@ def main():
     args.encoding = args.encoding if hasattr(args, 'encoding') else 'utf-8'
 
     file_ext = "wav"  # The output file format
-    for ext in {"mp3", "ogg", "webm"}:
+    for ext in ["mp3", "ogg", "webm"]:
         # mp3, ogg, webm are only supported when outputting to file
         if args.output_path is None and getattr(args, ext):
             parser.error(f"{ext} format is only supported when outputting to a file.")
