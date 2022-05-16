@@ -16,6 +16,7 @@ class FileFormat(Enum):
     WEBM = 'webm'
 
 
+# pylint: disable=too-few-public-methods
 class AudioFormat:
     """
     Class for audio format. You can also use FileFormat enum or speechsdk.SpeechSynthesisOutputFormat.
