@@ -13,8 +13,8 @@ def validate_quality(args, parser):
 
 def get_ineffective_args_for_listing(args):
     result = [option for option in
-              {'pitch', 'rate', 'style', 'role', 'style_degree', 'quality', 'format', 'encoding', 'file', 'text',
-               'ssml'} if hasattr(args, option)]
+              ['pitch', 'rate', 'style', 'role', 'style_degree', 'quality', 'format', 'encoding', 'file', 'text',
+               'ssml'] if hasattr(args, option)]
     if args.output_path is not None:
         result.append('output_path')
     return ', '.join(result)
