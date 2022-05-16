@@ -1,7 +1,7 @@
 from azure.cognitiveservices.speech.audio import AudioOutputConfig
 from azure.cognitiveservices.speech import ResultReason
 
-from aspeak import SpeechServiceProvider, text_to_speech, AudioFormat, FileFormat
+from aspeak import SpeechServiceProvider, text_to_speech, AudioFormat, FileFormat, AspeakError
 
 provider = SpeechServiceProvider()
 output = AudioOutputConfig(use_default_speaker=True)
@@ -13,5 +13,5 @@ if __name__ == "__main__":
                                 audio_format=AudioFormat(FileFormat.WAV, 1))
         if result.reason != ResultReason.SynthesizingAudioCompleted:
             raise Exception("Failed to synthesize speech.")
-    except:
+    except AspeakError:
         print("Error occurred while synthesizing speech.")
