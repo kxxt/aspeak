@@ -4,6 +4,7 @@ from functools import partial
 
 from ..api import SpeechServiceProvider, text_to_speech, pure_text_to_speech, ssml_to_speech
 from ..ssml import create_ssml
+from ..errors import AspeakError
 from .voices import list_voices
 from .utils import list_qualities_and_formats
 from ..quality import QUALITIES
@@ -130,6 +131,6 @@ def main():
             # Neither --text nor --ssml is provided, pretend --text is provided and empty
             result = speech_function_selector(funcs, preprocess_text(read_file(args), args), audio_format)
         handle_result(result)
-    except Exception as e:
+    except AspeakError as e:
         print(f"{COLOR_RED}Error{COLOR_CLEAR}: {e}")
-        exit(4)
+        sys.exit(4)
