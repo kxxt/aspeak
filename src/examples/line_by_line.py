@@ -1,8 +1,10 @@
-from aspeak import SpeechServiceProvider, pure_text_to_speech
-from azure.cognitiveservices.speech.audio import AudioOutputConfig
-from azure.cognitiveservices.speech import ResultReason
 from functools import partial
 from sys import stderr
+
+from azure.cognitiveservices.speech.audio import AudioOutputConfig
+from azure.cognitiveservices.speech import ResultReason
+
+from aspeak import SpeechServiceProvider, pure_text_to_speech
 
 provider = SpeechServiceProvider()
 output = AudioOutputConfig(use_default_speaker=True)
