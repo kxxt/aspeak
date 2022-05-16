@@ -21,4 +21,4 @@ def get_ineffective_args_for_listing(args):
 
 
 def has_text_options(args):
-    return any(hasattr(args, option) for option in {'pitch', 'rate', 'style', 'role', 'style_degree'})
+    return any(hasattr(args, option) for option in ['pitch', 'rate', 'style', 'role', 'style_degree'])
