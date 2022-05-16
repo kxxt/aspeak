@@ -20,10 +20,16 @@ subgroup.add_argument('-t', '--text', help='Text to speak. Left blank when readi
 subgroup.add_argument('-s', '--ssml', help='SSML to speak. Left blank when reading from file/stdin',
                       dest='ssml', nargs='?', default=argparse.SUPPRESS)
 text_group = parser.add_argument_group('Options for --text')
-text_group.add_argument('-p', '--pitch', help='Set pitch, default to 0', dest='pitch',
-                        type=pitch, default=argparse.SUPPRESS)
-text_group.add_argument('-r', '--rate', help='Set speech rate, default to 0', dest='rate',
-                        type=rate, default=argparse.SUPPRESS)
+text_group.add_argument('-p', '--pitch', help='Set pitch, default to 0. Valid values include floats(will be converted '
+                                              'to percentages), percentages such as 20%% and -10%%, '
+                                              'absolute values like 300Hz, and relative values like -20Hz, +2st '
+                                              'and string values like x-low. See the documentation for more details.',
+                        dest='pitch', type=pitch, default=argparse.SUPPRESS)
+text_group.add_argument('-r', '--rate', help='Set speech rate, default to 0. Valid values include floats(will be '
+                                             'converted to percentages), percentages like -20%%, floats with postfix '
+                                             '"f" (e.g. 2f means doubling the default speech rate), and string '
+                                             'values like x-slow. See the documentation for more details.',
+                        dest='rate', type=rate, default=argparse.SUPPRESS)
 text_group.add_argument('-S', '--style', help='Set speech style, default to "general"', dest='style',
                         default=argparse.SUPPRESS)
 text_group.add_argument('-R', '--role',
@@ -59,5 +65,7 @@ parser.usage = '''aspeak [-h] [-V | -L | -Q | [-t [TEXT] [-p PITCH] [-r RATE] [-
               [--mp3 [-q QUALITY] | --ogg [-q QUALITY] | --webm [-q QUALITY] | --wav [-q QUALITY] | -F FORMAT] 
 '''
 parser.epilog = 'Attention: If the result audio is longer than 10 minutes, the audio will be truncated to 10 minutes ' \
-                'and the program will not report an error. Please refer to the documentation for other limitations at' \
+                'and the program will not report an error. Unreasonable high/low values for pitch and rate will be ' \
+                'clipped to reasonable values by Azure Cognitive Services.' \
+                'Please refer to the documentation for other limitations at' \
                 ' https://github.com/kxxt/aspeak/blob/main/README.md#limitations'
