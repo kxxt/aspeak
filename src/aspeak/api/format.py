@@ -17,6 +17,10 @@ class FileFormat(Enum):
 
 
 class AudioFormat:
+    """
+    Class for audio format. You can also use FileFormat enum or speechsdk.SpeechSynthesisOutputFormat.
+    """
+
     def __init__(self, file_format: FileFormat, quality: int = 0):
         """
         Initialize an instance of AudioFormat from the file format and quality.
