@@ -51,25 +51,60 @@ def speech_function_selector(funcs, preprocessed, audio_format):
     return _pure_text_to_speech(text_or_ssml, audio_format=audio_format, **options)
 
 
+def main_ssml(func, args, audio_format):
+    if hasattr(args, 'rate') or hasattr(args, 'pitch') or hasattr(args, 'style'):
+        parser.error(
+            'You can only use text options with --text. Please set these settings in your SSML.')
+    if args.ssml is None:
+        # --ssml is provided but empty
+        result = func(read_file(args), audio_format)
+    else:
+        # --ssml is provided and not empty
+        if hasattr(args, 'file'):
+            parser.error('You can only specify one input source.')
+        result = func(args.text, audio_format)
+    return result
+
+
+def main_text(funcs, args, audio_format):
+    if args.text is None:
+        # --text is provided but empty
+        result = speech_function_selector(funcs, preprocess_text(read_file(args), args), audio_format)
+    else:
+        # --text is provided and not empty
+        if hasattr(args, 'file'):
+            parser.error('You can only specify one input source.')
+        result = speech_function_selector(funcs, preprocess_text(args.text, args), audio_format)
+    return result
+
+
+def main_list_qualities_and_formats(args):
+    ineffective_args = get_ineffective_args_for_listing(args)
+    if hasattr(args, 'locale'):
+        parser.error('--locale can not be used with --list-qualities-and-formats')
+    if hasattr(args, 'voice'):
+        parser.error('--voice can not be used with --list-qualities-and-formats')
+    if ineffective_args:
+        parser.error(f"You can't use argument(s) {ineffective_args} with --list-qualities-and-formats.")
+    list_qualities_and_formats()
+
+
+def main_list_voices(args):
+    ineffective_args = get_ineffective_args_for_listing(args)
+    if ineffective_args:
+        parser.error(f"You can't use argument(s) {ineffective_args} with --list-voices.")
+    list_voices(args)
+
+
 def main():
     args = parser.parse_args()
 
     if args.list_qualities_and_formats:
-        ineffective_args = get_ineffective_args_for_listing(args)
-        if hasattr(args, 'locale'):
-            parser.error('--locale can not be used with --list-qualities-and-formats')
-        if hasattr(args, 'voice'):
-            parser.error('--voice can not be used with --list-qualities-and-formats')
-        if ineffective_args:
-            parser.error(f"You can't use argument(s) {ineffective_args} with --list-qualities-and-formats.")
-        list_qualities_and_formats()
+        main_list_qualities_and_formats(args)
         return
 
     if args.list_voices:
-        ineffective_args = get_ineffective_args_for_listing(args)
-        if ineffective_args:
-            parser.error(f"You can't use argument(s) {ineffective_args} with --list-voices.")
-        list_voices(args)
+        main_list_voices(args)
         return
 
     if args.output_path is None:
@@ -107,26 +142,9 @@ def main():
         _pure_text_to_speech = partial(pure_text_to_speech, provider, audio_config)
         funcs = _ssml_to_speech, _pure_text_to_speech
         if hasattr(args, 'ssml'):
-            if hasattr(args, 'rate') or hasattr(args, 'pitch') or hasattr(args, 'style'):
-                parser.error(
-                    'You can only use text options with --text. Please set these settings in your SSML.')
-            if args.ssml is None:
-                # --ssml is provided but empty
-                result = _ssml_to_speech(read_file(args), audio_format)
-            else:
-                # --ssml is provided and not empty
-                if hasattr(args, 'file'):
-                    parser.error('You can only specify one input source.')
-                result = _ssml_to_speech(args.text, audio_format)
+            result = main_ssml(_ssml_to_speech, args, audio_format)
         elif hasattr(args, 'text'):
-            if args.text is None:
-                # --text is provided but empty
-                result = speech_function_selector(funcs, preprocess_text(read_file(args), args), audio_format)
-            else:
-                # --text is provided and not empty
-                if hasattr(args, 'file'):
-                    parser.error('You can only specify one input source.')
-                result = speech_function_selector(funcs, preprocess_text(args.text, args), audio_format)
+            result = main_text(funcs, args, audio_format)
         else:
             # Neither --text nor --ssml is provided, pretend --text is provided and empty
             result = speech_function_selector(funcs, preprocess_text(read_file(args), args), audio_format)
