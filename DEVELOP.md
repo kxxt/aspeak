@@ -124,8 +124,8 @@ You can specify a custom audio format in the following ways:
 
 1. Specify a file format and use the default quality setting.
 ```python
-from aspeak import AudioFormat, FileFormat
-audio_format = AudioFormat(FileFormat.WAV)
+from aspeak import FileFormat
+audio_format = FileFormat.WAV
 ```
 
 2. Specify a file format and a quality setting.
