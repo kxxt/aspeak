@@ -12,6 +12,6 @@ if __name__ == "__main__":
                                 voice="en-US-JennyNeural", rate="+10%", pitch="-5%", style="cheerful",
                                 audio_format=AudioFormat(FileFormat.WAV, 1))
         if result.reason != ResultReason.SynthesizingAudioCompleted:
-            raise Exception("Failed to synthesize speech.")
+            print("Failed to synthesize speech.")
     except AspeakError:
         print("Error occurred while synthesizing speech.")
