@@ -9,13 +9,11 @@ You can see examples in [`src/examples/`](src/examples) directory.
 ## Quick Start
 
 ```python
+import sys
+
+from azure.cognitiveservices.speech import ResultReason
 from azure.cognitiveservices.speech.audio import AudioOutputConfig
-from aspeak import SpeechServiceProvider, text_to_speech
-
-# We need to create a `SpeechServiceProvider` instance first.
-# We can use the same instance through the entire lifecycle of the application.
-
-provider = SpeechServiceProvider()
+from aspeak import SpeechServiceProvider, text_to_speech, AspeakError
 
 # We need to create an `AudioOutputConfig` instance to configure 
 # where the audio output should be sent.
@@ -27,9 +25,21 @@ output = AudioOutputConfig(use_default_speaker=True)
 # Or you can specify the output stream.
 # output = AudioOutputConfig(stream=stream)
 
+
+
+
 if __name__ == '__main__':
-    # Call the `text_to_speech` function to synthesize the speech.
-    text_to_speech(provider, output, 'Hello world!', 'en-US-JennyNeural')
+    try:
+        # We need to create a `SpeechServiceProvider` instance first.
+        # We can use the same instance through the entire lifecycle of the application.
+        provider = SpeechServiceProvider()
+
+        # Call the `text_to_speech` function to synthesize the speech.
+        result = text_to_speech(provider, output, 'Hello world!', 'en-US-JennyNeural')
+        if result.reason != ResultReason.SynthesizingAudioCompleted:
+            print("Failed to synthesize speech!", file=sys.stderr)
+    except AspeakError:
+        print("Error occurred!", file=sys.stderr)
 ```
 
 ## API
