@@ -14,7 +14,7 @@
 </a>
 
 
-A simple text-to-speech client using azure TTS API(trial). :laughing:
+A simple text-to-speech client which enables you to try out Azure's speech synthesis API directly in your terminal. :laughing:
 
 **TL;DR**: This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you.
 
