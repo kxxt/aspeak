@@ -16,8 +16,6 @@
 
 A simple text-to-speech client which enables you to try out Azure's speech synthesis API directly in your terminal. :laughing:
 
-**TL;DR**: This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you.
-
 You can try the Azure TTS API online: https://azure.microsoft.com/en-us/services/cognitive-services/text-to-speech
 
 ## Installation
