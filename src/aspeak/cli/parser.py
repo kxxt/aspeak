@@ -5,7 +5,7 @@ from .range import Range
 from .value_parsers import pitch, rate, format
 
 parser = argparse.ArgumentParser(
-    description='This program uses trial auth token of Azure Cognitive Services to do speech synthesis for you',
+    description='Try speech synthesis service(Provided by Azure Cognitive Services) in your terminal!',
     prog='aspeak')
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-V', '--version', action='version', version=f'%(prog)s {version}')
