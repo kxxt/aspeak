@@ -68,4 +68,6 @@ parser.epilog = 'Attention: If the result audio is longer than 10 minutes, the a
                 'and the program will not report an error. Unreasonable high/low values for pitch and rate will be ' \
                 'clipped to reasonable values by Azure Cognitive Services.' \
                 'Please refer to the documentation for other limitations at' \
-                ' https://github.com/kxxt/aspeak/blob/main/README.md#limitations'
+                ' https://github.com/kxxt/aspeak/blob/main/README.md#limitations. By the way, we don\'t store your ' \
+                'data, and Microsoft doesn\'t store your data according to information available on ' \
+                'https://azure.microsoft.com/en-us/services/cognitive-services/text-to-speech/'
