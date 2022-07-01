@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Optional
 
 import azure.cognitiveservices.speech as speechsdk
 
@@ -9,7 +9,7 @@ from ..ssml import create_ssml
 
 # pylint: disable=too-many-arguments
 def pure_text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.AudioOutputConfig, text: str,
-                        locale: Union[str, None] = None, voice: Union[str, None] = None,
+                        locale: Optional[str] = None, voice: Optional[str] = None,
                         use_async: bool = False,
                         audio_format: Union[
                             AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None) \
@@ -37,8 +37,8 @@ def pure_text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio
 # pylint: disable=too-many-arguments
 def text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.AudioOutputConfig, text: str, voice: str,
                    rate: Union[str, float] = 0.0, pitch: Union[str, float] = 0.0, style: str = "general",
-                   style_degree: Union[float, None] = None,
-                   role: Union[str, None] = None,
+                   style_degree: Optional[float] = None,
+                   role: Optional[str] = None,
                    use_async: bool = False,
                    audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None) \
         -> Union[speechsdk.SpeechSynthesisResult, speechsdk.ResultFuture]:
