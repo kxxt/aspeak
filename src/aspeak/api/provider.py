@@ -1,3 +1,4 @@
+from typing import Union
 import azure.cognitiveservices.speech as speechsdk
 
 from ..token import Token
@@ -33,14 +34,26 @@ class SpeechServiceProvider:
         """
         self._current_token.renew()
 
-    def text_to_speech(self, text: str, cfg: speechsdk.SpeechConfig,
-                       output: speechsdk.audio.AudioOutputConfig) -> speechsdk.SpeechSynthesisResult:
+    def get_synthesizer(self, cfg: speechsdk.SpeechConfig,
+                       output: speechsdk.audio.AudioOutputConfig) -> speechsdk.SpeechSynthesizer:
         if self._expired:
             self.renew()
-        return speechsdk.SpeechSynthesizer(speech_config=cfg, audio_config=output).speak_text(text)
+        return speechsdk.SpeechSynthesizer(speech_config=cfg, audio_config=output)
+
+    def text_to_speech(self, text: str, cfg: speechsdk.SpeechConfig,
+                       output: speechsdk.audio.AudioOutputConfig,
+                       use_async: bool = False) -> Union[speechsdk.SpeechSynthesisResult, speechsdk.ResultFuture]:
+        synthesizer = self.get_synthesizer(cfg, output)
+        if use_async:
+            return synthesizer.speak_text_async(text)
+        else:
+            return synthesizer.speak_text(text)
 
     def ssml_to_speech(self, ssml: str, cfg: speechsdk.SpeechConfig,
-                       output: speechsdk.audio.AudioOutputConfig) -> speechsdk.SpeechSynthesisResult:
-        if self._expired:
-            self.renew()
-        return speechsdk.SpeechSynthesizer(speech_config=cfg, audio_config=output).speak_ssml(ssml)
+                       output: speechsdk.audio.AudioOutputConfig,
+                       use_async: bool = False) -> Union[speechsdk.SpeechSynthesisResult, speechsdk.ResultFuture]:
+        synthesizer = self.get_synthesizer(cfg, output)
+        if use_async:
+            return synthesizer.speak_ssml_async(ssml)
+        else:
+            return synthesizer.speak_ssml(ssml)

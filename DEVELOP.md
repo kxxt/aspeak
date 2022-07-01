@@ -50,14 +50,16 @@ This function is used to synthesize the speech directly from the text, without c
 
 ```python
 def pure_text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.AudioOutputConfig, text: str,
-                        locale: Union[str, None] = None, voice: Union[str, None] = None,
+                        locale: Optional[str] = None, voice: Optional[str] = None,
+                        use_async: bool = False,
                         audio_format: Union[
                             AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None) \
-        -> speechsdk.SpeechSynthesisResult:
+        -> Union[speechsdk.SpeechSynthesisResult, speechsdk.ResultFuture]:
     ...
 ```
 - `locale` format: e.g. `en-US`, `zh-CN`
 - `voice` format: e.g. `en-US-JennyNeural`, execute `aspeak -L` to see available voices.
+- `use_async` : set it to `True` for using non-blocking (asynchronous) audio synthesizer
 - `audio_format`: See [Custom Audio Format](#custom-audio-format)
 
 If you specify the `voice`, there is no need to specify the `locale`.
@@ -70,10 +72,11 @@ with conversion to SSML, which provides more options to customize.
 ```python
 def text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.AudioOutputConfig, text: str, voice: str,
                    rate: Union[str, float] = 0.0, pitch: Union[str, float] = 0.0, style: str = "general",
-                   style_degree: Union[float, None] = None,
-                   role: Union[str, None] = None,
+                   style_degree: Optional[float] = None,
+                   role: Optional[str] = None,
+                   use_async: bool = False,
                    audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None) \
-        -> speechsdk.SpeechSynthesisResult:
+        -> Union[speechsdk.SpeechSynthesisResult, speechsdk.ResultFuture]:
     ...
 ```
 
@@ -113,6 +116,7 @@ It is a floating point number between 0.01 and 2, inclusive.
 changed.
   - At the time of writing, role adjustments are supported for these Chinese (Mandarin, Simplified) neural voices:
 `zh-CN-XiaomoNeural`, `zh-CN-XiaoxuanNeural`, `zh-CN-YunxiNeural`, and `zh-CN-YunyeNeural`.
+- `use_async` : set it to `True` for using non-blocking (asynchronous) audio synthesizer
 - `audio_format`: See [Custom Audio Format](#custom-audio-format)
 
 
@@ -122,8 +126,9 @@ This function is used to synthesize the speech from the SSML. Using SSML directl
 
 ```python
 def ssml_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.AudioOutputConfig, ssml: str,
-                   audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None]) \
-        -> speechsdk.SpeechSynthesisResult:
+                   audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None],
+                   use_async: bool = False) \
+        -> Union[speechsdk.SpeechSynthesisResult, speechsdk.ResultFuture]:
     ...
 ```
 

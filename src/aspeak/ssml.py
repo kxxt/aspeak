@@ -1,10 +1,10 @@
-from typing import Union
+from typing import Optional, Union
 from xml.sax.saxutils import escape
 
 
 # pylint: disable=too-many-arguments
-def create_ssml(text: str, voice: Union[str, None], rate: Union[float, str], pitch: Union[float, str],
-                style: str = "general", style_degree: Union[float, None] = None, role: Union[str, None] = None) -> str:
+def create_ssml(text: str, voice: Optional[str], rate: Union[float, str], pitch: Union[float, str],
+                style: str = "general", style_degree: Optional[float] = None, role: Optional[str] = None) -> str:
     """
     Create SSML for text to be spoken.
     """
