@@ -46,8 +46,7 @@ class SpeechServiceProvider:
         synthesizer = self.get_synthesizer(cfg, output)
         if use_async:
             return synthesizer.speak_text_async(text)
-        else:
-            return synthesizer.speak_text(text)
+        return synthesizer.speak_text(text)
 
     def ssml_to_speech(self, ssml: str, cfg: speechsdk.SpeechConfig,
                        output: speechsdk.audio.AudioOutputConfig,
@@ -55,5 +54,4 @@ class SpeechServiceProvider:
         synthesizer = self.get_synthesizer(cfg, output)
         if use_async:
             return synthesizer.speak_ssml_async(ssml)
-        else:
-            return synthesizer.speak_ssml(ssml)
+        return synthesizer.speak_ssml(ssml)
