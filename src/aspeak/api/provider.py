@@ -34,23 +34,26 @@ class SpeechServiceProvider:
         """
         self._current_token.renew()
 
+    def get_synthesizer(self, cfg: speechsdk.SpeechConfig,
+                       output: speechsdk.audio.AudioOutputConfig) -> speechsdk.SpeechSynthesizer:
+        if self._expired:
+            self.renew()
+        return speechsdk.SpeechSynthesizer(speech_config=cfg, audio_config=output)
 
     def text_to_speech(self, text: str, cfg: speechsdk.SpeechConfig,
                        output: speechsdk.audio.AudioOutputConfig,
                        use_async: bool = False) -> Union[speechsdk.SpeechSynthesisResult, speechsdk.ResultFuture]:
-        if self._expired:
-            self.renew()
+        synthesizer = self.get_synthesizer(cfg, output)
         if use_async:
-            return speechsdk.SpeechSynthesizer(speech_config=cfg, audio_config=output).speak_text_async(text)
+            return synthesizer.speak_text_async(text)
         else:
-            return speechsdk.SpeechSynthesizer(speech_config=cfg, audio_config=output).speak_text(text)
+            return synthesizer.speak_text(text)
 
     def ssml_to_speech(self, ssml: str, cfg: speechsdk.SpeechConfig,
                        output: speechsdk.audio.AudioOutputConfig,
                        use_async: bool = False) -> Union[speechsdk.SpeechSynthesisResult, speechsdk.ResultFuture]:
-        if self._expired:
-            self.renew()
+        synthesizer = self.get_synthesizer(cfg, output)
         if use_async:
-            return speechsdk.SpeechSynthesizer(speech_config=cfg, audio_config=output).speak_ssml_async(ssml)
+            return synthesizer.speak_ssml_async(ssml)
         else:
-            return speechsdk.SpeechSynthesizer(speech_config=cfg, audio_config=output).speak_ssml(ssml)
+            return synthesizer.speak_ssml(ssml)
