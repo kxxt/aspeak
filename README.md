@@ -22,7 +22,7 @@ You can try the Azure TTS API online: https://azure.microsoft.com/en-us/services
 
 Microsoft made some breaking changes to how the trial page works, which breaks `aspeak < 3.0.0.dev1`.
 
-To continue to use aspeak now, you need to install the latest preview version by: `pip install aspeak==3.0.0.dev1`.
+To continue to use aspeak now, you need to install the latest preview version by: `pip install aspeak==3.0.0b2`.
 
 A new stable version(v3.0.0) will be published after some refactors and testings.
 
