@@ -90,3 +90,10 @@ class SpeechToFileService(SpeechServiceBase):
     def _setup_synthesizer(self, file_path: str):
         self._output = speechsdk.audio.AudioOutputConfig(filename=file_path)
         self._synthesizer = speechsdk.SpeechSynthesizer(self._config, self._output)
+
+
+class SpeechToOneFileService(SpeechServiceBase):
+    def __init__(self, output_path: str, locale: Optional[str] = None, voice: Optional[str] = None,
+                 audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None):
+        output = speechsdk.audio.AudioOutputConfig(filename=output_path)
+        super().__init__(locale, voice, output, audio_format)
