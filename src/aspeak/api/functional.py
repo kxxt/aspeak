@@ -1,4 +1,5 @@
 from typing import Union, Optional
+from deprecated import deprecated
 
 import azure.cognitiveservices.speech as speechsdk
 
@@ -8,6 +9,7 @@ from ..ssml import create_ssml
 from ..urls import ENDPOINT_URL
 
 
+@deprecated(version='3.0.0.dev2')
 # pylint: disable=too-many-arguments
 def pure_text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.AudioOutputConfig, text: str,
                         locale: Optional[str] = None, voice: Optional[str] = None,
@@ -35,6 +37,7 @@ def pure_text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio
     return provider.text_to_speech(text, cfg, output, use_async=use_async)
 
 
+@deprecated(version='3.0.0.dev2')
 # pylint: disable=too-many-arguments
 def text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.AudioOutputConfig, text: str, voice: str,
                    rate: Union[str, float] = 0.0, pitch: Union[str, float] = 0.0, style: str = "general",
@@ -64,6 +67,7 @@ def text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.Audi
     return provider.ssml_to_speech(ssml, cfg, output, use_async=use_async)
 
 
+@deprecated(version='3.0.0.dev2')
 def ssml_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.AudioOutputConfig, ssml: str,
                    audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None],
                    use_async: bool = False) \
