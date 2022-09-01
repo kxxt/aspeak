@@ -65,7 +65,34 @@ audio_format = speechsdk.SpeechSynthesisOutputFormat.Webm24Khz16BitMonoOpus
 
 ### SpeechService
 
-All
+All speech services inherit from `SpeechServiceBase`.
+
+They all have simlar constructors. You can provide `locale`, `voice` and `audio_format` to them.
+
+If you do not use the `pure_text_to_speech` method, you can ignore `locale` and `voice` parameter
+and set `voice` parameter of method `text_to_speech`.
+
+Currently, there are three implementations:
+
+#### SpeechToSpeakerService
+
+Outputs to system speakers.
+
+You can set the desired speaker using parameter `device_name`. 
+
+#### SpeechToFileService
+
+Saves the speech to file.
+
+You need to pass `path` parameter when doing speech synthesis.
+
+#### SpeechToOneFileService
+
+This is the speech service that the CLI is using. It is almost useless for other purposes.
+
+This service outputs to a specific file which is specified when constructing the service.
+
+DO NOT use this service unless you know what you are doing!
 
 ## Deprecated API
 
