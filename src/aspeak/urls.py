@@ -1,5 +1,5 @@
-TRAIL_URL = 'https://azure.microsoft.com/en-us/services/cognitive-services/text-to-speech/'
+ENDPOINT_URL = 'wss://eastus.api.speech.microsoft.com/cognitiveservices/websocket/v1'
 
 
-def voice_list_url(region: str) -> str:
-    return f'https://{region}.tts.speech.microsoft.com/cognitiveservices/voices/list'
+def voice_list_url() -> str:
+    return f'https://eastus.api.speech.microsoft.com/cognitiveservices/voices/list'
