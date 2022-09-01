@@ -55,10 +55,30 @@ class SpeechServiceBase:
         return self._synthesizer.speak_ssml(ssml)
 
     def text_to_speech(self, text, **kwargs):
+        """
+        Supported keyword arguments:
+        voice: The voice name.
+        rate: The speaking rate, optional. See the documentation for more details.
+        pitch: The speaking pitch, optional. See the documentation for more details.
+        style: The speaking style, optional. See the documentation for more details.
+        style_degree: The speaking style degree, optional. It only works for some Chinese voices.
+        role: The speaking role, optional. It only works for some Chinese voices.
+        path: Output file path. Only works with SpeechService classes that support it.
+        """
         ssml = create_ssml(text, *_parse_kwargs(**kwargs))
         return self._synthesizer.speak_ssml(ssml)
 
     def text_to_speech_async(self, text, **kwargs):
+        """
+        Supported keyword arguments:
+        voice: The voice name.
+        rate: The speaking rate, optional. See the documentation for more details.
+        pitch: The speaking pitch, optional. See the documentation for more details.
+        style: The speaking style, optional. See the documentation for more details.
+        style_degree: The speaking style degree, optional. It only works for some Chinese voices.
+        role: The speaking role, optional. It only works for some Chinese voices.
+        path: Output file path. Only works with SpeechService classes that support it.
+        """
         ssml = create_ssml(text, *_parse_kwargs(**kwargs))
         return self._synthesizer.speak_ssml_async(ssml)
 
@@ -67,6 +87,7 @@ class SpeechToSpeakerService(SpeechServiceBase):
     """
     Speech service that outputs to speakers
     """
+
     def __init__(self, locale: str = None, voice: str = None,
                  audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None,
                  device_name: Union[str, None] = None):
@@ -87,6 +108,7 @@ class SpeechToFileService(SpeechServiceBase):
     """
     Speech service that outputs to files
     """
+
     def __init__(self, locale: Optional[str] = None, voice: Optional[str] = None,
                  audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None):
         """
@@ -123,6 +145,7 @@ class SpeechToOneFileService(SpeechServiceBase):
     """
     Speech service that outputs to a specific file, which can't be changed during runtime.
     """
+
     def __init__(self, output_path: str, locale: Optional[str] = None, voice: Optional[str] = None,
                  audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None):
         """
