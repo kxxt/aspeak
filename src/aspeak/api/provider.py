@@ -1,6 +1,7 @@
 from typing import Union
 import azure.cognitiveservices.speech as speechsdk
 
+
 class SpeechServiceProvider:
     """
     The SpeechServiceProvider class is a service provider for Azure Cognitive Services Text-to-speech
@@ -8,7 +9,7 @@ class SpeechServiceProvider:
     """
 
     def get_synthesizer(self, cfg: speechsdk.SpeechConfig,
-                       output: speechsdk.audio.AudioOutputConfig) -> speechsdk.SpeechSynthesizer:
+                        output: speechsdk.audio.AudioOutputConfig) -> speechsdk.SpeechSynthesizer:
         return speechsdk.SpeechSynthesizer(speech_config=cfg, audio_config=output)
 
     def text_to_speech(self, text: str, cfg: speechsdk.SpeechConfig,
