@@ -1,6 +1,5 @@
 import requests
 from ..urls import voice_list_url
-from ..token import Token
 
 
 def format_voice(voice: dict) -> str:
@@ -16,14 +15,13 @@ Status: {voice["Status"]}
 """
 
 
-def get_voice_list(token: Token) -> list:
-    response = requests.get(voice_list_url(token.region),
-                            headers={'Authorization': 'Bearer ' + token.token})
+def get_voice_list() -> list:
+    response = requests.get(voice_list_url())
     return response.json()
 
 
 def list_voices(args):
-    voices = get_voice_list(Token())
+    voices = get_voice_list()
     if hasattr(args, 'voice'):
         voices = [v for v in voices if v["ShortName"] == args.voice]
     if hasattr(args, 'locale'):

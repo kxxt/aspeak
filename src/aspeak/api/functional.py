@@ -5,6 +5,7 @@ import azure.cognitiveservices.speech as speechsdk
 from .provider import SpeechServiceProvider
 from .format import AudioFormat, FileFormat, parse_format
 from ..ssml import create_ssml
+from ..urls import ENDPOINT_URL
 
 
 # pylint: disable=too-many-arguments
@@ -25,7 +26,7 @@ def pure_text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio
     :param audio_format: The audio format, optional.
     :return: result either of type SpeechSynthesisResult or ResultFuture.
     """
-    cfg = speechsdk.SpeechConfig(auth_token=provider.token.token, region=provider.token.region)
+    cfg = speechsdk.SpeechConfig(endpoint=ENDPOINT_URL)
     if locale is not None:
         cfg.speech_synthesis_language = locale
     if voice is not None:
@@ -58,7 +59,7 @@ def text_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.Audi
     :return: result either of type SpeechSynthesisResult or ResultFuture.
     """
     ssml = create_ssml(text, voice, rate, pitch, style, style_degree, role)
-    cfg = speechsdk.SpeechConfig(auth_token=provider.token.token, region=provider.token.region)
+    cfg = speechsdk.SpeechConfig(endpoint=ENDPOINT_URL)
     cfg.set_speech_synthesis_output_format(parse_format(audio_format))
     return provider.ssml_to_speech(ssml, cfg, output, use_async=use_async)
 
@@ -76,6 +77,6 @@ def ssml_to_speech(provider: SpeechServiceProvider, output: speechsdk.audio.Audi
     :param audio_format: The audio format, optional.
     :return: result either of type SpeechSynthesisResult or ResultFuture.
     """
-    cfg = speechsdk.SpeechConfig(auth_token=provider.token.token, region=provider.token.region)
+    cfg = speechsdk.SpeechConfig(endpoint=ENDPOINT_URL)
     cfg.set_speech_synthesis_output_format(parse_format(audio_format))
     return provider.ssml_to_speech(ssml, cfg, output, use_async=use_async)
