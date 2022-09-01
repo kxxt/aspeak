@@ -101,7 +101,7 @@ class SpeechToSpeakerService(SpeechServiceBase):
             output = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
         else:
             output = speechsdk.audio.AudioOutputConfig(device_name=device_name)
-        super().__init__(locale, voice, output, audio_format)
+        super().__init__(locale, voice, audio_format, output)
 
 
 class SpeechToFileService(SpeechServiceBase):
@@ -116,7 +116,7 @@ class SpeechToFileService(SpeechServiceBase):
         :param voice: The voice name, optional.
         :param audio_format: The audio format, optional.
         """
-        super().__init__(locale, voice, None, audio_format)
+        super().__init__(locale, voice, audio_format, None)
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -155,4 +155,4 @@ class SpeechToOneFileService(SpeechServiceBase):
         :param audio_format: The audio format, optional.
         """
         output = speechsdk.audio.AudioOutputConfig(filename=output_path)
-        super().__init__(locale, voice, output, audio_format)
+        super().__init__(locale, voice, audio_format, output)
