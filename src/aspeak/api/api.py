@@ -18,10 +18,20 @@ def _parse_kwargs(**kwargs):
 
 
 class SpeechServiceBase:
+    """
+    A base class that provides speech service
+    """
+
     def __init__(self, locale: Optional[str] = None, voice: Optional[str] = None,
                  audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None,
                  output: speechsdk.audio.AudioOutputConfig = None
                  ):
+        """
+        :param locale: The locale of the voice, optional.
+        :param voice: The voice name, optional.
+        :param output: An instance of AudioOutputConfig.
+        :param audio_format: The audio format, optional.
+        """
         self._config = speechsdk.SpeechConfig(endpoint=ENDPOINT_URL)
         self._output = output
         if locale is not None:
@@ -54,9 +64,18 @@ class SpeechServiceBase:
 
 
 class SpeechToSpeakerService(SpeechServiceBase):
+    """
+    Speech service that outputs to speakers
+    """
     def __init__(self, locale: str = None, voice: str = None,
                  audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None,
                  device_name: Union[str, None] = None):
+        """
+        :param locale: The locale of the voice, optional.
+        :param voice: The voice name, optional.
+        :param audio_format: The audio format, optional.
+        :param device_name: Device name of the speaker, optional.
+        """
         if device_name is None:
             output = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
         else:
@@ -65,8 +84,16 @@ class SpeechToSpeakerService(SpeechServiceBase):
 
 
 class SpeechToFileService(SpeechServiceBase):
+    """
+    Speech service that outputs to files
+    """
     def __init__(self, locale: Optional[str] = None, voice: Optional[str] = None,
                  audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None):
+        """
+        :param locale: The locale of the voice, optional.
+        :param voice: The voice name, optional.
+        :param audio_format: The audio format, optional.
+        """
         super().__init__(locale, voice, None, audio_format)
 
     def __init_subclass__(cls, **kwargs):
@@ -93,7 +120,16 @@ class SpeechToFileService(SpeechServiceBase):
 
 
 class SpeechToOneFileService(SpeechServiceBase):
+    """
+    Speech service that outputs to a specific file, which can't be changed during runtime.
+    """
     def __init__(self, output_path: str, locale: Optional[str] = None, voice: Optional[str] = None,
                  audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None):
+        """
+        :param output_path: The path of output file
+        :param locale: The locale of the voice, optional.
+        :param voice: The voice name, optional.
+        :param audio_format: The audio format, optional.
+        """
         output = speechsdk.audio.AudioOutputConfig(filename=output_path)
         super().__init__(locale, voice, output, audio_format)
