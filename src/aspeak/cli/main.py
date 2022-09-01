@@ -3,7 +3,7 @@ from functools import partial
 
 import azure.cognitiveservices.speech as speechsdk
 
-from ..api.api import SpeechToSpeakerService, SpeechToOneFileService
+from ..api import SpeechToSpeakerService, SpeechToOneFileService
 from ..ssml import create_ssml
 from .voices import list_voices
 from .utils import list_qualities_and_formats
