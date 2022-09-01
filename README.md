@@ -43,6 +43,7 @@ Since we are using Azure Cognitive Services, there are some limitations:
 
 | Quota | Free (F0)<sup>3</sup> |
 |--|--|
+| Max input length | 1000 characters |
 | **Max number of transactions per certain time period per Speech service resource** | |
 | Real-time API. Prebuilt neural voices and custom neural voices. | 20 transactions per 60 seconds |
 | Adjustable | No<sup>4</sup> |
@@ -56,6 +57,8 @@ Since we are using Azure Cognitive Services, there are some limitations:
 
 This table is copied
 from [Azure Cognitive Services documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-services-quotas-and-limits#general)
+
+**The 1000 characters limitation was added recently(2022-09-01).**  
 
 And the limitations may be subject to change. The table above might become outdated in the future. Please refer to the
 latest [Azure Cognitive Services documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-services-quotas-and-limits#general)
