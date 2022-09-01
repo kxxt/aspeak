@@ -19,8 +19,8 @@ def _parse_kwargs(**kwargs):
 
 class SpeechServiceBase:
     def __init__(self, locale: Optional[str] = None, voice: Optional[str] = None,
-                 output: speechsdk.audio.AudioOutputConfig = None,
-                 audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None
+                 audio_format: Union[AudioFormat, FileFormat, speechsdk.SpeechSynthesisOutputFormat, None] = None,
+                 output: speechsdk.audio.AudioOutputConfig = None
                  ):
         self._config = speechsdk.SpeechConfig(endpoint=ENDPOINT_URL)
         self._output = output
