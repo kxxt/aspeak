@@ -104,6 +104,15 @@ class SpeechToSpeakerService(SpeechServiceBase):
         super().__init__(locale, voice, audio_format, output)
 
 
+def _setup_synthesizer_for_file(fn):
+    @wraps(fn)
+    def wrapper(self, text, **kwargs):
+        self._setup_synthesizer(kwargs['path'])
+        return fn(self, text, **kwargs)
+
+    return wrapper
+
+
 class SpeechToFileService(SpeechServiceBase):
     """
     Speech service that outputs to files
@@ -118,23 +127,12 @@ class SpeechToFileService(SpeechServiceBase):
         """
         super().__init__(locale, voice, audio_format, None)
 
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        cls.pure_text_to_speech = cls._setup_synthesizer_for_file(cls.pure_text_to_speech)
-        cls.pure_text_to_speech_async = cls._setup_synthesizer_for_file(cls.pure_text_to_speech_async)
-        cls.text_to_speech = cls._setup_synthesizer_for_file(cls.text_to_speech)
-        cls.text_to_speech_async = cls._setup_synthesizer_for_file(cls.text_to_speech_async)
-        cls.ssml_to_speech = cls._setup_synthesizer_for_file(cls.ssml_to_speech)
-        cls.ssml_to_speech_async = cls._setup_synthesizer_for_file(cls.ssml_to_speech_async)
-
-    @staticmethod
-    def _setup_synthesizer_for_file(fn):
-        @wraps(fn)
-        def wrapper(self, text, **kwargs):
-            self._setup_synthesizer(kwargs['path'])
-            return fn(self, text, **kwargs)
-
-        return wrapper
+    pure_text_to_speech = _setup_synthesizer_for_file(SpeechServiceBase.pure_text_to_speech)
+    pure_text_to_speech_async = _setup_synthesizer_for_file(SpeechServiceBase.pure_text_to_speech_async)
+    text_to_speech = _setup_synthesizer_for_file(SpeechServiceBase.text_to_speech)
+    text_to_speech_async = _setup_synthesizer_for_file(SpeechServiceBase.text_to_speech_async)
+    ssml_to_speech = _setup_synthesizer_for_file(SpeechServiceBase.ssml_to_speech)
+    ssml_to_speech_async = _setup_synthesizer_for_file(SpeechServiceBase.ssml_to_speech_async)
 
     def _setup_synthesizer(self, file_path: str):
         self._output = speechsdk.audio.AudioOutputConfig(filename=file_path)
