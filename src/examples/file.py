@@ -1,7 +1,6 @@
 import sys
 
-from azure.cognitiveservices.speech import ResultReason, CancellationReason
-from aspeak import SpeechToFileService, AudioFormat, FileFormat
+from aspeak import SpeechToFileService, AudioFormat, FileFormat, ResultReason, CancellationReason
 
 if __name__ == "__main__":
     speech = SpeechToFileService(voice="en-US-JennyNeural", audio_format=AudioFormat(FileFormat.OGG, quality=1))

@@ -11,8 +11,7 @@ You can see examples in [`src/examples/`](src/examples) directory.
 ```python
 import sys
 
-from azure.cognitiveservices.speech import ResultReason
-from aspeak import SpeechToSpeakerService
+from aspeak import SpeechToSpeakerService, ResultReason
 
 if __name__ == '__main__':
     try:
@@ -58,9 +57,9 @@ audio_format = AudioFormat(FileFormat.WAV, quality=1)
 3. (For expert) You can use formats defined in `speechsdk.SpeechSynthesisOutputFormat`.
 
 ```python
-import azure.cognitiveservices.speech as speechsdk
+from aspeak import SpeechSynthesisOutputFormat
 
-audio_format = speechsdk.SpeechSynthesisOutputFormat.Webm24Khz16BitMonoOpus
+audio_format = SpeechSynthesisOutputFormat.Webm24Khz16BitMonoOpus
 ```
 
 ### SpeechService

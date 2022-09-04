@@ -1,8 +1,6 @@
 from sys import stderr
 
-from azure.cognitiveservices.speech import ResultReason
-
-from aspeak import SpeechToSpeakerService
+from aspeak import SpeechToSpeakerService, ResultReason
 
 if __name__ == "__main__":
     try:
