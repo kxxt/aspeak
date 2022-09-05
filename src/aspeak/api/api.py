@@ -52,7 +52,7 @@ class SpeechServiceBase:
         return self._synthesizer.speak_ssml(ssml)
 
     def ssml_to_speech_async(self, ssml, **kwargs):
-        return self._synthesizer.speak_ssml(ssml)
+        return self._synthesizer.speak_ssml_async(ssml)
 
     def text_to_speech(self, text, **kwargs):
         """
