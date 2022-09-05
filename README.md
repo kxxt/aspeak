@@ -28,6 +28,13 @@ For old users, to continue to use aspeak, you need to upgrade to v3.0 by executi
 pip install "aspeak>=3.0"
 ```
 
+If you get the following error, please shorten your input and do not submit issues about it.
+
+```
+Error: Speech synthesis canceled: CancellationReason.Error
+WebSocket operation failed. Internal error: 3. Error details: WS_ERROR_UNDERLYING_IO_ERROR USP state: 4. Received audio size: 13965696 bytes.
+```
+
 ## Installation
 
 ```sh
