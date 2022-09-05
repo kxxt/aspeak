@@ -23,8 +23,9 @@ def pitch(arg: str):
     if arg.endswith('st') and try_parse_float(arg[:-2])[0] and arg[0] in {'+', '-'}:
         # Relative value: +1st, -2st
         return arg
-    if (result := try_parse_float(arg)) and result[0]:
-        return result[1]
+    is_float, value = try_parse_float(arg)
+    if is_float:
+        return value
     if arg in {'default', 'x-low', 'low', 'medium', 'high', 'x-high'}:
         return arg
     raise error(arg)
@@ -37,9 +38,10 @@ def rate(arg: str):
     if arg in {"default", "x-slow", "slow", "medium", "fast", "x-fast"}:
         # enum values
         return arg
-    if (result := try_parse_float(arg)) and result[0]:
+    is_float, value = try_parse_float(arg)
+    if is_float:
         # float values that will be converted to percentages
-        return result[1]
+        return value
     if arg.endswith('f') and try_parse_float(arg[:-1])[0]:
         # raw float values
         return arg[:-1]
