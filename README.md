@@ -20,20 +20,15 @@ You can try the Azure TTS API online: https://azure.microsoft.com/en-us/services
 
 ## Important Notice
 
-Microsoft made some breaking changes to how the trial page works, which breaks `aspeak < 3.0.0.dev1`.
+It seems that Microsoft has deliberately done some changes to prevent 3rd party tools(such as aspeak) using their trial service.
 
-For old users, to continue to use aspeak, you need to upgrade to v3.0 by executing:
-
-```sh
-pip install "aspeak>=3.0"
-```
-
-If you get the following error, please shorten your input and do not submit issues about it.
+You are expected to receive this error now:
 
 ```
-Error: Speech synthesis canceled: CancellationReason.Error
-WebSocket operation failed. Internal error: 3. Error details: WS_ERROR_UNDERLYING_IO_ERROR USP state: 4. Received audio size: 13965696 bytes.
+WebSocket upgrade failed: Unspecified connection error (200). USP state: 2. Received audio size: 0 bytes.
 ```
+
+There is an on-going discussion(#33) for this issue. Please do not open new issues for the same error.
 
 ## Installation
 
