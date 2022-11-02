@@ -16,7 +16,8 @@ Status: {voice["Status"]}
 
 
 def get_voice_list() -> list:
-    response = requests.get(voice_list_url())
+    response = requests.get(voice_list_url(), headers={
+                            'Origin': 'https://azure.microsoft.com'})
     return response.json()
 
 
