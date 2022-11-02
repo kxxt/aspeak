@@ -28,7 +28,7 @@ You are expected to receive this error now:
 WebSocket upgrade failed: Unspecified connection error (200). USP state: 2. Received audio size: 0 bytes.
 ```
 
-There is an on-going discussion(#33) for this issue. Please do not open new issues for the same error.
+There is an on-going discussion([#33](https://github.com/kxxt/aspeak/issues/33)) for this issue. Please do not open new issues for the same error.
 
 ## Installation
 
