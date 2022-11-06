@@ -35,18 +35,14 @@ class SpeechServiceBase:
         :param output: An instance of AudioOutputConfig.
         :param audio_format: The audio format, optional.
         """
-        self.config()
+        self.locale = locale
+        self.voice = voice
+        self.audio_format = audio_format
         self._output = output
-        if locale is not None:
-            self._config.speech_synthesis_language = locale
-        if voice is not None:
-            self._config.speech_synthesis_voice_name = voice
-        if audio_format is not None:
-            self._config.set_speech_synthesis_output_format(parse_format(audio_format))
-        self._synthesizer = speechsdk.SpeechSynthesizer(self._config, self._output)
-
+        self.config()
+        
     def config(self):
-        html = get(GET_TOKEN,verify=False)
+        html = get(GET_TOKEN)
         html.raise_for_status()
         html = html.text
         token = search(r'token: "(.+)"',html)
@@ -56,6 +52,14 @@ class SpeechServiceBase:
         self.time = time()
         print(f"region={region.group(1)} auth_token={'bearer '+token.group(1)}")
         self._config = speechsdk.SpeechConfig(region=region.group(1),auth_token="bearer "+token.group(1))
+        if self.locale is not None:
+            self._config.speech_synthesis_language = self.locale
+        if self.voice is not None:
+            self._config.speech_synthesis_voice_name = self.voice
+        if self.audio_format is not None:
+            self._config.set_speech_synthesis_output_format(parse_format(self.audio_format))
+        self._synthesizer = speechsdk.SpeechSynthesizer(self._config, self._output)
+
 
     def _chk(self):
         now = time()
