@@ -22,13 +22,15 @@ You can try the Azure TTS API online: https://azure.microsoft.com/en-us/services
 
 It seems that Microsoft has deliberately done some changes to prevent 3rd party tools(such as aspeak) using their trial service.
 
-You are expected to receive this error now:
+You are expected to receive this error if you are still using `aspeak < 3.1.0`:
 
 ```
 WebSocket upgrade failed: Unspecified connection error (200). USP state: 2. Received audio size: 0 bytes.
 ```
 
-There is an on-going discussion([#33](https://github.com/kxxt/aspeak/issues/33)) for this issue. Please do not open new issues for the same error.
+Please upgrade to `aspeak >= 3.1.0`. 
+
+Credit goes to @ujmyvq1582, who [proposed a fix](https://github.com/kxxt/aspeak/issues/33#issuecomment-1304673329) and @flt6, who [implemented the fix](https://github.com/kxxt/aspeak/pull/35).
 
 ## Installation
 
