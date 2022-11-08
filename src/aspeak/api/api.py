@@ -70,7 +70,6 @@ class SpeechServiceBase:
 
     def pure_text_to_speech(self, text, **kwargs):
         self._renew()
-        print("TTS")
         return self._synthesizer.speak_text(text)
 
     def pure_text_to_speech_async(self, text, **kwargs):
