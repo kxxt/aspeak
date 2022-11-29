@@ -1,6 +1,6 @@
 from typing import Union
 from deprecated import deprecated
-import azure.cognitiveservices.speech as speechsdk
+import mytts as speechsdk
 
 
 class SpeechServiceProvider:

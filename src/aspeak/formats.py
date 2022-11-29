@@ -1,4 +1,4 @@
-from azure.cognitiveservices.speech import SpeechSynthesisOutputFormat
+from mytts import SpeechSynthesisOutputFormat
 
 
 def get_available_formats() -> set:

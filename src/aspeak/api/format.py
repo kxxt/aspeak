@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Union
 
-import azure.cognitiveservices.speech as speechsdk
+import mytts as speechsdk
 
 from ..quality import QUALITIES
 

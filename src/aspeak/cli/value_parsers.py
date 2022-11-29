@@ -1,4 +1,4 @@
-import azure.cognitiveservices.speech as speechsdk
+import mytts as speechsdk
 
 
 def try_parse_float(arg: str):
