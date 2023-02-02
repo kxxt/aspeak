@@ -1,5 +1,5 @@
 use log::debug;
-use std::{cell::RefCell, fmt::format, net::TcpStream, str::Bytes};
+use std::{cell::RefCell, error::Error, fmt::format, net::TcpStream, str::Bytes};
 use tungstenite::{
     client::IntoClientRequest, connect, http::HeaderValue, stream::MaybeTlsStream, Message,
     WebSocket,
@@ -55,7 +55,10 @@ pub(crate) struct Synthesizer {
 }
 
 impl Synthesizer {
-    pub fn synthesize(&self, mut callback: impl FnMut(&[u8])) -> Result<(), AspeakError> {
+    pub fn synthesize(
+        &self,
+        mut callback: impl FnMut(&[u8]) -> Result<(), AspeakError>,
+    ) -> Result<(), AspeakError> {
         let now = Utc::now();
         let request_id = &self.request_id;
         let ssml = r#"<speak xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xmlns:emo="http://www.w3.org/2009/10/emotionml" version="1.0" xml:lang="en-US"><voice name="en-US-JennyNeural"><prosody rate="0%" pitch="0%">You can replace this text with any text you wish. You can either write in this text box or paste your own text here.
@@ -66,16 +69,12 @@ impl Synthesizer {
         self.wss.borrow_mut().write_message(Message::Text(format!(
             "Path: ssml\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}\r\nContent-Type: application/ssml+xml\r\n\r\n{ssml}"
         )))?;
-        let _turn_start = self.wss.borrow_mut().read_message()?.into_text()?;
-        debug!("Received turn.start msg: {_turn_start:?}");
-        let _response = self.wss.borrow_mut().read_message()?.into_text()?;
-        debug!("Received response msg: {_response:?}");
         loop {
             let raw_msg = self.wss.borrow_mut().read_message()?;
             let msg = WebSocketMessage::try_from(&raw_msg)?;
             match msg {
                 WebSocketMessage::TurnStart | WebSocketMessage::Response { body: _ } => continue,
-                WebSocketMessage::Audio { data } => callback(data),
+                WebSocketMessage::Audio { data } => callback(data)?,
                 WebSocketMessage::TurnEnd => break,
             }
         }
