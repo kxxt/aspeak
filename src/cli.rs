@@ -10,9 +10,9 @@ use clap::{Args, Parser, Subcommand, ValueEnum};
 )]
 pub(crate) struct Cli {
     #[command(subcommand)]
-    command: Option<Commands>,
+    pub command: Option<Commands>,
     #[arg(short, long, default_value_t = String::from("eastus.api.speech.microsoft.com"))]
-    endpoint: String,
+    pub endpoint: String,
 }
 
 #[derive(Debug, Clone, Copy, Default, ValueEnum)]
@@ -27,34 +27,34 @@ pub(crate) enum ContainerFormat {
 #[derive(Args, Debug)]
 pub(crate) struct InputArgs {
     #[arg(short, long)]
-    file: Option<String>,
+    pub file: Option<String>,
     #[arg(short, long)]
-    encoding: Option<String>,
+    pub encoding: Option<String>,
 }
 
 #[derive(Args, Debug)]
 pub(crate) struct OutputArgs {
     #[arg(short, long)]
-    output: Option<String>,
+    pub output: Option<String>,
     #[arg(short, long)]
-    quality: Option<i32>,
+    pub quality: Option<i32>,
     #[arg(short, long)]
-    container_format: Option<ContainerFormat>,
+    pub container_format: Option<ContainerFormat>,
     #[arg(
         short = 'F',
         long,
         conflicts_with = "quality",
         conflicts_with = "container_format"
     )]
-    format: Option<String>,
+    pub format: Option<String>,
 }
 
 #[derive(Args, Debug)]
 pub(crate) struct CommonArgs {
     #[arg(short, long, conflicts_with = "locale")]
-    voice: Option<String>,
+    pub voice: Option<String>,
     #[arg(short, long)]
-    locale: Option<String>,
+    pub locale: Option<String>,
 }
 
 #[derive(Debug, Subcommand)]

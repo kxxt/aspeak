@@ -1,0 +1,63 @@
+use std::str;
+
+use tungstenite::Message;
+
+use crate::error::AspeakError;
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum WebSocketMessage<'a> {
+    TurnStart,
+    TurnEnd,
+    Response { body: &'a str },
+    Audio { data: &'a [u8] },
+}
+
+impl<'a> TryFrom<&'a Message> for WebSocketMessage<'a> {
+    type Error = AspeakError;
+
+    fn try_from(value: &'a Message) -> Result<Self, Self::Error> {
+        Ok(match value {
+            &Message::Binary(ref data) => {
+                let (int_bytes, rest) = data.split_at(std::mem::size_of::<u16>());
+                let header_len = u16::from_be_bytes([int_bytes[0], int_bytes[1]]);
+                let header = str::from_utf8(&rest[..header_len as usize]).unwrap();
+                let is_audio = {
+                    let headers = header.split("\r\n");
+                    let mut is_audio = false;
+                    for header in headers {
+                        if header.starts_with("Path") && header.ends_with("audio") {
+                            is_audio = true;
+                        }
+                    }
+                    is_audio
+                };
+                if !is_audio {
+                    return Err(AspeakError::InvalidWebSocketMessage(header.to_string()));
+                }
+                WebSocketMessage::Audio { data: rest }
+            }
+            &Message::Text(ref text) => {
+                let err_construct = || AspeakError::InvalidWebSocketMessage(text.to_string());
+                let (header_text, body) = text.split_once("\r\n\r\n").ok_or_else(err_construct)?;
+                let mut result = None;
+                for header in header_text.split("\r\n") {
+                    let (k, v) = header.split_once(':').ok_or_else(err_construct)?;
+                    if k == "Path" {
+                        match v.trim() {
+                            "turn.end" => result = Some(WebSocketMessage::TurnEnd),
+                            "turn.start" => result = Some(WebSocketMessage::TurnStart),
+                            "response" => result = Some(WebSocketMessage::Response { body }),
+                            _ => break,
+                        }
+                    }
+                }
+                result.ok_or_else(err_construct)?
+            }
+            _ => {
+                return Err(AspeakError::InvalidWebSocketMessage(
+                    "Niether Binary nor Text!".to_string(),
+                ))
+            }
+        })
+    }
+}
