@@ -30,7 +30,20 @@ fn process_input(args: InputArgs) -> Result<String, AspeakError> {
 fn process_output(
     args: OutputArgs,
 ) -> Result<Box<dyn FnMut(&[u8]) -> Result<(), AspeakError>>, AspeakError> {
-    todo!();
+    Ok(if let Some(file) = args.output {
+        // todo: file already exists?
+        let file = File::create(file)?;
+        let mut buf_writer = BufWriter::new(file);
+        Box::new(move |data| {
+            buf_writer.write(data)?;
+            Ok(())
+        })
+    } else {
+        Box::new(move |data| {
+            info!("Received {} bytes of data", data.len());
+            Ok(())
+        })
+    })
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -47,7 +60,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         } => {
             let ssml = ssml
                 .ok_or(AspeakError::InputError)
-                .or_else(|_| process_input(input_args));
+                .or_else(|_| process_input(input_args))?;
+            let synthesizer = synthesizer::SynthesizerConfig::new(&cli.endpoint).connect()?;
+            let callback = process_output(output_args)?;
+            synthesizer.synthesize(&ssml, callback)?;
         }
         Commands::Text {
             text,
@@ -62,21 +78,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         } => {
             let text = text
                 .ok_or(AspeakError::InputError)
-                .or_else(|_| process_input(input_args));
+                .or_else(|_| process_input(input_args))?;
         }
         _ => todo!(),
     }
-    let synthesizer = synthesizer::SynthesizerConfig::new(&cli.endpoint).connect()?;
-    let (_stream, stream_handle) = OutputStream::try_default()?;
-    let file = File::create("debug.mp3")?;
-    let mut buf_writer = BufWriter::new(file);
-    synthesizer.synthesize("", |data| {
-        // let cursor = Cursor::new(Vec::from(data));
-        // let source = Decoder::new_mp3(cursor)?;
-        // stream_handle.play_raw(source.convert_samples())?;
-        buf_writer.write(data)?;
-        // buf_writer.write(b"\r\n")?;
-        Ok(())
-    })?;
+
     Ok(())
 }

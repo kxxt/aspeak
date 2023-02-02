@@ -1,4 +1,4 @@
-use log::debug;
+use log::{debug, info};
 use std::{cell::RefCell, error::Error, fmt::format, net::TcpStream, str::Bytes};
 use tungstenite::{
     client::IntoClientRequest, connect, http::HeaderValue, stream::MaybeTlsStream, Message,
@@ -19,6 +19,7 @@ const SYNTHESIS_CONFIG_PAYLOAD: &str = r#"{"synthesis":{"audio":{"metadataOption
 impl SynthesizerConfig {
     pub fn new(endpoint: &str) -> Self {
         let wss_endpoint = format!("wss://{endpoint}/cognitiveservices/websocket/v1");
+        info!("Successfully created SynthesizerConfig");
         return Self { wss_endpoint };
     }
 
@@ -42,6 +43,7 @@ impl SynthesizerConfig {
             "Path: speech.config\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{SYNTHESIS_CONFIG_PAYLOAD}", 
             request_id = & request_id)),
         )?;
+        info!("Successfully created Synthesizer");
         Ok(Synthesizer {
             request_id,
             wss: RefCell::new(wss),
