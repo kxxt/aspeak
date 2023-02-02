@@ -1,6 +1,4 @@
-use std::default;
-
-use clap::{Arg, Args, Parser, Subcommand, ValueEnum};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
@@ -13,6 +11,8 @@ use clap::{Arg, Args, Parser, Subcommand, ValueEnum};
 pub(crate) struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
+    #[arg(short, long, default_value_t = String::from("eastus.api.speech.microsoft.com"))]
+    endpoint: String,
 }
 
 #[derive(Debug, Clone, Copy, Default, ValueEnum)]
@@ -59,7 +59,10 @@ pub(crate) struct CommonArgs {
 
 #[derive(Debug, Subcommand)]
 pub(crate) enum Commands {
-    ListVoices,
+    ListVoices {
+        #[command(flatten)]
+        common_args: CommonArgs,
+    },
     ListQualitiesAndFormats,
     Text {
         text: Option<String>,
