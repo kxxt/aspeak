@@ -57,15 +57,11 @@ pub(crate) struct Synthesizer {
 impl Synthesizer {
     pub fn synthesize(
         &self,
+        ssml: &str,
         mut callback: impl FnMut(&[u8]) -> Result<(), AspeakError>,
     ) -> Result<(), AspeakError> {
         let now = Utc::now();
         let request_id = &self.request_id;
-        let ssml = r#"<speak xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xmlns:emo="http://www.w3.org/2009/10/emotionml" version="1.0" xml:lang="en-US"><voice name="en-US-JennyNeural"><prosody rate="0%" pitch="0%">You can replace this text with any text you wish. You can either write in this text box or paste your own text here.
-
-        Try different languages and voices. Change the speed and the pitch of the voice. You can even tweak the SSML (Speech Synthesis Markup Language) to control how the different sections of the text sound. Click on SSML above to give it a try!
-        
-        Enjoy using Text to Speech!</prosody></voice></speak>"#;
         self.wss.borrow_mut().write_message(Message::Text(format!(
             "Path: ssml\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}\r\nContent-Type: application/ssml+xml\r\n\r\n{ssml}"
         )))?;

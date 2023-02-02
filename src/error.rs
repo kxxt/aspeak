@@ -14,4 +14,6 @@ pub enum AspeakError {
     PlayError(#[from] rodio::PlayError),
     #[error("IO error")]
     IOError(#[from] std::io::Error),
+    #[error("No input text/SSML.")]
+    InputError,
 }
