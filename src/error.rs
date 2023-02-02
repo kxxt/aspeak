@@ -12,4 +12,6 @@ pub enum AspeakError {
     StreamError(#[from] rodio::StreamError),
     #[error("audio play error")]
     PlayError(#[from] rodio::PlayError),
+    #[error("IO error")]
+    IOError(#[from] std::io::Error),
 }

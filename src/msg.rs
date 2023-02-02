@@ -20,8 +20,8 @@ impl<'a> TryFrom<&'a Message> for WebSocketMessage<'a> {
         Ok(match value {
             &Message::Binary(ref data) => {
                 let (int_bytes, rest) = data.split_at(std::mem::size_of::<u16>());
-                let header_len = u16::from_be_bytes([int_bytes[0], int_bytes[1]]);
-                let header = str::from_utf8(&rest[..header_len as usize]).unwrap();
+                let header_len = u16::from_be_bytes([int_bytes[0], int_bytes[1]]) as usize;
+                let header = str::from_utf8(&rest[..header_len]).unwrap();
                 let is_audio = {
                     let headers = header.split("\r\n");
                     let mut is_audio = false;
@@ -37,7 +37,9 @@ impl<'a> TryFrom<&'a Message> for WebSocketMessage<'a> {
                 if !is_audio {
                     return Err(AspeakError::InvalidWebSocketMessage(header.to_string()));
                 }
-                WebSocketMessage::Audio { data: rest }
+                WebSocketMessage::Audio {
+                    data: &rest[header_len..],
+                }
             }
             &Message::Text(ref text) => {
                 let err_construct = || AspeakError::InvalidWebSocketMessage(text.to_string());
