@@ -55,8 +55,6 @@ fn process_output(
                 buffer.extend_from_slice(data);
             } else {
                 info!("Playing audio... ({} bytes)", buffer.len());
-                // debug!("Audio data: {:?}", buffer);
-                File::create("debug.wav")?.write_all(buffer.as_slice())?;
                 let (_stream, stream_handle) = OutputStream::try_default()?;
                 let sink = Sink::try_new(&stream_handle).unwrap();
                 let cursor = Cursor::new(Vec::from(&buffer[..]));
