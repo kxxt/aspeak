@@ -1,6 +1,5 @@
 use aspeak::{AudioFormat, TextOptions};
 use clap::{Args, Parser, Subcommand, ValueEnum};
-
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
 #[command(author, version,
