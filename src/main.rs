@@ -3,8 +3,8 @@ mod error;
 mod msg;
 mod ssml;
 mod synthesizer;
-mod voice;
 mod types;
+mod voice;
 
 use std::{
     error::Error,
@@ -16,7 +16,7 @@ use clap::Parser;
 use cli::{Cli, Commands, InputArgs, OutputArgs};
 use error::AspeakError;
 use log::{debug, info};
-use reqwest::header::{self, HeaderMap, HeaderName, HeaderValue};
+use reqwest::header::{self, HeaderMap, HeaderValue};
 
 use crate::{ssml::interpolate_ssml, voice::Voice};
 

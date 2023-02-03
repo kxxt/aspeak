@@ -1,6 +1,5 @@
 use crate::types::{AudioFormat, ContainerFormat, Role};
 use clap::{Args, Parser, Subcommand};
-use strum::{self};
 
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
