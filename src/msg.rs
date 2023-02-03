@@ -1,7 +1,7 @@
 use std::str;
 
 use log::debug;
-use tungstenite::Message;
+use tungstenite::{protocol::CloseFrame, Message};
 
 use crate::error::AspeakError;
 
@@ -11,6 +11,7 @@ pub(crate) enum WebSocketMessage<'a> {
     TurnEnd,
     Response { body: &'a str },
     Audio { data: &'a [u8] },
+    Close(Option<&'a CloseFrame<'a>>),
 }
 
 impl<'a> TryFrom<&'a Message> for WebSocketMessage<'a> {
@@ -59,6 +60,7 @@ impl<'a> TryFrom<&'a Message> for WebSocketMessage<'a> {
                 }
                 result.ok_or_else(err_construct)?
             }
+            &Message::Close(ref frame) => WebSocketMessage::Close(frame.as_ref()),
             _ => {
                 return Err(AspeakError::InvalidWebSocketMessage(
                     "Niether Binary nor Text!".to_string(),

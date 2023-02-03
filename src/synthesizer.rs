@@ -74,6 +74,18 @@ impl Synthesizer {
                 WebSocketMessage::TurnStart | WebSocketMessage::Response { body: _ } => continue,
                 WebSocketMessage::Audio { data } => callback(data)?,
                 WebSocketMessage::TurnEnd => break,
+                WebSocketMessage::Close(frame) => {
+                    return Err(frame.map_or_else(
+                        || AspeakError::ConnectionCloseError {
+                            code: "Unknown".to_string(),
+                            reason: "The server closed the connection without a reason".to_string(),
+                        },
+                        |fr| AspeakError::ConnectionCloseError {
+                            code: fr.code.to_string(),
+                            reason: fr.reason.to_string(),
+                        },
+                    ));
+                }
             }
         }
         Ok(())
