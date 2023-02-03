@@ -42,7 +42,7 @@ pub fn interpolate_ssml(options: &TextOptions) -> Result<String> {
 
     writer.write({
         let builder = XmlEvent::start_element("voice");
-        if let Some(ref voice) = options.common_args.voice {
+        if let Some(ref voice) = options.voice {
             builder.attr("name", voice)
         } else {
             builder

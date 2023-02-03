@@ -17,14 +17,6 @@ pub enum Role {
 }
 
 #[derive(Args, Debug)]
-pub struct CommonArgs {
-    #[arg(short, long, conflicts_with = "locale", help = "Voice to use")]
-    pub voice: Option<String>,
-    #[arg(short, long, help = "Locale to use, default to en-US")]
-    pub locale: Option<String>,
-}
-
-#[derive(Args, Debug)]
 pub struct TextOptions {
     #[clap(help = "The text to speak. \
                 If neither text nor input file is specified, the text will be read from stdin.")]
@@ -54,8 +46,10 @@ pub struct TextOptions {
         help = "Specifies the intensity of the speaking style. This only works for some Chinese voices!"
     )]
     pub style_degree: Option<f32>,
-    #[command(flatten)]
-    pub common_args: CommonArgs,
+    #[arg(short, long, conflicts_with = "locale", help = "Voice to use")]
+    pub voice: Option<String>,
+    #[arg(short, long, help = "Locale to use, default to en-US")]
+    pub locale: Option<String>,
 }
 
 fn is_float(s: &str) -> bool {

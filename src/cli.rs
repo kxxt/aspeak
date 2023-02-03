@@ -1,4 +1,4 @@
-use aspeak::{AudioFormat, CommonArgs, TextOptions};
+use aspeak::{AudioFormat, TextOptions};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 
 /// Simple program to greet a person
@@ -58,8 +58,15 @@ pub(crate) struct OutputArgs {
 #[derive(Debug, Subcommand)]
 pub(crate) enum Commands {
     ListVoices {
-        #[command(flatten)]
-        common_args: CommonArgs,
+        #[arg(
+            short,
+            long,
+            conflicts_with = "locale",
+            help = "Voice to list, default to all voices"
+        )]
+        voice: Option<String>,
+        #[arg(short, long, help = "Locale to list, default to all locales")]
+        locale: Option<String>,
     },
     ListQualitiesAndFormats,
     Text {
@@ -79,7 +86,5 @@ pub(crate) enum Commands {
         input_args: InputArgs,
         #[command(flatten)]
         output_args: OutputArgs,
-        #[command(flatten)]
-        common_args: CommonArgs,
     },
 }

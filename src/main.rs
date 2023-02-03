@@ -66,7 +66,6 @@ fn main() -> std::result::Result<(), Box<dyn Error>> {
             ssml,
             input_args,
             output_args,
-            common_args: _,
         } => {
             let ssml = ssml
                 .ok_or(AspeakError::InputError)
@@ -93,7 +92,10 @@ fn main() -> std::result::Result<(), Box<dyn Error>> {
             let callback = process_output(output_args)?;
             synthesizer.synthesize(&ssml, callback)?;
         }
-        Commands::ListVoices { common_args } => {
+        Commands::ListVoices {
+            ref voice,
+            ref locale,
+        } => {
             let url = format!("https://{}/cognitiveservices/voices/list", cli.endpoint);
             let headers =
                 HeaderMap::from_iter([(header::ORIGIN, HeaderValue::from_str(ORIGIN).unwrap())]);
@@ -104,8 +106,8 @@ fn main() -> std::result::Result<(), Box<dyn Error>> {
             let request = client.get(url).build()?;
             let voices = client.execute(request)?.json::<Vec<Voice>>()?;
             let voices = voices.iter();
-            let locale_id = common_args.locale.as_deref();
-            let voice_id = common_args.voice.as_deref();
+            let locale_id = locale.as_deref();
+            let voice_id = voice.as_deref();
             let voices: Box<dyn Iterator<Item = &Voice>> = {
                 if locale_id.is_some() {
                     Box::new(voices.filter(|voice| Some(voice.locale.as_str()) == locale_id))
