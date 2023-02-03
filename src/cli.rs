@@ -94,7 +94,7 @@ fn parse_pitch(arg: &str) -> Result<String, String> {
         Ok(format!("{:.2}", v * 100f32))
     } else {
         Err(format!(
-            "Please read the documentation for possible values for pitch."
+            "Please read the documentation for possible values of pitch."
         ))
     }
 }
@@ -112,7 +112,7 @@ fn parse_rate(arg: &str) -> Result<String, String> {
         Ok(format!("{:.2}", v * 100f32))
     } else {
         Err(format!(
-            "Please read the documentation for possible values for pitch."
+            "Please read the documentation for possible values of rate."
         ))
     }
 }
