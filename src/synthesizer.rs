@@ -63,7 +63,7 @@ impl Synthesizer {
     pub fn synthesize(
         &self,
         ssml: &str,
-        mut callback: impl FnMut(&[u8]) -> Result<(), AspeakError>,
+        mut callback: impl FnMut(Option<&[u8]>) -> Result<(), AspeakError>,
     ) -> Result<(), AspeakError> {
         let now = Utc::now();
         let request_id = &self.request_id;
@@ -75,8 +75,8 @@ impl Synthesizer {
             let msg = WebSocketMessage::try_from(&raw_msg)?;
             match msg {
                 WebSocketMessage::TurnStart | WebSocketMessage::Response { body: _ } => continue,
-                WebSocketMessage::Audio { data } => callback(data)?,
-                WebSocketMessage::TurnEnd => break,
+                WebSocketMessage::Audio { data } => callback(Some(data))?,
+                WebSocketMessage::TurnEnd => return callback(None),
                 WebSocketMessage::Close(frame) => {
                     return Err(frame.map_or_else(
                         || AspeakError::ConnectionCloseError {
@@ -91,6 +91,5 @@ impl Synthesizer {
                 }
             }
         }
-        Ok(())
     }
 }

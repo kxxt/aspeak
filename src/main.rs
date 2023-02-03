@@ -9,7 +9,7 @@ mod voice;
 use std::{
     error::Error,
     fs::File,
-    io::{self, BufWriter, Read, Write},
+    io::{self, BufWriter, Cursor, Read, Write},
 };
 
 use clap::Parser;
@@ -17,6 +17,7 @@ use cli::{Cli, Commands, InputArgs, OutputArgs};
 use error::AspeakError;
 use log::{debug, info};
 use reqwest::header::{self, HeaderMap, HeaderValue};
+use rodio::{Decoder, OutputStream, Sink, Source};
 
 use crate::{ssml::interpolate_ssml, voice::Voice};
 
@@ -35,18 +36,34 @@ fn process_input(args: InputArgs) -> Result<String, AspeakError> {
 
 fn process_output(
     args: OutputArgs,
-) -> Result<Box<dyn FnMut(&[u8]) -> Result<(), AspeakError>>, AspeakError> {
+) -> Result<Box<dyn FnMut(Option<&[u8]>) -> Result<(), AspeakError>>, AspeakError> {
     Ok(if let Some(file) = args.output {
         // todo: file already exists?
         let file = File::create(file)?;
         let mut buf_writer = BufWriter::new(file);
         Box::new(move |data| {
-            buf_writer.write(data)?;
-            Ok(())
+            Ok(if let Some(data) = data {
+                buf_writer.write_all(data)?
+            } else {
+                buf_writer.flush()?
+            })
         })
     } else {
+        let mut buffer = Vec::new();
         Box::new(move |data| {
-            info!("Received {} bytes of data", data.len());
+            if let Some(data) = data {
+                buffer.extend_from_slice(data);
+            } else {
+                info!("Playing audio... ({} bytes)", buffer.len());
+                // debug!("Audio data: {:?}", buffer);
+                File::create("debug.wav")?.write_all(buffer.as_slice())?;
+                let (_stream, stream_handle) = OutputStream::try_default()?;
+                let sink = Sink::try_new(&stream_handle).unwrap();
+                let cursor = Cursor::new(Vec::from(&buffer[..]));
+                let source = Decoder::new(cursor)?;
+                sink.append(source);
+                sink.sleep_until_end();
+            }
             Ok(())
         })
     })
