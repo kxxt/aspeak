@@ -2,8 +2,6 @@ use clap::{Args, ValueEnum};
 use strum;
 use strum::IntoStaticStr;
 
-
-
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, ValueEnum, IntoStaticStr)]
 #[clap(rename_all = "verbatim")]

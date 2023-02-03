@@ -7,7 +7,7 @@ mod voice;
 
 pub const ORIGIN: &str = "https://azure.microsoft.com";
 
-pub use error::AspeakError;
+pub use error::{AspeakError, Result};
 pub use ssml::interpolate_ssml;
 pub use synthesizer::{Synthesizer, SynthesizerConfig};
 pub use types::*;

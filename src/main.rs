@@ -8,13 +8,13 @@ use std::{
 
 use cli::{Cli, Commands, InputArgs, OutputArgs};
 
-use aspeak::{interpolate_ssml, AspeakError, SynthesizerConfig, Voice, ORIGIN};
+use aspeak::{interpolate_ssml, AspeakError, Result, SynthesizerConfig, Voice, ORIGIN};
 use clap::Parser;
 use log::{debug, info};
 use reqwest::header::{self, HeaderMap, HeaderValue};
 use rodio::{Decoder, OutputStream, Sink};
 
-fn process_input(args: InputArgs) -> Result<String, AspeakError> {
+fn process_input(args: InputArgs) -> Result<String> {
     let mut s = String::new();
     // todo: encoding
     if let Some(file) = args.file {
@@ -25,9 +25,7 @@ fn process_input(args: InputArgs) -> Result<String, AspeakError> {
     Ok(s)
 }
 
-fn process_output(
-    args: OutputArgs,
-) -> Result<Box<dyn FnMut(Option<&[u8]>) -> Result<(), AspeakError>>, AspeakError> {
+fn process_output(args: OutputArgs) -> Result<Box<dyn FnMut(Option<&[u8]>) -> Result<()>>> {
     Ok(if let Some(file) = args.output {
         // todo: file already exists?
         let file = File::create(file)?;
@@ -58,7 +56,7 @@ fn process_output(
     })
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> std::result::Result<(), Box<dyn Error>> {
     env_logger::init();
     let cli = Cli::parse();
     debug!("Commandline args: {cli:?}");

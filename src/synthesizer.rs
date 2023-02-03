@@ -6,7 +6,7 @@ use tungstenite::{
 };
 use uuid::Uuid;
 
-use crate::{error::AspeakError, msg::WebSocketMessage, types::AudioFormat, ORIGIN};
+use crate::{msg::WebSocketMessage, AspeakError, AudioFormat, Result, ORIGIN};
 use chrono::Utc;
 
 pub struct SynthesizerConfig {
@@ -22,7 +22,7 @@ impl SynthesizerConfig {
         return Self { wss_endpoint };
     }
 
-    pub fn connect(self, audio_format: AudioFormat) -> Result<Synthesizer, AspeakError> {
+    pub fn connect(self, audio_format: AudioFormat) -> Result<Synthesizer> {
         let uuid = Uuid::new_v4();
         let request_id = uuid.as_simple().to_string();
         let mut request = self.wss_endpoint.into_client_request()?;
@@ -63,8 +63,8 @@ impl Synthesizer {
     pub fn synthesize(
         &self,
         ssml: &str,
-        mut callback: impl FnMut(Option<&[u8]>) -> Result<(), AspeakError>,
-    ) -> Result<(), AspeakError> {
+        mut callback: impl FnMut(Option<&[u8]>) -> Result<()>,
+    ) -> Result<()> {
         let now = Utc::now();
         let request_id = &self.request_id;
         self.wss.borrow_mut().write_message(Message::Text(format!(
