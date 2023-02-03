@@ -56,10 +56,22 @@ pub(crate) struct CommonArgs {
 
 #[derive(Args, Debug)]
 pub(crate) struct TextOptions {
+    #[clap(help = "The text to speak. \
+                If neither text nor input file is specified, the text will be read from stdin.")]
     pub text: Option<String>,
-    #[arg(short, long, value_parser = parse_pitch, help="Set pitch, default to 0. Valid values include floats(will be converted to percentages), percentages such as 20% and -10%, absolute values like 300Hz, and relative values like -20Hz, +2st and string values like x-low. See the documentation for more details.")]
+    #[arg(short, long, value_parser = parse_pitch,
+        help="Set pitch, default to 0. \
+              Valid values include floats(will be converted to percentages), \
+              percentages such as 20% and -10%, absolute values like 300Hz, \
+              and relative values like -20Hz, +2st and string values like x-low. \
+              See the documentation for more details.")]
     pub pitch: Option<String>,
-    #[arg(short, long, value_parser = parse_rate, help =r#"Set speech rate, default to 0. Valid values include floats(will be converted to percentages), percentages like -20%%, floats with postfix "f" (e.g. 2f means doubling the default speech rate), and string values like x-slow. See the documentation for more details."# )]
+    #[arg(short, long, value_parser = parse_rate,
+        help=r#"Set speech rate, default to 0. \
+                Valid values include floats(will be converted to percentages), \
+                percentages like -20%%, floats with postfix "f" \
+                (e.g. 2f means doubling the default speech rate), \
+                and string values like x-slow. See the documentation for more details."# )]
     pub rate: Option<String>,
     #[arg(short = 'S', long, help = r#"Set speech style, default to "general""#)]
     pub style: Option<String>,
@@ -92,6 +104,9 @@ pub(crate) enum Commands {
         output_args: OutputArgs,
     },
     SSML {
+        #[clap(help = "The SSML to speak. \
+                    If neither SSML nor input file is specified, the SSML will be read from stdin. \
+                    Do not include the document type definition in your SSML.")]
         ssml: Option<String>,
         #[command(flatten)]
         input_args: InputArgs,
