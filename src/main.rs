@@ -7,15 +7,14 @@ mod synthesizer;
 use std::{
     error::Error,
     fs::File,
-    io::{self, BufRead, BufReader, BufWriter, Cursor, Read, Stdin, Write},
-    path::Path,
+    io::{self, BufWriter, Read, Write},
 };
 
 use clap::Parser;
 use cli::{Cli, Commands, InputArgs, OutputArgs};
 use error::AspeakError;
 use log::{debug, info};
-use rodio::{Decoder, OutputStream, Source};
+
 
 use crate::ssml::interpolate_ssml;
 
@@ -59,7 +58,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             ssml,
             input_args,
             output_args,
-            common_args,
+            common_args: _,
         } => {
             let ssml = ssml
                 .ok_or(AspeakError::InputError)

@@ -1,5 +1,5 @@
 use log::{debug, info};
-use std::{cell::RefCell, error::Error, fmt::format, net::TcpStream, str::Bytes};
+use std::{cell::RefCell, net::TcpStream};
 use tungstenite::{
     client::IntoClientRequest, connect, http::HeaderValue, stream::MaybeTlsStream, Message,
     WebSocket,
