@@ -72,7 +72,7 @@ fn main() -> std::result::Result<(), Box<dyn Error>> {
                 .ok_or(AspeakError::InputError)
                 .or_else(|_| process_input(input_args))?;
             let synthesizer =
-                SynthesizerConfig::new(&cli.endpoint).connect(output_args.format.unwrap())?; // todo
+                SynthesizerConfig::new(&cli.endpoint, output_args.format.unwrap()).connect()?; // todo
             let callback = process_output(output_args)?;
             synthesizer.synthesize(&ssml, callback)?;
         }
@@ -88,7 +88,7 @@ fn main() -> std::result::Result<(), Box<dyn Error>> {
                     .or_else(|_| process_input(input_args))?,
             );
             let synthesizer =
-                SynthesizerConfig::new(&cli.endpoint).connect(output_args.format.unwrap())?;
+                SynthesizerConfig::new(&cli.endpoint, output_args.format.unwrap()).connect()?;
             let ssml = interpolate_ssml(&text_options)?;
             let callback = process_output(output_args)?;
             synthesizer.synthesize(&ssml, callback)?;

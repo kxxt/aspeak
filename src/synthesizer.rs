@@ -11,18 +11,22 @@ use chrono::Utc;
 
 pub struct SynthesizerConfig {
     wss_endpoint: String,
+    audio_format: AudioFormat,
 }
 
 const CLIENT_INFO_PAYLOAD: &str = r#"{"context":{"system":{"name":"SpeechSDK","version":"1.12.1-rc.1","build":"JavaScript","lang":"JavaScript","os":{"platform":"Browser/Linux x86_64","name":"Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0","version":"5.0 (X11)"}}}}"#;
 
 impl SynthesizerConfig {
-    pub fn new(endpoint: &str) -> Self {
+    pub fn new(endpoint: &str, audio_format: AudioFormat) -> Self {
         let wss_endpoint = format!("wss://{endpoint}/cognitiveservices/websocket/v1");
         info!("Successfully created SynthesizerConfig");
-        return Self { wss_endpoint };
+        return Self {
+            wss_endpoint,
+            audio_format,
+        };
     }
 
-    pub fn connect(self, audio_format: AudioFormat) -> Result<Synthesizer> {
+    pub fn connect(self) -> Result<Synthesizer> {
         let uuid = Uuid::new_v4();
         let request_id = uuid.as_simple().to_string();
         let mut request = self.wss_endpoint.into_client_request()?;
@@ -39,7 +43,7 @@ impl SynthesizerConfig {
         now = Utc::now();
         let synthesis_config = format!(
             r#"{{"synthesis":{{"audio":{{"metadataOptions":{{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false}},"outputFormat":"{}"}}}}}}"#,
-            Into::<&str>::into(&audio_format)
+            Into::<&str>::into(&self.audio_format)
         );
         info!("Synthesis config is: {}", synthesis_config);
         wss.write_message(Message::Text(format!(
