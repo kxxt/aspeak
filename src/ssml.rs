@@ -48,12 +48,11 @@ pub(crate) fn interpolate_ssml(options: &TextOptions) -> Result<String> {
     writer.write(
         XmlEvent::start_element("mstts:express-as")
             .optional_attrs(&[
-                ("role", options.role.as_deref()),
+                ("role", options.role.map(|role| role.into())),
                 ("styledegree", style_degree.as_deref()),
             ])
             .attr("style", options.style.as_deref().unwrap_or("general")),
     )?;
-
     writer.write(XmlEvent::start_element("prosody").optional_attrs(&[
         ("pitch", options.pitch.as_deref()),
         ("rate", options.rate.as_deref()),

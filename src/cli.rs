@@ -1,4 +1,5 @@
 use clap::{Args, Parser, Subcommand, ValueEnum};
+use strum::{AsRefStr, IntoStaticStr};
 
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
@@ -57,17 +58,71 @@ pub(crate) struct CommonArgs {
     pub locale: Option<String>,
 }
 
+#[non_exhaustive]
+#[derive(Debug, Clone, Copy, ValueEnum, IntoStaticStr)]
+pub(crate) enum Role {
+    Girl,
+    Boy,
+    YoungAdultFemale,
+    YoungAdultMale,
+    OlderAdultFemale,
+    OlderAdultMale,
+    SeniorFemale,
+    SeniorMale,
+}
+
+fn is_float(s: &str) -> bool {
+    return s.parse::<f32>().is_ok();
+}
+
+fn parse_pitch(arg: &str) -> Result<String, String> {
+    if (arg.ends_with("Hz") && is_float(&arg[..arg.len() - 2]))
+        || (arg.ends_with("%") && is_float(&arg[..arg.len() - 1]))
+        || (arg.ends_with("st")
+            && (arg.starts_with('+') || arg.starts_with('-'))
+            && is_float(&arg[..arg.len() - 2]))
+        || ["default", "x-low", "low", "medium", "high", "x-high"].contains(&arg)
+    {
+        Ok(arg.to_owned())
+    } else if let Ok(v) = arg.parse::<f32>() {
+        // float values that will be converted to percentages
+        Ok(format!("{:.2}", v * 100f32))
+    } else {
+        Err(format!(
+            "Please read the documentation for possible values for pitch."
+        ))
+    }
+}
+
+fn parse_rate(arg: &str) -> Result<String, String> {
+    if (arg.ends_with("%") && is_float(&arg[..arg.len() - 1]))
+        || ["default", "x-slow", "slow", "medium", "fast", "x-fast"].contains(&arg)
+    {
+        Ok(arg.to_owned())
+    } else if arg.ends_with('f') && is_float(&arg[..arg.len() - 1]) {
+        // raw float
+        Ok(arg[..arg.len() - 1].to_owned())
+    } else if let Ok(v) = arg.parse::<f32>() {
+        // float values that will be converted to percentages
+        Ok(format!("{:.2}", v * 100f32))
+    } else {
+        Err(format!(
+            "Please read the documentation for possible values for pitch."
+        ))
+    }
+}
+
 #[derive(Args, Debug)]
 pub(crate) struct TextOptions {
     pub text: Option<String>,
-    #[arg(short, long)]
+    #[arg(short, long, value_parser = parse_pitch)]
     pub pitch: Option<String>,
-    #[arg(short, long)]
+    #[arg(short, long, value_parser = parse_rate)]
     pub rate: Option<String>,
     #[arg(short = 'S', long)]
     pub style: Option<String>,
     #[arg(short = 'R', long)]
-    pub role: Option<String>,
+    pub role: Option<Role>,
     #[arg(short = 'd', long)]
     pub style_degree: Option<f32>,
     #[command(flatten)]
