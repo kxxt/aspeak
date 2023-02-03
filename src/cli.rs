@@ -1,5 +1,6 @@
-use clap::{Args, Parser, Subcommand, ValueEnum};
-use strum::IntoStaticStr;
+use crate::types::{AudioFormat, ContainerFormat, Role};
+use clap::{Args, Parser, Subcommand};
+use strum::{self};
 
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
@@ -14,15 +15,6 @@ pub(crate) struct Cli {
     pub command: Option<Commands>,
     #[arg(short, long, default_value_t = String::from("eastus.api.speech.microsoft.com"))]
     pub endpoint: String,
-}
-
-#[derive(Debug, Clone, Copy, Default, ValueEnum)]
-pub(crate) enum ContainerFormat {
-    Mp3,
-    Ogg,
-    Webm,
-    #[default]
-    Wav,
 }
 
 #[derive(Args, Debug)]
@@ -52,7 +44,7 @@ pub(crate) struct OutputArgs {
         conflicts_with = "container_format",
         help = "Set output audio format (experts only)"
     )]
-    pub format: Option<String>,
+    pub format: Option<AudioFormat>,
 }
 
 #[derive(Args, Debug)]
@@ -63,18 +55,52 @@ pub(crate) struct CommonArgs {
     pub locale: Option<String>,
 }
 
-#[non_exhaustive]
-#[derive(Debug, Clone, Copy, ValueEnum, IntoStaticStr)]
-#[clap(rename_all = "verbatim")]
-pub(crate) enum Role {
-    Girl,
-    Boy,
-    YoungAdultFemale,
-    YoungAdultMale,
-    OlderAdultFemale,
-    OlderAdultMale,
-    SeniorFemale,
-    SeniorMale,
+#[derive(Args, Debug)]
+pub(crate) struct TextOptions {
+    pub text: Option<String>,
+    #[arg(short, long, value_parser = parse_pitch, help="Set pitch, default to 0. Valid values include floats(will be converted to percentages), percentages such as 20% and -10%, absolute values like 300Hz, and relative values like -20Hz, +2st and string values like x-low. See the documentation for more details.")]
+    pub pitch: Option<String>,
+    #[arg(short, long, value_parser = parse_rate, help =r#"Set speech rate, default to 0. Valid values include floats(will be converted to percentages), percentages like -20%%, floats with postfix "f" (e.g. 2f means doubling the default speech rate), and string values like x-slow. See the documentation for more details."# )]
+    pub rate: Option<String>,
+    #[arg(short = 'S', long, help = r#"Set speech style, default to "general""#)]
+    pub style: Option<String>,
+    #[arg(short = 'R', long)]
+    pub role: Option<Role>,
+    #[arg(
+        short = 'd',
+        long,
+        value_parser = parse_style_degree,
+        help = "Specifies the intensity of the speaking style. This only works for some Chinese voices!"
+    )]
+    pub style_degree: Option<f32>,
+    #[command(flatten)]
+    pub common_args: CommonArgs,
+}
+
+#[derive(Debug, Subcommand)]
+pub(crate) enum Commands {
+    ListVoices {
+        #[command(flatten)]
+        common_args: CommonArgs,
+    },
+    ListQualitiesAndFormats,
+    Text {
+        #[command(flatten)]
+        text_options: TextOptions,
+        #[command(flatten)]
+        input_args: InputArgs,
+        #[command(flatten)]
+        output_args: OutputArgs,
+    },
+    SSML {
+        ssml: Option<String>,
+        #[command(flatten)]
+        input_args: InputArgs,
+        #[command(flatten)]
+        output_args: OutputArgs,
+        #[command(flatten)]
+        common_args: CommonArgs,
+    },
 }
 
 fn is_float(s: &str) -> bool {
@@ -128,51 +154,4 @@ fn parse_style_degree(arg: &str) -> Result<f32, String> {
     } else {
         Err("Not a floating point number!".to_owned())
     }
-}
-
-#[derive(Args, Debug)]
-pub(crate) struct TextOptions {
-    pub text: Option<String>,
-    #[arg(short, long, value_parser = parse_pitch, help="Set pitch, default to 0. Valid values include floats(will be converted to percentages), percentages such as 20% and -10%, absolute values like 300Hz, and relative values like -20Hz, +2st and string values like x-low. See the documentation for more details.")]
-    pub pitch: Option<String>,
-    #[arg(short, long, value_parser = parse_rate, help =r#"Set speech rate, default to 0. Valid values include floats(will be converted to percentages), percentages like -20%%, floats with postfix "f" (e.g. 2f means doubling the default speech rate), and string values like x-slow. See the documentation for more details."# )]
-    pub rate: Option<String>,
-    #[arg(short = 'S', long, help = r#"Set speech style, default to "general""#)]
-    pub style: Option<String>,
-    #[arg(short = 'R', long)]
-    pub role: Option<Role>,
-    #[arg(
-        short = 'd', long, 
-        value_parser = parse_style_degree, 
-        help = "Specifies the intensity of the speaking style. This only works for some Chinese voices!"
-    )]
-    pub style_degree: Option<f32>,
-    #[command(flatten)]
-    pub common_args: CommonArgs,
-}
-
-#[derive(Debug, Subcommand)]
-pub(crate) enum Commands {
-    ListVoices {
-        #[command(flatten)]
-        common_args: CommonArgs,
-    },
-    ListQualitiesAndFormats,
-    Text {
-        #[command(flatten)]
-        text_options: TextOptions,
-        #[command(flatten)]
-        input_args: InputArgs,
-        #[command(flatten)]
-        output_args: OutputArgs,
-    },
-    SSML {
-        ssml: Option<String>,
-        #[command(flatten)]
-        input_args: InputArgs,
-        #[command(flatten)]
-        output_args: OutputArgs,
-        #[command(flatten)]
-        common_args: CommonArgs,
-    },
 }

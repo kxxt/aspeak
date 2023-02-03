@@ -6,7 +6,7 @@ use tungstenite::{
 };
 use uuid::Uuid;
 
-use crate::{error::AspeakError, msg::WebSocketMessage, ORIGIN};
+use crate::{error::AspeakError, msg::WebSocketMessage, types::AudioFormat, ORIGIN};
 use chrono::Utc;
 
 pub(crate) struct SynthesizerConfig {
@@ -14,7 +14,6 @@ pub(crate) struct SynthesizerConfig {
 }
 
 const CLIENT_INFO_PAYLOAD: &str = r#"{"context":{"system":{"name":"SpeechSDK","version":"1.12.1-rc.1","build":"JavaScript","lang":"JavaScript","os":{"platform":"Browser/Linux x86_64","name":"Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0","version":"5.0 (X11)"}}}}"#;
-const SYNTHESIS_CONFIG_PAYLOAD: &str = r#"{"synthesis":{"audio":{"metadataOptions":{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false},"outputFormat":"audio-16khz-32kbitrate-mono-mp3"}}}"#;
 
 impl SynthesizerConfig {
     pub fn new(endpoint: &str) -> Self {
@@ -23,7 +22,7 @@ impl SynthesizerConfig {
         return Self { wss_endpoint };
     }
 
-    pub fn connect(self) -> Result<Synthesizer, AspeakError> {
+    pub fn connect(self, audio_format: AudioFormat) -> Result<Synthesizer, AspeakError> {
         let uuid = Uuid::new_v4();
         let request_id = uuid.as_simple().to_string();
         let mut request = self.wss_endpoint.into_client_request()?;
@@ -38,8 +37,13 @@ impl SynthesizerConfig {
             "Path: speech.config\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{CLIENT_INFO_PAYLOAD}"
         ,request_id = &request_id)) )?;
         now = Utc::now();
+        let synthesis_config = format!(
+            r#"{{"synthesis":{{"audio":{{"metadataOptions":{{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false}},"outputFormat":"{}"}}}}}}"#,
+            Into::<&str>::into(&audio_format)
+        );
+        info!("Synthesis config is: {}", synthesis_config);
         wss.write_message(Message::Text(format!(
-            "Path: speech.config\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{SYNTHESIS_CONFIG_PAYLOAD}", 
+            "Path: synthesis.context\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{synthesis_config}", 
             request_id = & request_id)),
         )?;
         info!("Successfully created Synthesizer");

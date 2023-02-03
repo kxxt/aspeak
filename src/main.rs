@@ -4,6 +4,7 @@ mod msg;
 mod ssml;
 mod synthesizer;
 mod voice;
+mod types;
 
 use std::{
     error::Error,
@@ -66,7 +67,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             let ssml = ssml
                 .ok_or(AspeakError::InputError)
                 .or_else(|_| process_input(input_args))?;
-            let synthesizer = synthesizer::SynthesizerConfig::new(&cli.endpoint).connect()?;
+            let synthesizer = synthesizer::SynthesizerConfig::new(&cli.endpoint)
+                .connect(output_args.format.unwrap())?; // todo
             let callback = process_output(output_args)?;
             synthesizer.synthesize(&ssml, callback)?;
         }
@@ -81,7 +83,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                     .ok_or(AspeakError::InputError)
                     .or_else(|_| process_input(input_args))?,
             );
-            let synthesizer = synthesizer::SynthesizerConfig::new(&cli.endpoint).connect()?;
+            let synthesizer = synthesizer::SynthesizerConfig::new(&cli.endpoint)
+                .connect(output_args.format.unwrap())?;
             let ssml = interpolate_ssml(&text_options)?;
             let callback = process_output(output_args)?;
             synthesizer.synthesize(&ssml, callback)?;
