@@ -9,7 +9,7 @@ use uuid::Uuid;
 use crate::{error::AspeakError, msg::WebSocketMessage, types::AudioFormat, ORIGIN};
 use chrono::Utc;
 
-pub(crate) struct SynthesizerConfig {
+pub struct SynthesizerConfig {
     wss_endpoint: String,
 }
 
@@ -54,7 +54,7 @@ impl SynthesizerConfig {
     }
 }
 
-pub(crate) struct Synthesizer {
+pub struct Synthesizer {
     request_id: String,
     wss: RefCell<WebSocket<MaybeTlsStream<TcpStream>>>,
 }

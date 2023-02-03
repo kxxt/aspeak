@@ -9,8 +9,13 @@ use crate::error::AspeakError;
 pub(crate) enum WebSocketMessage<'a> {
     TurnStart,
     TurnEnd,
-    Response { body: &'a str },
-    Audio { data: &'a [u8] },
+    #[allow(unused)]
+    Response {
+        body: &'a str,
+    },
+    Audio {
+        data: &'a [u8],
+    },
     Close(Option<&'a CloseFrame<'a>>),
 }
 

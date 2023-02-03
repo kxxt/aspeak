@@ -1,5 +1,5 @@
-use crate::cli::TextOptions;
 use crate::error::Result;
+use crate::TextOptions;
 
 use log::info;
 use xml::{
@@ -25,7 +25,7 @@ impl<'a> StartElementBuilderExt<'a> for StartElementBuilder<'a> {
 
 const DEFAULT_PITCH_RATE_STR: &str = "0%";
 
-pub(crate) fn interpolate_ssml(options: &TextOptions) -> Result<String> {
+pub fn interpolate_ssml(options: &TextOptions) -> Result<String> {
     let mut buf = Vec::new();
     let mut writer = EventWriter::new_with_config(
         &mut buf,

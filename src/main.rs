@@ -1,10 +1,4 @@
 mod cli;
-mod error;
-mod msg;
-mod ssml;
-mod synthesizer;
-mod types;
-mod voice;
 
 use std::{
     error::Error,
@@ -12,16 +6,13 @@ use std::{
     io::{self, BufWriter, Cursor, Read, Write},
 };
 
-use clap::Parser;
 use cli::{Cli, Commands, InputArgs, OutputArgs};
-use error::AspeakError;
+
+use aspeak::{interpolate_ssml, AspeakError, SynthesizerConfig, Voice, ORIGIN};
+use clap::Parser;
 use log::{debug, info};
 use reqwest::header::{self, HeaderMap, HeaderValue};
 use rodio::{Decoder, OutputStream, Sink};
-
-use crate::{ssml::interpolate_ssml, voice::Voice};
-
-const ORIGIN: &str = "https://azure.microsoft.com";
 
 fn process_input(args: InputArgs) -> Result<String, AspeakError> {
     let mut s = String::new();
@@ -82,8 +73,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             let ssml = ssml
                 .ok_or(AspeakError::InputError)
                 .or_else(|_| process_input(input_args))?;
-            let synthesizer = synthesizer::SynthesizerConfig::new(&cli.endpoint)
-                .connect(output_args.format.unwrap())?; // todo
+            let synthesizer =
+                SynthesizerConfig::new(&cli.endpoint).connect(output_args.format.unwrap())?; // todo
             let callback = process_output(output_args)?;
             synthesizer.synthesize(&ssml, callback)?;
         }
@@ -98,8 +89,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                     .ok_or(AspeakError::InputError)
                     .or_else(|_| process_input(input_args))?,
             );
-            let synthesizer = synthesizer::SynthesizerConfig::new(&cli.endpoint)
-                .connect(output_args.format.unwrap())?;
+            let synthesizer =
+                SynthesizerConfig::new(&cli.endpoint).connect(output_args.format.unwrap())?;
             let ssml = interpolate_ssml(&text_options)?;
             let callback = process_output(output_args)?;
             synthesizer.synthesize(&ssml, callback)?;

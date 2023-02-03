@@ -4,20 +4,20 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "PascalCase")]
-pub(crate) struct Voice {
+pub struct Voice {
     pub display_name: String,
-    gender: String,
-    local_name: String,
+    pub gender: String,
+    pub local_name: String,
     pub locale: String,
-    locale_name: String,
-    name: String,
-    sample_rate_hertz: String,
+    pub locale_name: String,
+    pub name: String,
+    pub sample_rate_hertz: String,
     pub short_name: String,
-    status: String,
-    voice_type: String,
-    words_per_minute: Option<String>,
-    style_list: Option<Vec<String>>,
-    role_play_list: Option<Vec<String>>,
+    pub status: String,
+    pub voice_type: String,
+    pub words_per_minute: Option<String>,
+    pub style_list: Option<Vec<String>>,
+    pub role_play_list: Option<Vec<String>>,
 }
 
 impl Display for Voice {
