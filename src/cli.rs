@@ -1,5 +1,6 @@
 use aspeak::{AudioFormat, TextOptions};
 use clap::{Args, Parser, Subcommand, ValueEnum};
+use strum::AsRefStr;
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
 #[command(author, version,
@@ -15,7 +16,8 @@ pub(crate) struct Cli {
     pub endpoint: String,
 }
 
-#[derive(Debug, Clone, Copy, Default, ValueEnum)]
+#[derive(Debug, Clone, Copy, Default, ValueEnum, AsRefStr)]
+#[strum(serialize_all = "kebab-case")]
 pub(crate) enum ContainerFormat {
     Mp3,
     Ogg,

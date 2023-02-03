@@ -20,6 +20,8 @@ pub enum AspeakError {
     InputError,
     #[error("Failed to create SSML!")]
     XmlError(#[from] xml::writer::Error),
+    #[error("{0}")]
+    CliError(String),
 }
 
 pub type Result<T> = std::result::Result<T, AspeakError>;
