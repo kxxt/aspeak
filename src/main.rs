@@ -17,6 +17,8 @@ use error::AspeakError;
 use log::{debug, info};
 use rodio::{Decoder, OutputStream, Source};
 
+use crate::ssml::interpolate_ssml;
+
 fn process_input(args: InputArgs) -> Result<String, AspeakError> {
     let mut s = String::new();
     // todo: encoding
@@ -77,7 +79,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                     .ok_or(AspeakError::InputError)
                     .or_else(|_| process_input(input_args))?,
             );
-            
+            let synthesizer = synthesizer::SynthesizerConfig::new(&cli.endpoint).connect()?;
+            let ssml = interpolate_ssml(&text_options)?;
+            let callback = process_output(output_args)?;
+            synthesizer.synthesize(&ssml, callback)?;
         }
         _ => todo!(),
     }

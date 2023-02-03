@@ -1,6 +1,7 @@
 use crate::cli::TextOptions;
 use crate::error::Result;
 
+use log::info;
 use xml::{
     writer::{events::StartElementBuilder, XmlEvent},
     EventWriter,
@@ -22,9 +23,14 @@ impl<'a> StartElementBuilderExt<'a> for StartElementBuilder<'a> {
     }
 }
 
+const DEFAULT_PITCH_RATE_STR: &str = "0%";
+
 pub(crate) fn interpolate_ssml(options: &TextOptions) -> Result<String> {
     let mut buf = Vec::new();
-    let mut writer = EventWriter::new(&mut buf);
+    let mut writer = EventWriter::new_with_config(
+        &mut buf,
+        xml::EmitterConfig::new().write_document_declaration(false),
+    );
     writer.write(
         XmlEvent::start_element("speak")
             .default_ns("http://www.w3.org/2001/10/synthesis")
@@ -53,14 +59,23 @@ pub(crate) fn interpolate_ssml(options: &TextOptions) -> Result<String> {
             ])
             .attr("style", options.style.as_deref().unwrap_or("general")),
     )?;
-    writer.write(XmlEvent::start_element("prosody").optional_attrs(&[
-        ("pitch", options.pitch.as_deref()),
-        ("rate", options.rate.as_deref()),
-    ]))?;
+    writer.write(
+        XmlEvent::start_element("prosody")
+            .attr(
+                "pitch",
+                options.pitch.as_deref().unwrap_or(DEFAULT_PITCH_RATE_STR),
+            )
+            .attr(
+                "rate",
+                options.rate.as_deref().unwrap_or(DEFAULT_PITCH_RATE_STR),
+            ),
+    )?;
     writer.write(XmlEvent::characters(options.text.as_deref().unwrap()))?;
     writer.write(XmlEvent::end_element())?;
     writer.write(XmlEvent::end_element())?;
     writer.write(XmlEvent::end_element())?;
     writer.write(XmlEvent::end_element())?;
-    return Ok(String::from_utf8(buf).unwrap());
+    let ssml = String::from_utf8(buf).unwrap();
+    info!("Created SSML: {}", &ssml);
+    return Ok(ssml);
 }
