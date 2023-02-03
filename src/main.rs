@@ -15,9 +15,11 @@ use clap::Parser;
 use cli::{Cli, Commands, InputArgs, OutputArgs};
 use error::AspeakError;
 use log::{debug, info};
+use reqwest::header::{self, HeaderMap, HeaderName, HeaderValue};
 
+use crate::{ssml::interpolate_ssml, voice::Voice};
 
-use crate::ssml::interpolate_ssml;
+const ORIGIN: &str = "https://azure.microsoft.com";
 
 fn process_input(args: InputArgs) -> Result<String, AspeakError> {
     let mut s = String::new();
@@ -86,7 +88,17 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
         Commands::ListVoices { common_args } => {
             let url = format!("https://{}/cognitiveservices/voices/list", cli.endpoint);
-            
+            let headers =
+                HeaderMap::from_iter([(header::ORIGIN, HeaderValue::from_str(ORIGIN).unwrap())]);
+            let client = reqwest::blocking::ClientBuilder::new()
+                .default_headers(headers)
+                .build()
+                .unwrap();
+            let request = client.get(url).build()?;
+            let voices = client.execute(request)?.json::<Vec<Voice>>()?;
+            for voice in voices.iter() {
+                println!("{voice}");
+            }
         }
         _ => todo!(),
     }

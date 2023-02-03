@@ -6,7 +6,7 @@ use tungstenite::{
 };
 use uuid::Uuid;
 
-use crate::{error::AspeakError, msg::WebSocketMessage};
+use crate::{error::AspeakError, msg::WebSocketMessage, ORIGIN};
 use chrono::Utc;
 
 pub(crate) struct SynthesizerConfig {
@@ -27,10 +27,9 @@ impl SynthesizerConfig {
         let uuid = Uuid::new_v4();
         let request_id = uuid.as_simple().to_string();
         let mut request = self.wss_endpoint.into_client_request()?;
-        request.headers_mut().append(
-            "Origin",
-            HeaderValue::from_str("https://azure.microsoft.com").unwrap(),
-        );
+        request
+            .headers_mut()
+            .append("Origin", HeaderValue::from_str(ORIGIN).unwrap());
         debug!("The initial request is {request:?}");
         let (mut wss, resp) = connect(request)?;
         let mut now = Utc::now();
