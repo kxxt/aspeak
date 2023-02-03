@@ -17,7 +17,7 @@ use cli::{Cli, Commands, InputArgs, OutputArgs};
 use error::AspeakError;
 use log::{debug, info};
 use reqwest::header::{self, HeaderMap, HeaderValue};
-use rodio::{Decoder, OutputStream, Sink, Source};
+use rodio::{Decoder, OutputStream, Sink};
 
 use crate::{ssml::interpolate_ssml, voice::Voice};
 
