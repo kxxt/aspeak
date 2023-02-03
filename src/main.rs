@@ -3,6 +3,7 @@ mod error;
 mod msg;
 mod ssml;
 mod synthesizer;
+mod voice;
 
 use std::{
     error::Error,
@@ -82,6 +83,10 @@ fn main() -> Result<(), Box<dyn Error>> {
             let ssml = interpolate_ssml(&text_options)?;
             let callback = process_output(output_args)?;
             synthesizer.synthesize(&ssml, callback)?;
+        }
+        Commands::ListVoices { common_args } => {
+            let url = format!("https://{}/cognitiveservices/voices/list", cli.endpoint);
+            
         }
         _ => todo!(),
     }
