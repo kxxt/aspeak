@@ -1,5 +1,5 @@
 use clap::{Args, Parser, Subcommand, ValueEnum};
-use strum::{AsRefStr, IntoStaticStr};
+use strum::IntoStaticStr;
 
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
@@ -27,17 +27,21 @@ pub(crate) enum ContainerFormat {
 
 #[derive(Args, Debug)]
 pub(crate) struct InputArgs {
-    #[arg(short, long)]
+    #[arg(short, long, help = "Text/SSML file to speak, default to `-`(stdin)")]
     pub file: Option<String>,
-    #[arg(short, long)]
+    #[arg(
+        short,
+        long,
+        help = r#"Text/SSML file encoding, default to "utf-8"(Not for stdin!)"#
+    )]
     pub encoding: Option<String>,
 }
 
 #[derive(Args, Debug)]
 pub(crate) struct OutputArgs {
-    #[arg(short, long)]
+    #[arg(short, long, help = "Output file path")]
     pub output: Option<String>,
-    #[arg(short, long)]
+    #[arg(short, long, help = "Output quality, default to 0")]
     pub quality: Option<i32>,
     #[arg(short, long)]
     pub container_format: Option<ContainerFormat>,
@@ -45,16 +49,17 @@ pub(crate) struct OutputArgs {
         short = 'F',
         long,
         conflicts_with = "quality",
-        conflicts_with = "container_format"
+        conflicts_with = "container_format",
+        help = "Set output audio format (experts only)"
     )]
     pub format: Option<String>,
 }
 
 #[derive(Args, Debug)]
 pub(crate) struct CommonArgs {
-    #[arg(short, long, conflicts_with = "locale")]
+    #[arg(short, long, conflicts_with = "locale", help = "Voice to use")]
     pub voice: Option<String>,
-    #[arg(short, long)]
+    #[arg(short, long, help = "Locale to use, default to en-US")]
     pub locale: Option<String>,
 }
 
@@ -127,11 +132,11 @@ fn parse_style_degree(arg: &str) -> Result<f32, String> {
 #[derive(Args, Debug)]
 pub(crate) struct TextOptions {
     pub text: Option<String>,
-    #[arg(short, long, value_parser = parse_pitch)]
+    #[arg(short, long, value_parser = parse_pitch, help="Set pitch, default to 0. Valid values include floats(will be converted to percentages), percentages such as 20% and -10%, absolute values like 300Hz, and relative values like -20Hz, +2st and string values like x-low. See the documentation for more details.")]
     pub pitch: Option<String>,
-    #[arg(short, long, value_parser = parse_rate)]
+    #[arg(short, long, value_parser = parse_rate, help =r#"Set speech rate, default to 0. Valid values include floats(will be converted to percentages), percentages like -20%%, floats with postfix "f" (e.g. 2f means doubling the default speech rate), and string values like x-slow. See the documentation for more details."# )]
     pub rate: Option<String>,
-    #[arg(short = 'S', long)]
+    #[arg(short = 'S', long, help = r#"Set speech style, default to "general""#)]
     pub style: Option<String>,
     #[arg(short = 'R', long)]
     pub role: Option<Role>,
