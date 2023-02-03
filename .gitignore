@@ -1,0 +1,7 @@
+/target
+/dist
+/.vscode
+/.idea
+*.wav
+*.mp3
+*.ogg
