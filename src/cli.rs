@@ -65,6 +65,7 @@ pub(crate) struct CommonArgs {
 
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, ValueEnum, IntoStaticStr)]
+#[clap(rename_all = "verbatim")]
 pub(crate) enum Role {
     Girl,
     Boy,
@@ -140,7 +141,11 @@ pub(crate) struct TextOptions {
     pub style: Option<String>,
     #[arg(short = 'R', long)]
     pub role: Option<Role>,
-    #[arg(short = 'd', long, value_parser = parse_style_degree)]
+    #[arg(
+        short = 'd', long, 
+        value_parser = parse_style_degree, 
+        help = "Specifies the intensity of the speaking style. This only works for some Chinese voices!"
+    )]
     pub style_degree: Option<f32>,
     #[command(flatten)]
     pub common_args: CommonArgs,
