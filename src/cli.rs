@@ -112,6 +112,18 @@ fn parse_rate(arg: &str) -> Result<String, String> {
     }
 }
 
+fn parse_style_degree(arg: &str) -> Result<f32, String> {
+    if let Ok(v) = arg.parse::<f32>() {
+        if 0.01f32 <= v && v <= 2.0f32 {
+            Ok(v)
+        } else {
+            Err(format!("Value {v} out of range [0.01, 2]"))
+        }
+    } else {
+        Err("Not a floating point number!".to_owned())
+    }
+}
+
 #[derive(Args, Debug)]
 pub(crate) struct TextOptions {
     pub text: Option<String>,
@@ -123,7 +135,7 @@ pub(crate) struct TextOptions {
     pub style: Option<String>,
     #[arg(short = 'R', long)]
     pub role: Option<Role>,
-    #[arg(short = 'd', long)]
+    #[arg(short = 'd', long, value_parser = parse_style_degree)]
     pub style_degree: Option<f32>,
     #[command(flatten)]
     pub common_args: CommonArgs,
