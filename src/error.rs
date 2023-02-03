@@ -16,4 +16,8 @@ pub enum AspeakError {
     IOError(#[from] std::io::Error),
     #[error("No input text/SSML.")]
     InputError,
+    #[error("Failed to create SSML!")]
+    XmlError(#[from] xml::writer::Error),
 }
+
+pub type Result<T> = std::result::Result<T, AspeakError>;

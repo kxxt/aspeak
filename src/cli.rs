@@ -57,6 +57,23 @@ pub(crate) struct CommonArgs {
     pub locale: Option<String>,
 }
 
+#[derive(Args, Debug)]
+pub(crate) struct TextOptions {
+    pub text: Option<String>,
+    #[arg(short, long)]
+    pub pitch: Option<String>,
+    #[arg(short, long)]
+    pub rate: Option<String>,
+    #[arg(short = 'S', long)]
+    pub style: Option<String>,
+    #[arg(short = 'R', long)]
+    pub role: Option<String>,
+    #[arg(short = 'd', long)]
+    pub style_degree: Option<f32>,
+    #[command(flatten)]
+    pub common_args: CommonArgs,
+}
+
 #[derive(Debug, Subcommand)]
 pub(crate) enum Commands {
     ListVoices {
@@ -65,23 +82,12 @@ pub(crate) enum Commands {
     },
     ListQualitiesAndFormats,
     Text {
-        text: Option<String>,
-        #[arg(short, long)]
-        pitch: Option<String>,
-        #[arg(short, long)]
-        rate: Option<String>,
-        #[arg(short = 'S', long)]
-        style: Option<String>,
-        #[arg(short = 'R', long)]
-        role: Option<String>,
-        #[arg(short = 'd', long)]
-        style_degree: Option<f32>,
+        #[command(flatten)]
+        text_options: TextOptions,
         #[command(flatten)]
         input_args: InputArgs,
         #[command(flatten)]
         output_args: OutputArgs,
-        #[command(flatten)]
-        common_args: CommonArgs,
     },
     SSML {
         ssml: Option<String>,

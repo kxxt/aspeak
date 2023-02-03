@@ -1,6 +1,7 @@
 mod cli;
 mod error;
 mod msg;
+mod ssml;
 mod synthesizer;
 
 use std::{
@@ -66,19 +67,17 @@ fn main() -> Result<(), Box<dyn Error>> {
             synthesizer.synthesize(&ssml, callback)?;
         }
         Commands::Text {
-            text,
-            pitch,
-            rate,
-            style,
-            role,
-            style_degree,
+            mut text_options,
             input_args,
             output_args,
-            common_args,
         } => {
-            let text = text
-                .ok_or(AspeakError::InputError)
-                .or_else(|_| process_input(input_args))?;
+            text_options.text = Some(
+                text_options
+                    .text
+                    .ok_or(AspeakError::InputError)
+                    .or_else(|_| process_input(input_args))?,
+            );
+            
         }
         _ => todo!(),
     }
