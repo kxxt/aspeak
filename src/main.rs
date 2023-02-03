@@ -96,7 +96,19 @@ fn main() -> Result<(), Box<dyn Error>> {
                 .unwrap();
             let request = client.get(url).build()?;
             let voices = client.execute(request)?.json::<Vec<Voice>>()?;
-            for voice in voices.iter() {
+            let voices = voices.iter();
+            let locale_id = common_args.locale.as_deref();
+            let voice_id = common_args.voice.as_deref();
+            let voices: Box<dyn Iterator<Item = &Voice>> = {
+                if locale_id.is_some() {
+                    Box::new(voices.filter(|voice| Some(voice.locale.as_str()) == locale_id))
+                } else if voice_id.is_some() {
+                    Box::new(voices.filter(|voice| Some(voice.short_name.as_str()) == voice_id))
+                } else {
+                    Box::new(voices)
+                }
+            };
+            for voice in voices {
                 println!("{voice}");
             }
         }
