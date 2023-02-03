@@ -5,6 +5,10 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[profile.release]
+lto = true
+strip = true
+
 [dependencies]
 chrono = { version = "0.4.23", features = ["std", "clock"] }
 clap = { version = "4.1.4", features = ["derive"] }
