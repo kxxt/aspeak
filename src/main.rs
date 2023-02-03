@@ -6,7 +6,7 @@ use std::{
     io::{self, BufWriter, Cursor, Read, Write},
 };
 
-use cli::{Cli, Commands, ContainerFormat, InputArgs, OutputArgs};
+use cli::{Cli, Commands, InputArgs, OutputArgs};
 
 use aspeak::{
     interpolate_ssml, AspeakError, AudioFormat, Result, SynthesizerConfig, Voice, ORIGIN,
@@ -29,7 +29,7 @@ fn process_input(args: InputArgs) -> Result<String> {
 }
 
 fn process_output(
-    mut args: OutputArgs,
+    args: OutputArgs,
 ) -> Result<(Box<dyn FnMut(Option<&[u8]>) -> Result<()>>, AudioFormat)> {
     let format = args
         .format

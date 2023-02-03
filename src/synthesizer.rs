@@ -36,18 +36,18 @@ impl SynthesizerConfig {
         debug!("The initial request is {request:?}");
         let (mut wss, resp) = connect(request)?;
         let mut now = Utc::now();
-        println!("{:?}", resp);
+        debug!("The response to the initial request is {:?}", resp);
         wss.write_message(Message::Text(format!(
             "Path: speech.config\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{CLIENT_INFO_PAYLOAD}"
         ,request_id = &request_id)) )?;
         now = Utc::now();
-        let synthesis_config = format!(
+        let synthesis_context = format!(
             r#"{{"synthesis":{{"audio":{{"metadataOptions":{{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false}},"outputFormat":"{}"}}}}}}"#,
             Into::<&str>::into(&self.audio_format)
         );
-        info!("Synthesis config is: {}", synthesis_config);
+        info!("Synthesis context is: {}", synthesis_context);
         wss.write_message(Message::Text(format!(
-            "Path: synthesis.context\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{synthesis_config}", 
+            "Path: synthesis.context\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{synthesis_context}", 
             request_id = & request_id)),
         )?;
         info!("Successfully created Synthesizer");
