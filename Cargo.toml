@@ -2,6 +2,12 @@
 name = "aspeak"
 version = "0.1.0"
 edition = "2021"
+authors = ["kxxt <rsworktech@outlook.com>"]
+description = "A simple text-to-speech client based on Azure's speech synthesis API"
+homepage = "https://github.com/kxxt/aspeak"
+repository = "https://github.com/kxxt/aspeak"
+keywords = ["speech-synthesis", "aspeak", "tts", "text-to-speech"]
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
