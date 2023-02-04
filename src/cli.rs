@@ -1,18 +1,21 @@
 use aspeak::{AudioFormat, TextOptions};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use strum::AsRefStr;
-/// Simple program to greet a person
+
 #[derive(Parser, Debug)]
 #[command(author, version,
     bin_name = "aspeak",
-    about = "Try speech synthesis service(Provided by Azure Cognitive Services) in your terminal!", 
+    about = "Try speech synthesis service(Powered by Azure Cognitive Services) in your terminal!", 
     long_about = None,
     after_help = "Attention: If the result audio is longer than 10 minutes, the audio will be truncated to 10 minutes and the program will not report an error. Unreasonable high/low values for pitch and rate will be clipped to reasonable values by Azure Cognitive Services. Please refer to the documentation for other limitations at https://github.com/kxxt/aspeak/blob/main/README.md#limitations. By the way, we don\'t store your data, and Microsoft doesn\'t store your data according to information available on https://azure.microsoft.com/en-us/services/cognitive-services/text-to-speech/"
 )]
+
 pub(crate) struct Cli {
     #[command(subcommand)]
     pub command: Option<Commands>,
-    #[arg(short, long, default_value_t = String::from("eastus.api.speech.microsoft.com"))]
+    #[arg(short, long,
+        default_value_t = String::from("eastus.api.speech.microsoft.com"), 
+        help = "Endpoint of Azure Cognitive Services")]
     pub endpoint: String,
 }
 
@@ -58,6 +61,7 @@ pub(crate) struct OutputArgs {
 
 #[derive(Debug, Subcommand)]
 pub(crate) enum Commands {
+    #[command(about = "List information of available voices, optionally filter by locale/voice")]
     ListVoices {
         #[arg(
             short,
@@ -69,7 +73,9 @@ pub(crate) enum Commands {
         #[arg(short, long, help = "Locale to list, default to all locales")]
         locale: Option<String>,
     },
+    #[command(about = "List available qualities and formats")]
     ListQualitiesAndFormats,
+    #[command(about = "Speak text")]
     Text {
         #[command(flatten)]
         text_options: TextOptions,
@@ -78,6 +84,7 @@ pub(crate) enum Commands {
         #[command(flatten)]
         output_args: OutputArgs,
     },
+    #[command(about = "Speak SSML")]
     SSML {
         #[clap(help = "The SSML to speak. \
                     If neither SSML nor input file is specified, the SSML will be read from stdin. \
