@@ -1,3 +1,5 @@
+use std::default;
+
 use aspeak::{AudioFormat, TextOptions};
 use clap::{ArgAction, Args, Parser, Subcommand, ValueEnum};
 use strum::AsRefStr;
@@ -43,7 +45,7 @@ pub(crate) enum ContainerFormat {
     Wav,
 }
 
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Default)]
 pub(crate) struct InputArgs {
     #[arg(short, long, help = "Text/SSML file to speak, default to `-`(stdin)")]
     pub file: Option<String>,
@@ -55,7 +57,7 @@ pub(crate) struct InputArgs {
     pub encoding: Option<String>,
 }
 
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Default)]
 pub(crate) struct OutputArgs {
     #[arg(short, long, help = "Output file path")]
     pub output: Option<String>,
@@ -109,4 +111,14 @@ pub(crate) enum Commands {
         #[command(flatten)]
         output_args: OutputArgs,
     },
+}
+
+impl Default for Commands {
+    fn default() -> Self {
+        Self::Text {
+            text_options: TextOptions::default(),
+            input_args: InputArgs::default(),
+            output_args: OutputArgs::default(),
+        }
+    }
 }

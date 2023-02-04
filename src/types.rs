@@ -16,7 +16,7 @@ pub enum Role {
     SeniorMale,
 }
 
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Default)]
 pub struct TextOptions {
     #[clap(help = "The text to speak. \
                 If neither text nor input file is specified, the text will be read from stdin.")]

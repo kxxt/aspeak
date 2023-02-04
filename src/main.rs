@@ -88,8 +88,7 @@ fn main() -> std::result::Result<(), Box<dyn Error>> {
     let cli = Cli::parse();
     env_logger::builder().filter_level(cli.log_level()).init();
     debug!("Commandline args: {cli:?}");
-    // TODO: fix empty command case
-    match cli.command.unwrap() {
+    match cli.command.unwrap_or_default() {
         Commands::SSML {
             ssml,
             input_args,
