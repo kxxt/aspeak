@@ -1,4 +1,4 @@
-use aspeak::{AudioFormat, TextOptions};
+use aspeak::{AudioFormat, TextOptions, DEFAULT_ENDPOINT};
 use clap::{ArgAction, Args, Parser, Subcommand, ValueEnum};
 use strum::AsRefStr;
 
@@ -13,7 +13,7 @@ pub(crate) struct Cli {
     #[command(subcommand)]
     pub command: Option<Commands>,
     #[arg(short, long,
-        default_value_t = String::from("eastus.api.speech.microsoft.com"), 
+        default_value_t = String::from(DEFAULT_ENDPOINT), 
         help = "Endpoint of Azure Cognitive Services")]
     pub endpoint: String,
     #[arg(short, long, action = ArgAction::Count,

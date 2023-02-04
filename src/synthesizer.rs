@@ -1,5 +1,6 @@
 use log::{debug, info};
-use std::{cell::RefCell, net::TcpStream};
+use rodio::{Decoder, OutputStream, Sink};
+use std::{cell::RefCell, io::Cursor, net::TcpStream};
 use tungstenite::{
     client::IntoClientRequest, connect, http::HeaderValue, stream::MaybeTlsStream, Message,
     WebSocket,
@@ -9,16 +10,22 @@ use uuid::Uuid;
 use crate::{msg::WebSocketMessage, AspeakError, AudioFormat, Result, ORIGIN};
 use chrono::Utc;
 
+#[cfg_attr(feature = "python", pyo3::pyclass)]
+#[derive(Debug, Clone)]
 pub struct SynthesizerConfig {
-    wss_endpoint: String,
-    audio_format: AudioFormat,
+    pub(crate) wss_endpoint: String,
+    pub(crate) audio_format: AudioFormat,
 }
 
 const CLIENT_INFO_PAYLOAD: &str = r#"{"context":{"system":{"name":"SpeechSDK","version":"1.12.1-rc.1","build":"JavaScript","lang":"JavaScript","os":{"platform":"Browser/Linux x86_64","name":"Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0","version":"5.0 (X11)"}}}}"#;
 
 impl SynthesizerConfig {
+    pub(crate) fn format_endpoint_url(endpoint: &str) -> String {
+        format!("wss://{endpoint}/cognitiveservices/websocket/v1",)
+    }
+
     pub fn new(endpoint: &str, audio_format: AudioFormat) -> Self {
-        let wss_endpoint = format!("wss://{endpoint}/cognitiveservices/websocket/v1");
+        let wss_endpoint = Self::format_endpoint_url(endpoint);
         info!("Successfully created SynthesizerConfig");
         return Self {
             wss_endpoint,
@@ -58,6 +65,7 @@ impl SynthesizerConfig {
     }
 }
 
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 pub struct Synthesizer {
     request_id: String,
     wss: RefCell<WebSocket<MaybeTlsStream<TcpStream>>>,
@@ -96,4 +104,32 @@ impl Synthesizer {
             }
         }
     }
+}
+
+pub fn callback_play_blocking() -> Box<dyn FnMut(Option<&[u8]>) -> Result<()>> {
+    let mut buffer = Vec::new();
+    Box::new(move |data| {
+        if let Some(data) = data {
+            buffer.extend_from_slice(data);
+        } else {
+            info!("Playing audio... ({} bytes)", buffer.len());
+            let (_stream, stream_handle) = OutputStream::try_default()?;
+            let sink = Sink::try_new(&stream_handle).unwrap();
+            let cursor = Cursor::new(Vec::from(&buffer[..]));
+            let source = Decoder::new(cursor)?;
+            sink.append(source);
+            sink.sleep_until_end();
+        }
+        Ok(())
+    })
+}
+
+#[cfg(feature = "python")]
+pub(crate) fn register_python_items(
+    _py: pyo3::Python<'_>,
+    m: &pyo3::types::PyModule,
+) -> pyo3::PyResult<()> {
+    m.add_class::<Synthesizer>()?;
+    m.add_class::<SynthesizerConfig>()?;
+    Ok(())
 }

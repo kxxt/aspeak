@@ -2,6 +2,7 @@ use clap::{Args, ValueEnum};
 use strum::{self, EnumString};
 use strum::{EnumIter, IntoEnumIterator, IntoStaticStr};
 
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, ValueEnum, IntoStaticStr)]
 #[clap(rename_all = "verbatim")]
@@ -16,6 +17,7 @@ pub enum Role {
     SeniorMale,
 }
 
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[derive(Args, Debug, Default)]
 pub struct TextOptions {
     #[clap(help = "The text to speak. \
@@ -56,7 +58,7 @@ fn is_float(s: &str) -> bool {
     return s.parse::<f32>().is_ok();
 }
 
-fn parse_pitch(arg: &str) -> Result<String, String> {
+pub(crate) fn parse_pitch(arg: &str) -> Result<String, String> {
     if (arg.ends_with("Hz") && is_float(&arg[..arg.len() - 2]))
         || (arg.ends_with("%") && is_float(&arg[..arg.len() - 1]))
         || (arg.ends_with("st")
@@ -75,7 +77,7 @@ fn parse_pitch(arg: &str) -> Result<String, String> {
     }
 }
 
-fn parse_rate(arg: &str) -> Result<String, String> {
+pub(crate) fn parse_rate(arg: &str) -> Result<String, String> {
     if (arg.ends_with("%") && is_float(&arg[..arg.len() - 1]))
         || ["default", "x-slow", "slow", "medium", "fast", "x-fast"].contains(&arg)
     {
@@ -95,7 +97,7 @@ fn parse_rate(arg: &str) -> Result<String, String> {
 
 fn parse_style_degree(arg: &str) -> Result<f32, String> {
     if let Ok(v) = arg.parse::<f32>() {
-        if 0.01f32 <= v && v <= 2.0f32 {
+        if validate_style_degree(v) {
             Ok(v)
         } else {
             Err(format!("Value {v} out of range [0.01, 2]"))
@@ -105,6 +107,11 @@ fn parse_style_degree(arg: &str) -> Result<f32, String> {
     }
 }
 
+pub(crate) fn validate_style_degree(degree: f32) -> bool {
+    0.01f32 <= degree && degree <= 2.0f32
+}
+
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[derive(Debug, Clone, Copy, Default, IntoStaticStr, EnumString, EnumIter)]
 #[non_exhaustive]
 pub enum AudioFormat {
@@ -196,4 +203,15 @@ impl ValueEnum for AudioFormat {
     fn to_possible_value(&self) -> Option<clap::builder::PossibleValue> {
         Some(clap::builder::PossibleValue::new(Into::<&str>::into(self)))
     }
+}
+
+#[cfg(feature = "python")]
+pub(crate) fn register_python_items(
+    _py: pyo3::Python<'_>,
+    m: &pyo3::types::PyModule,
+) -> pyo3::PyResult<()> {
+    m.add_class::<AudioFormat>()?;
+    m.add_class::<Role>()?;
+    m.add_class::<TextOptions>()?;
+    Ok(())
 }

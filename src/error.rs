@@ -21,7 +21,23 @@ pub enum AspeakError {
     #[error("Failed to create SSML!")]
     XmlError(#[from] xml::writer::Error),
     #[error("{0}")]
-    CliError(String),
+    ArgumentError(String),
 }
 
 pub type Result<T> = std::result::Result<T, AspeakError>;
+
+#[cfg(feature = "python")]
+mod python {
+    use super::AspeakError::{self, *};
+    use pyo3::exceptions::{PyException, PyOSError, PyValueError};
+    use pyo3::prelude::*;
+
+    impl From<AspeakError> for PyErr {
+        fn from(value: AspeakError) -> Self {
+            match value {
+                ArgumentError(detail) => PyValueError::new_err(detail),
+                e => PyOSError::new_err(e.to_string()),
+            }
+        }
+    }
+}

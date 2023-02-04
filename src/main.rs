@@ -9,7 +9,8 @@ use std::{
 use cli::{Cli, Commands, InputArgs, OutputArgs};
 
 use aspeak::{
-    interpolate_ssml, AspeakError, AudioFormat, Result, SynthesizerConfig, Voice, ORIGIN,
+    callback_play_blocking, interpolate_ssml, AspeakError, AudioFormat, Result, SynthesizerConfig,
+    Voice, ORIGIN,
 };
 use clap::Parser;
 use colored::Colorize;
@@ -35,7 +36,7 @@ fn process_output(
 ) -> Result<(Box<dyn FnMut(Option<&[u8]>) -> Result<()>>, AudioFormat)> {
     let format = args
         .format
-        .ok_or(AspeakError::CliError(String::new()))
+        .ok_or(AspeakError::ArgumentError(String::new()))
         .or_else(|_| {
             let container = args.container_format.unwrap_or_default();
             let container = container.as_ref();
@@ -45,7 +46,7 @@ fn process_output(
                 .unwrap()
                 .get(&(quality as i8))
                 .map(|x| *x)
-                .ok_or(AspeakError::CliError(format!(
+                .ok_or(AspeakError::ArgumentError(format!(
                     "Invalid quality {} for container type {}",
                     quality, container
                 )))
@@ -65,24 +66,7 @@ fn process_output(
             format,
         )
     } else {
-        let mut buffer = Vec::new();
-        (
-            Box::new(move |data| {
-                if let Some(data) = data {
-                    buffer.extend_from_slice(data);
-                } else {
-                    info!("Playing audio... ({} bytes)", buffer.len());
-                    let (_stream, stream_handle) = OutputStream::try_default()?;
-                    let sink = Sink::try_new(&stream_handle).unwrap();
-                    let cursor = Cursor::new(Vec::from(&buffer[..]));
-                    let source = Decoder::new(cursor)?;
-                    sink.append(source);
-                    sink.sleep_until_end();
-                }
-                Ok(())
-            }),
-            format,
-        )
+        (callback_play_blocking(), format)
     })
 }
 
