@@ -85,8 +85,8 @@ fn process_output(
 }
 
 fn main() -> std::result::Result<(), Box<dyn Error>> {
-    env_logger::init();
     let cli = Cli::parse();
+    env_logger::builder().filter_level(cli.log_level()).init();
     debug!("Commandline args: {cli:?}");
     // TODO: fix empty command case
     match cli.command.unwrap() {

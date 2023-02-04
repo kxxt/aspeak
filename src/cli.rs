@@ -1,5 +1,5 @@
 use aspeak::{AudioFormat, TextOptions};
-use clap::{Args, Parser, Subcommand, ValueEnum};
+use clap::{ArgAction, Args, Parser, Subcommand, ValueEnum};
 use strum::AsRefStr;
 
 #[derive(Parser, Debug)]
@@ -17,6 +17,20 @@ pub(crate) struct Cli {
         default_value_t = String::from("eastus.api.speech.microsoft.com"), 
         help = "Endpoint of Azure Cognitive Services")]
     pub endpoint: String,
+    #[arg(short, long, action = ArgAction::Count,
+        help = "Log verbosity, -v for INFO, -vv for DEBUG, -vvv for TRACE")]
+    verbose: u8,
+}
+
+impl Cli {
+    pub(crate) fn log_level(&self) -> log::LevelFilter {
+        match self.verbose {
+            0 => log::LevelFilter::Warn,
+            1 => log::LevelFilter::Info,
+            2 => log::LevelFilter::Debug,
+            _ => log::LevelFilter::Trace,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, Default, ValueEnum, AsRefStr)]
