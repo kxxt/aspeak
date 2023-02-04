@@ -13,7 +13,7 @@ pub(crate) struct Cli {
     #[command(subcommand)]
     pub command: Option<Commands>,
     #[arg(short, long,
-        default_value_t = String::from(DEFAULT_ENDPOINT), 
+        default_value_t = String::from(DEFAULT_ENDPOINT),
         help = "Endpoint of Azure Cognitive Services")]
     pub endpoint: String,
     #[arg(short, long, action = ArgAction::Count,

@@ -3,7 +3,7 @@ mod cli;
 use std::{
     error::Error,
     fs::File,
-    io::{self, BufWriter, Cursor, Read, Write},
+    io::{self, BufWriter, Read, Write},
 };
 
 use cli::{Cli, Commands, InputArgs, OutputArgs};
@@ -14,10 +14,10 @@ use aspeak::{
 };
 use clap::Parser;
 use colored::Colorize;
-use log::{debug, info};
+use log::debug;
 use phf::phf_map;
 use reqwest::header::{self, HeaderMap, HeaderValue};
-use rodio::{Decoder, OutputStream, Sink};
+
 use strum::IntoEnumIterator;
 
 fn process_input(args: InputArgs) -> Result<String> {
