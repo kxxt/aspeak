@@ -1,6 +1,6 @@
 use clap::{Args, ValueEnum};
-use strum;
-use strum::IntoStaticStr;
+use strum::{self, EnumString};
+use strum::{EnumIter, IntoEnumIterator, IntoStaticStr};
 
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, ValueEnum, IntoStaticStr)]
@@ -105,10 +105,10 @@ fn parse_style_degree(arg: &str) -> Result<f32, String> {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, ValueEnum, IntoStaticStr)]
-#[clap(rename_all = "verbatim")]
+#[derive(Debug, Clone, Copy, Default, IntoStaticStr, EnumString, EnumIter)]
 #[non_exhaustive]
 pub enum AudioFormat {
+    #[strum(to_string = "amr-wb-16000hz")]
     AmrWb16000Hz,
     #[strum(to_string = "audio-16khz-128kbitrate-mono-mp3")]
     Audio16Khz128KBitRateMonoMp3,
@@ -158,9 +158,9 @@ pub enum AudioFormat {
     Raw8Khz8BitMonoALaw,
     #[strum(to_string = "raw-8khz-8bit-mono-mulaw")]
     Raw8Khz8BitMonoMULaw,
-    #[strum(to_string = "raw-16khz-16bit-mono-pcm")]
+    #[strum(to_string = "riff-16khz-16bit-mono-pcm")]
     Riff16Khz16BitMonoPcm,
-    #[strum(to_string = "raw-22050hz-16bit-mono-pcm")]
+    #[strum(to_string = "riff-22050hz-16bit-mono-pcm")]
     Riff22050Hz16BitMonoPcm,
     #[default]
     #[strum(to_string = "riff-24khz-16bit-mono-pcm")]
@@ -181,4 +181,19 @@ pub enum AudioFormat {
     Webm24Khz16Bit24KbpsMonoOpus,
     #[strum(to_string = "webm-24khz-16bit-mono-opus")]
     Webm24Khz16BitMonoOpus,
+}
+
+/// We can't derive `ValueEnum` for `AudioFormat`
+/// because we need to use the strum's string representation,
+/// which is not supported by clap for now.
+impl ValueEnum for AudioFormat {
+    fn value_variants<'a>() -> &'a [Self] {
+        // It's fine to leak it,
+        // because otherwise we need to store it as a static/const variable
+        AudioFormat::iter().collect::<Vec<_>>().leak()
+    }
+
+    fn to_possible_value(&self) -> Option<clap::builder::PossibleValue> {
+        Some(clap::builder::PossibleValue::new(Into::<&str>::into(self)))
+    }
 }

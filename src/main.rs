@@ -12,10 +12,12 @@ use aspeak::{
     interpolate_ssml, AspeakError, AudioFormat, Result, SynthesizerConfig, Voice, ORIGIN,
 };
 use clap::Parser;
+use colored::Colorize;
 use log::{debug, info};
 use phf::phf_map;
 use reqwest::header::{self, HeaderMap, HeaderValue};
 use rodio::{Decoder, OutputStream, Sink};
+use strum::IntoEnumIterator;
 
 fn process_input(args: InputArgs) -> Result<String> {
     let mut s = String::new();
@@ -98,7 +100,7 @@ fn main() -> std::result::Result<(), Box<dyn Error>> {
                 .ok_or(AspeakError::InputError)
                 .or_else(|_| process_input(input_args))?;
             let (callback, format) = process_output(output_args)?;
-            let synthesizer = SynthesizerConfig::new(&cli.endpoint, format).connect()?; // todo
+            let synthesizer = SynthesizerConfig::new(&cli.endpoint, format).connect()?;
             synthesizer.synthesize(&ssml, callback)?;
         }
         Commands::Text {
@@ -152,7 +154,24 @@ fn main() -> std::result::Result<(), Box<dyn Error>> {
                 println!("{voice}");
             }
         }
-        _ => todo!(),
+        Commands::ListQualities => {
+            for (container, qualities) in QUALITY_MAP.into_iter() {
+                println!(
+                    "{} {}:",
+                    "Qualities for".cyan(),
+                    container.to_uppercase().cyan()
+                );
+                for (quality, format) in qualities.into_iter() {
+                    println!("{:>3}: {}", quality, Into::<&str>::into(format));
+                }
+                println!()
+            }
+        }
+        Commands::ListFormats => {
+            for format in AudioFormat::iter() {
+                println!("{}", Into::<&str>::into(format));
+            }
+        }
     }
 
     Ok(())

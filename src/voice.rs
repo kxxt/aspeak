@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+use colored::Colorize;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -22,7 +23,7 @@ pub struct Voice {
 
 impl Display for Voice {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{}", self.name)?;
+        writeln!(f, "{}", self.name.bright_green())?;
         writeln!(f, "Display name: {}", self.display_name)?;
         writeln!(f, "Local name: {} @ {}", self.local_name, self.locale)?;
         writeln!(f, "Locale: {}", self.locale_name)?;

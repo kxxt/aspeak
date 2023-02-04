@@ -61,7 +61,12 @@ pub(crate) struct InputArgs {
 pub(crate) struct OutputArgs {
     #[arg(short, long, help = "Output file path")]
     pub output: Option<String>,
-    #[arg(short, long, help = "Output quality, default to 0")]
+    #[arg(
+        short,
+        long,
+        allow_negative_numbers = true,
+        help = "Output quality, default to 0. Run `aspeak list-qualities` to list available quality levels"
+    )]
     pub quality: Option<i32>,
     #[arg(short, long)]
     pub container_format: Option<ContainerFormat>,
@@ -70,14 +75,15 @@ pub(crate) struct OutputArgs {
         long,
         conflicts_with = "quality",
         conflicts_with = "container_format",
-        help = "Set output audio format (experts only)"
+        hide_possible_values = true,
+        help = "Set output audio format (experts only). Run `aspeak list-formats` to list available formats"
     )]
     pub format: Option<AudioFormat>,
 }
 
 #[derive(Debug, Subcommand)]
 pub(crate) enum Commands {
-    #[command(about = "List information of available voices, optionally filter by locale/voice")]
+    #[command(about = "List information of available voices, optionally filtered by locale/voice")]
     ListVoices {
         #[arg(
             short,
@@ -89,8 +95,10 @@ pub(crate) enum Commands {
         #[arg(short, long, help = "Locale to list, default to all locales")]
         locale: Option<String>,
     },
-    #[command(about = "List available qualities and formats")]
-    ListQualitiesAndFormats,
+    #[command(about = "List available qualities for all container formats")]
+    ListQualities,
+    #[command(about = "List available formats (for experts)")]
+    ListFormats,
     #[command(about = "Speak text")]
     Text {
         #[command(flatten)]
