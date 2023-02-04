@@ -1,5 +1,3 @@
-use std::default;
-
 use aspeak::{AudioFormat, TextOptions};
 use clap::{ArgAction, Args, Parser, Subcommand, ValueEnum};
 use strum::AsRefStr;
@@ -11,7 +9,6 @@ use strum::AsRefStr;
     long_about = None,
     after_help = "Attention: If the result audio is longer than 10 minutes, the audio will be truncated to 10 minutes and the program will not report an error. Unreasonable high/low values for pitch and rate will be clipped to reasonable values by Azure Cognitive Services. Please refer to the documentation for other limitations at https://github.com/kxxt/aspeak/blob/main/README.md#limitations. By the way, we don\'t store your data, and Microsoft doesn\'t store your data according to information available on https://azure.microsoft.com/en-us/services/cognitive-services/text-to-speech/"
 )]
-
 pub(crate) struct Cli {
     #[command(subcommand)]
     pub command: Option<Commands>,
