@@ -32,12 +32,18 @@ impl SynthesizerConfig {
     pub async fn connect(self) -> Result<Synthesizer> {
         let uuid = Uuid::new_v4();
         let request_id = uuid.as_simple().to_string();
-        let mut request = format!("{}?X-ConnectionId={}", self.auth.endpoint, request_id)
-            .into_client_request()?;
+        let uri = {
+            let uri = format!("{}?X-ConnectionId={}", self.auth.endpoint, request_id);
+            if let Some(auth_token) = self.auth.token {
+                format!("{}&Authorization={}", uri, auth_token)
+            } else {
+                uri
+            }
+        };
+        let mut request = uri.into_client_request()?;
         let headers = request.headers_mut();
         headers.append("Origin", HeaderValue::from_str(ORIGIN).unwrap());
         headers.extend(self.auth.headers);
-        // headers.append("Authorization", HeaderValue::from_str("Bearer ").unwrap());
         debug!("The initial request is {request:?}");
         let (wss, resp) = connect_async(request).await?;
         let (mut write, read) = wss.split();

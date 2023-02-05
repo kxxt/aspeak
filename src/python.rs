@@ -23,7 +23,7 @@ impl SynthesizerConfig {
             .map(|endpoint| endpoint.extract::<String>())
             .transpose()?;
         Ok(Self {
-            endpoint: endpoint.unwrap_or(DEFAULT_ENDPOINT.to_string()),
+            auth: todo!(),
             audio_format,
         })
     }

@@ -80,7 +80,7 @@ pub struct AuthOptions {
         help = "Endpoint of Azure Cognitive Services")]
     pub endpoint: String,
     #[arg(short, long, help = "Auth token for speech service")]
-    pub auth_token: Option<String>,
+    pub token: Option<String>,
     #[arg(short = 'H', long,value_parser = parse_header, help = "Additional request headers")]
     pub headers: Vec<(HeaderName, HeaderValue)>,
 }
