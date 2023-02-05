@@ -1,4 +1,4 @@
-use crate::{msg::WebSocketMessage, AspeakError, AudioFormat, Result, ORIGIN};
+use crate::{msg::WebSocketMessage, AspeakError, AudioFormat, AuthOptions, Result, ORIGIN};
 use chrono::Utc;
 use futures_util::{
     stream::{SplitSink, SplitStream},
@@ -17,28 +17,26 @@ use uuid::Uuid;
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 #[derive(Debug, Clone)]
 pub struct SynthesizerConfig {
-    pub(crate) endpoint: String,
+    pub(crate) auth: AuthOptions,
     pub(crate) audio_format: AudioFormat,
 }
 
 const CLIENT_INFO_PAYLOAD: &str = r#"{"context":{"system":{"version":"1.25.0","name":"SpeechSDK","build":"Windows-x64"},"os":{"platform":"Windows","name":"Client","version":"10"}}}"#; // r#"{"context":{"system":{"name":"SpeechSDK","version":"1.12.1-rc.1","build":"JavaScript","lang":"JavaScript","os":{"platform":"Browser/Linux x86_64","name":"Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0","version":"5.0 (X11)"}}}}"#;
 
 impl SynthesizerConfig {
-    pub fn new(endpoint: &str, audio_format: AudioFormat) -> Self {
+    pub fn new(auth: AuthOptions, audio_format: AudioFormat) -> Self {
         info!("Successfully created SynthesizerConfig");
-        return Self {
-            endpoint: endpoint.to_string(),
-            audio_format,
-        };
+        return Self { auth, audio_format };
     }
 
     pub async fn connect(self) -> Result<Synthesizer> {
         let uuid = Uuid::new_v4();
         let request_id = uuid.as_simple().to_string();
-        let mut request =
-            format!("{}?X-ConnectionId={}", self.endpoint, request_id).into_client_request()?;
+        let mut request = format!("{}?X-ConnectionId={}", self.auth.endpoint, request_id)
+            .into_client_request()?;
         let headers = request.headers_mut();
         headers.append("Origin", HeaderValue::from_str(ORIGIN).unwrap());
+        headers.extend(self.auth.headers);
         // headers.append("Authorization", HeaderValue::from_str("Bearer ").unwrap());
         debug!("The initial request is {request:?}");
         let (wss, resp) = connect_async(request).await?;

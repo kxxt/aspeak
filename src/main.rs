@@ -85,9 +85,7 @@ async fn main() -> color_eyre::eyre::Result<()> {
                 .ok_or(AspeakError::InputError)
                 .or_else(|_| process_input(input_args))?;
             let (callback, format) = process_output(output_args)?;
-            let synthesizer = SynthesizerConfig::new(&cli.endpoint, format)
-                .connect()
-                .await?;
+            let synthesizer = SynthesizerConfig::new(cli.auth, format).connect().await?;
             synthesizer.synthesize(&ssml, callback).await?;
         }
         Commands::Text {
@@ -108,9 +106,7 @@ async fn main() -> color_eyre::eyre::Result<()> {
                     .map(|voice| voice.to_string())
             });
             let (callback, format) = process_output(output_args)?;
-            let synthesizer = SynthesizerConfig::new(&cli.endpoint, format)
-                .connect()
-                .await?;
+            let synthesizer = SynthesizerConfig::new(cli.auth, format).connect().await?;
             let ssml = interpolate_ssml(&text_options)?;
             synthesizer.synthesize(&ssml, callback).await?;
         }
@@ -118,7 +114,7 @@ async fn main() -> color_eyre::eyre::Result<()> {
             ref voice,
             ref locale,
         } => {
-            let url = format!("https://{}/cognitiveservices/voices/list", cli.endpoint);
+            let url = "https://eastus.api.speech.microsoft.com/cognitiveservices/voices/list";
             let headers =
                 HeaderMap::from_iter([(header::ORIGIN, HeaderValue::from_str(ORIGIN).unwrap())]);
             let client = reqwest::blocking::ClientBuilder::new()

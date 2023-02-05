@@ -1,4 +1,8 @@
-use aspeak::{AudioFormat, TextOptions, DEFAULT_ENDPOINT};
+use std::collections::HashMap;
+use std::error::Error;
+
+use aspeak::{AudioFormat, AuthOptions, TextOptions, DEFAULT_ENDPOINT};
+use clap::builder::TypedValueParser as _;
 use clap::{ArgAction, Args, Parser, Subcommand, ValueEnum};
 use strum::AsRefStr;
 
@@ -12,13 +16,11 @@ use strum::AsRefStr;
 pub(crate) struct Cli {
     #[command(subcommand)]
     pub command: Option<Commands>,
-    #[arg(short, long,
-        default_value_t = String::from(DEFAULT_ENDPOINT),
-        help = "Endpoint of Azure Cognitive Services")]
-    pub endpoint: String,
     #[arg(short, long, action = ArgAction::Count,
         help = "Log verbosity, -v for INFO, -vv for DEBUG, -vvv for TRACE")]
     verbose: u8,
+    #[command(flatten)]
+    pub auth: AuthOptions,
 }
 
 impl Cli {

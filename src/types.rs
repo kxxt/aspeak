@@ -1,6 +1,12 @@
+use std::error::Error;
+
 use clap::{Args, ValueEnum};
+use log::debug;
+use reqwest::header::{HeaderName, HeaderValue};
 use strum::{self, EnumString};
 use strum::{EnumIter, IntoEnumIterator, IntoStaticStr};
+
+use crate::DEFAULT_ENDPOINT;
 
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 #[non_exhaustive]
@@ -52,6 +58,31 @@ pub struct TextOptions {
     pub voice: Option<String>,
     #[arg(short, long, help = "Locale to use, default to en-US")]
     pub locale: Option<String>,
+}
+
+/// Parse a single key-value pair
+fn parse_header(
+    s: &str,
+) -> Result<(HeaderName, HeaderValue), Box<dyn Error + Send + Sync + 'static>> {
+    let pos = s
+        .find('=')
+        .ok_or_else(|| format!("invalid KEY=value: no `=` found in `{s}`"))?;
+    Ok((
+        HeaderName::from_bytes(s[..pos].as_bytes())?,
+        HeaderValue::from_str(&s[pos + 1..])?,
+    ))
+}
+
+#[derive(Args, Debug, Clone)]
+pub struct AuthOptions {
+    #[arg(short, long,
+        default_value_t = String::from(DEFAULT_ENDPOINT),
+        help = "Endpoint of Azure Cognitive Services")]
+    pub endpoint: String,
+    #[arg(short, long, help = "Auth token for speech service")]
+    pub auth_token: Option<String>,
+    #[arg(short = 'H', long,value_parser = parse_header, help = "Additional request headers")]
+    pub headers: Vec<(HeaderName, HeaderValue)>,
 }
 
 fn is_float(s: &str) -> bool {
