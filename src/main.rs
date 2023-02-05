@@ -70,7 +70,9 @@ fn process_output(
     })
 }
 
-fn main() -> std::result::Result<(), Box<dyn Error>> {
+#[tokio::main]
+async fn main() -> color_eyre::eyre::Result<()> {
+    color_eyre::install()?;
     let cli = Cli::parse();
     env_logger::builder().filter_level(cli.log_level()).init();
     debug!("Commandline args: {cli:?}");
@@ -84,8 +86,10 @@ fn main() -> std::result::Result<(), Box<dyn Error>> {
                 .ok_or(AspeakError::InputError)
                 .or_else(|_| process_input(input_args))?;
             let (callback, format) = process_output(output_args)?;
-            let synthesizer = SynthesizerConfig::new(&cli.endpoint, format).connect()?;
-            synthesizer.synthesize(&ssml, callback)?;
+            let synthesizer = SynthesizerConfig::new(&cli.endpoint, format)
+                .connect()
+                .await?;
+            synthesizer.synthesize(&ssml, callback).await?;
         }
         Commands::Text {
             mut text_options,
@@ -105,9 +109,11 @@ fn main() -> std::result::Result<(), Box<dyn Error>> {
                     .map(|voice| voice.to_string())
             });
             let (callback, format) = process_output(output_args)?;
-            let synthesizer = SynthesizerConfig::new(&cli.endpoint, format).connect()?;
+            let synthesizer = SynthesizerConfig::new(&cli.endpoint, format)
+                .connect()
+                .await?;
             let ssml = interpolate_ssml(&text_options)?;
-            synthesizer.synthesize(&ssml, callback)?;
+            synthesizer.synthesize(&ssml, callback).await?;
         }
         Commands::ListVoices {
             ref voice,

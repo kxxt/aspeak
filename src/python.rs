@@ -1,9 +1,9 @@
-use pyo3::exceptions::{PyOSError, PyValueError};
+use pyo3::exceptions::PyValueError;
 use pyo3::{prelude::*, types::PyDict};
 
 use crate::{
-    callback_play_blocking, parse_pitch, parse_rate, validate_style_degree, AspeakError,
-    AudioFormat, Synthesizer, SynthesizerConfig, TextOptions, DEFAULT_ENDPOINT,
+    callback_play_blocking, parse_pitch, parse_rate, validate_style_degree, AudioFormat,
+    Synthesizer, SynthesizerConfig, TextOptions, DEFAULT_ENDPOINT,
 };
 
 #[pymodule]
@@ -23,24 +23,28 @@ impl SynthesizerConfig {
             .map(|endpoint| endpoint.extract::<String>())
             .transpose()?;
         Ok(Self {
-            wss_endpoint: SynthesizerConfig::format_endpoint_url(
-                endpoint.as_deref().unwrap_or(DEFAULT_ENDPOINT),
-            ),
+            endpoint: endpoint.unwrap_or(DEFAULT_ENDPOINT.to_string()),
             audio_format,
         })
     }
 
     #[pyo3(name = "connect")]
     fn pyconnect(&self) -> PyResult<Synthesizer> {
+        let rt = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()?;
         let config = self.clone();
-        Ok(config.connect()?)
+        Ok(rt.block_on(config.connect())?)
     }
 }
 
 #[pymethods]
 impl Synthesizer {
     fn speak_ssml(&self, ssml: &str) -> PyResult<()> {
-        Ok(self.synthesize(ssml, callback_play_blocking())?)
+        let rt = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()?;
+        Ok(rt.block_on(self.synthesize(ssml, callback_play_blocking()))?)
     }
 
     fn speak_text(&self, text: &str, options: Option<&PyDict>) -> PyResult<()> {

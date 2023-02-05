@@ -1,7 +1,7 @@
 use std::str;
 
 use log::debug;
-use tungstenite::{protocol::CloseFrame, Message};
+use tokio_tungstenite::{tungstenite::protocol::CloseFrame, tungstenite::Message};
 
 use crate::error::AspeakError;
 

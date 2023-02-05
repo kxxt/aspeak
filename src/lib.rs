@@ -6,7 +6,7 @@ mod types;
 mod voice;
 
 pub const ORIGIN: &str = "https://azure.microsoft.com";
-pub const DEFAULT_ENDPOINT: &str = "eastus.api.speech.microsoft.com";
+pub const DEFAULT_ENDPOINT: &str = "wss://eastus.api.speech.microsoft.com/cognitiveservices/websocket/v1";
 
 pub use error::{AspeakError, Result};
 pub use ssml::interpolate_ssml;
