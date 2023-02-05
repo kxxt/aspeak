@@ -1,7 +1,6 @@
 mod cli;
 
 use std::{
-    error::Error,
     fs::File,
     io::{self, BufWriter, Read, Write},
 };
