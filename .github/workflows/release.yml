@@ -41,7 +41,7 @@ jobs:
             target: x86_64-pc-windows-msvc
           - os: windows-2022
             target: x86_64-pc-windows-gnu
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
@@ -53,6 +53,7 @@ jobs:
           cache-targets: true
           cache-on-failure: false
       - name: Install native dependencies
+        if: runner.os == 'Linux'
         run: sudo apt install libasound2-dev
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
