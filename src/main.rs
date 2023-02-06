@@ -19,8 +19,8 @@ use encoding_rs_io::{DecodeReaderBytes, DecodeReaderBytesBuilder};
 use log::debug;
 use phf::phf_map;
 use reqwest::header::{self, HeaderMap, HeaderValue};
-
 use strum::IntoEnumIterator;
+use tokio_tungstenite::tungstenite::{error::ProtocolError, Error as TungsteniteError};
 
 fn process_input(args: InputArgs) -> color_eyre::Result<String> {
     let mut s = String::new();
@@ -123,7 +123,17 @@ async fn main() -> color_eyre::eyre::Result<()> {
                 .connect()
                 .await?;
             let ssml = interpolate_ssml((&text_args).try_into()?)?;
-            synthesizer.synthesize(&ssml, callback).await?;
+            let result = synthesizer.synthesize(&ssml, callback).await;
+            if let Err(AspeakError::WebSocketError(TungsteniteError::Protocol(
+                ProtocolError::ResetWithoutClosingHandshake,
+            ))) = result
+            {
+                return result.with_note(|| "This error usually indicates a poor internet connection or that the remote API terminates your service.")
+                    .with_suggestion(|| "Retry if you are on a poor internet connection. \
+                                         If this error persists and you are using the trial service, please shorten your input.");
+            } else {
+                result?;
+            }
         }
         Commands::ListVoices {
             ref voice,
