@@ -48,7 +48,7 @@ jobs:
           toolchain: stable
       - uses: Swatinem/rust-cache@v2
         with:
-          prefix-key: ${{ runner.os }}-rust
+          prefix-key: ${{ matrix.os }}-${{ matrix.target }}-rust
           cache-targets: true
           cache-on-failure: false
       - name: Install native dependencies
