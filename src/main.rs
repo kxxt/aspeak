@@ -23,21 +23,22 @@ use strum::IntoEnumIterator;
 fn process_input(args: InputArgs) -> Result<String> {
     let mut s = String::new();
 
-    if let Some(file) = args.file {
-        let file = File::open(&file)?;
-        let mut decoder = if let Some(encoding) = args.encoding.as_deref() {
-            let encoding = encoding_rs::Encoding::for_label(encoding.as_bytes())
-                .ok_or(AspeakError::ArgumentError(format!("Unsupported encoding: {}", encoding)))?;
-            DecodeReaderBytesBuilder::new()
-                .encoding(Some(encoding))
-                .build(file)
-        } else {
-            DecodeReaderBytes::new(file)
-        };
-        decoder.read_to_string(&mut s)?;
+    let file: Box<dyn io::Read> = if let Some(file) = args.file {
+        Box::new(File::open(&file)?)
     } else {
-        io::stdin().read_to_string(&mut s)?;
-    }
+        Box::new(io::stdin())
+    };
+    let mut decoder = if let Some(encoding) = args.encoding.as_deref() {
+        let encoding = encoding_rs::Encoding::for_label(encoding.as_bytes()).ok_or(
+            AspeakError::ArgumentError(format!("Unsupported encoding: {}", encoding)),
+        )?;
+        DecodeReaderBytesBuilder::new()
+            .encoding(Some(encoding))
+            .build(file)
+    } else {
+        DecodeReaderBytes::new(file)
+    };
+    decoder.read_to_string(&mut s)?;
     Ok(s)
 }
 

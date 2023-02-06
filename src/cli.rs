@@ -85,11 +85,7 @@ pub(crate) enum ContainerFormat {
 pub(crate) struct InputArgs {
     #[arg(short, long, help = "Text/SSML file to speak, default to `-`(stdin)")]
     pub file: Option<String>,
-    #[arg(
-        short,
-        long,
-        help = r#"Text/SSML file encoding, default to "utf-8"(Not for stdin!)"#
-    )]
+    #[arg(short, long, help = "Text/SSML file encoding")]
     pub encoding: Option<String>,
 }
 
