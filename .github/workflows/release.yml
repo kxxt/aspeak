@@ -29,8 +29,8 @@ jobs:
             target: x86_64-unknown-linux-gnu
           # - os: ubuntu-22.04
           #   target: x86_64-unknown-linux-musl
-          - os: ubuntu-22.04
-            target: aarch64-unknown-linux-gnu
+          # - os: ubuntu-22.04
+          #   target: aarch64-unknown-linux-gnu
           # - os: ubuntu-22.04
           #   target: aarch64-unknown-linux-musl
           - os: macos-12
@@ -54,7 +54,7 @@ jobs:
           cache-on-failure: false
       - name: Install native dependencies
         if: runner.os == 'Linux'
-        run: sudo apt install libasound2-dev libssl-dev
+        run: sudo apt install libasound2-dev binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           bin: aspeak
