@@ -1,6 +1,7 @@
 mod cli;
 
 use std::{
+    error::Error,
     fs::File,
     io::{self, BufWriter, Read, Write},
 };
@@ -12,6 +13,7 @@ use aspeak::{
     Voice, ORIGIN,
 };
 use clap::Parser;
+use color_eyre::Help;
 use colored::Colorize;
 use encoding_rs_io::{DecodeReaderBytes, DecodeReaderBytesBuilder};
 use log::debug;
@@ -20,7 +22,7 @@ use reqwest::header::{self, HeaderMap, HeaderValue};
 
 use strum::IntoEnumIterator;
 
-fn process_input(args: InputArgs) -> Result<String> {
+fn process_input(args: InputArgs) -> color_eyre::Result<String> {
     let mut s = String::new();
 
     let file: Box<dyn io::Read> = if let Some(file) = args.file {
@@ -38,7 +40,10 @@ fn process_input(args: InputArgs) -> Result<String> {
     } else {
         DecodeReaderBytes::new(file)
     };
-    decoder.read_to_string(&mut s)?;
+    decoder.read_to_string(&mut s).with_note(|| {
+        "It is possibly due to incorrect encoding. \
+         Please specify an encoding for your file manually"
+    })?;
     Ok(s)
 }
 
