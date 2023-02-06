@@ -1,12 +1,8 @@
-
-
-use clap::{Args, ValueEnum};
+use clap::ValueEnum;
 
 use reqwest::header::{HeaderName, HeaderValue};
 use strum::{self, EnumString};
 use strum::{EnumIter, IntoEnumIterator, IntoStaticStr};
-
-
 
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 #[non_exhaustive]
@@ -23,105 +19,22 @@ pub enum Role {
     SeniorMale,
 }
 
-#[cfg_attr(feature = "python", pyo3::pyclass)]
-#[derive(Args, Debug, Default)]
-pub struct TextOptions {
-    #[clap(help = "The text to speak. \
-                If neither text nor input file is specified, the text will be read from stdin.")]
-    pub text: Option<String>,
-    #[arg(short, long, value_parser = parse_pitch,
-        help="Set pitch, default to 0. \
-              Valid values include floats(will be converted to percentages), \
-              percentages such as 20% and -10%, absolute values like 300Hz, \
-              and relative values like -20Hz, +2st and string values like x-low. \
-              See the documentation for more details.")]
-    pub pitch: Option<String>,
-    #[arg(short, long, value_parser = parse_rate,
-        help=r#"Set speech rate, default to 0. \
-                Valid values include floats(will be converted to percentages), \
-                percentages like -20%%, floats with postfix "f" \
-                (e.g. 2f means doubling the default speech rate), \
-                and string values like x-slow. See the documentation for more details."# )]
-    pub rate: Option<String>,
-    #[arg(short = 'S', long, help = r#"Set speech style, default to "general""#)]
-    pub style: Option<String>,
-    #[arg(short = 'R', long)]
-    pub role: Option<Role>,
-    #[arg(
-        short = 'd',
-        long,
-        value_parser = parse_style_degree,
-        help = "Specifies the intensity of the speaking style. This only works for some Chinese voices!"
-    )]
-    pub style_degree: Option<f32>,
-    #[arg(short, long, conflicts_with = "locale", help = "Voice to use")]
-    pub voice: Option<String>,
-    #[arg(short, long, help = "Locale to use, default to en-US")]
-    pub locale: Option<String>,
-}
-
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct AuthOptions<'a> {
     pub endpoint: &'a str,
     pub token: Option<&'a str>,
     pub headers: &'a [(HeaderName, HeaderValue)],
 }
 
-fn is_float(s: &str) -> bool {
-    return s.parse::<f32>().is_ok();
-}
-
-pub(crate) fn parse_pitch(arg: &str) -> Result<String, String> {
-    if (arg.ends_with("Hz") && is_float(&arg[..arg.len() - 2]))
-        || (arg.ends_with("%") && is_float(&arg[..arg.len() - 1]))
-        || (arg.ends_with("st")
-            && (arg.starts_with('+') || arg.starts_with('-'))
-            && is_float(&arg[..arg.len() - 2]))
-        || ["default", "x-low", "low", "medium", "high", "x-high"].contains(&arg)
-    {
-        Ok(arg.to_owned())
-    } else if let Ok(v) = arg.parse::<f32>() {
-        // float values that will be converted to percentages
-        Ok(format!("{:.2}", v * 100f32))
-    } else {
-        Err(format!(
-            "Please read the documentation for possible values of pitch."
-        ))
-    }
-}
-
-pub(crate) fn parse_rate(arg: &str) -> Result<String, String> {
-    if (arg.ends_with("%") && is_float(&arg[..arg.len() - 1]))
-        || ["default", "x-slow", "slow", "medium", "fast", "x-fast"].contains(&arg)
-    {
-        Ok(arg.to_owned())
-    } else if arg.ends_with('f') && is_float(&arg[..arg.len() - 1]) {
-        // raw float
-        Ok(arg[..arg.len() - 1].to_owned())
-    } else if let Ok(v) = arg.parse::<f32>() {
-        // float values that will be converted to percentages
-        Ok(format!("{:.2}", v * 100f32))
-    } else {
-        Err(format!(
-            "Please read the documentation for possible values of rate."
-        ))
-    }
-}
-
-fn parse_style_degree(arg: &str) -> Result<f32, String> {
-    if let Ok(v) = arg.parse::<f32>() {
-        if validate_style_degree(v) {
-            Ok(v)
-        } else {
-            Err(format!("Value {v} out of range [0.01, 2]"))
-        }
-    } else {
-        Err("Not a floating point number!".to_owned())
-    }
-}
-
-pub(crate) fn validate_style_degree(degree: f32) -> bool {
-    0.01f32 <= degree && degree <= 2.0f32
+#[derive(Debug, Clone, Copy)]
+pub struct TextOptions<'a> {
+    pub text: &'a str,
+    pub voice: &'a str,
+    pub pitch: Option<&'a str>,
+    pub rate: Option<&'a str>,
+    pub style: Option<&'a str>,
+    pub role: Option<Role>,
+    pub style_degree: Option<f32>,
 }
 
 #[cfg_attr(feature = "python", pyo3::pyclass)]
@@ -225,6 +138,6 @@ pub(crate) fn register_python_items(
 ) -> pyo3::PyResult<()> {
     m.add_class::<AudioFormat>()?;
     m.add_class::<Role>()?;
-    m.add_class::<TextOptions>()?;
+    // m.add_class::<TextOptions>()?;
     Ok(())
 }

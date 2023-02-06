@@ -25,7 +25,7 @@ impl<'a> StartElementBuilderExt<'a> for StartElementBuilder<'a> {
 
 const DEFAULT_PITCH_RATE_STR: &str = "0%";
 
-pub fn interpolate_ssml(options: &TextOptions) -> Result<String> {
+pub fn interpolate_ssml(options: TextOptions) -> Result<String> {
     let mut buf = Vec::new();
     let mut writer = EventWriter::new_with_config(
         &mut buf,
@@ -40,14 +40,7 @@ pub fn interpolate_ssml(options: &TextOptions) -> Result<String> {
             .attr("xml:lang", "en-US"),
     )?;
 
-    writer.write({
-        let builder = XmlEvent::start_element("voice");
-        if let Some(ref voice) = options.voice {
-            builder.attr("name", voice)
-        } else {
-            builder
-        }
-    })?;
+    writer.write(XmlEvent::start_element("voice").attr("name", options.voice))?;
 
     // Make the borrow checker happy
     let style_degree = options.style_degree.map(|x| x.to_string());
@@ -70,7 +63,7 @@ pub fn interpolate_ssml(options: &TextOptions) -> Result<String> {
                 options.rate.as_deref().unwrap_or(DEFAULT_PITCH_RATE_STR),
             ),
     )?;
-    writer.write(XmlEvent::characters(options.text.as_deref().unwrap()))?;
+    writer.write(XmlEvent::characters(options.text))?;
     writer.write(XmlEvent::end_element())?;
     writer.write(XmlEvent::end_element())?;
     writer.write(XmlEvent::end_element())?;

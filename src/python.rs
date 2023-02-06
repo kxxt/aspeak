@@ -3,7 +3,7 @@ use pyo3::{prelude::*, types::PyDict};
 
 use crate::{
     callback_play_blocking, parse_pitch, parse_rate, validate_style_degree, AudioFormat,
-    Synthesizer, SynthesizerConfig, TextOptions, DEFAULT_ENDPOINT,
+    Synthesizer, SynthesizerConfig, TextArgs, DEFAULT_ENDPOINT,
 };
 
 #[pymodule]
@@ -53,7 +53,7 @@ impl Synthesizer {
 }
 
 #[pymethods]
-impl TextOptions {
+impl TextArgs {
     #[new]
     #[pyo3(signature = (**kwargs))]
     fn new(kwargs: Option<&PyDict>) -> PyResult<Self> {
