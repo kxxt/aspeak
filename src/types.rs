@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use clap::ValueEnum;
 
 use reqwest::header::{HeaderName, HeaderValue};
@@ -19,11 +21,12 @@ pub enum Role {
     SeniorMale,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct AuthOptions<'a> {
-    pub endpoint: &'a str,
-    pub token: Option<&'a str>,
-    pub headers: &'a [(HeaderName, HeaderValue)],
+    pub endpoint: Cow<'a, str>,
+    pub token: Option<Cow<'a, str>>,
+    pub key: Option<Cow<'a, str>>,
+    pub headers: Cow<'a, [(HeaderName, HeaderValue)]>,
 }
 
 #[derive(Debug, Clone, Copy)]

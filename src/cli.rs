@@ -1,6 +1,9 @@
-use std::error::Error;
+use std::{borrow::Cow, error::Error};
 
-use aspeak::{AspeakError, AudioFormat, AuthOptions, Role, TextOptions, DEFAULT_ENDPOINT};
+use aspeak::{
+    get_endpoint_by_region, AspeakError, AudioFormat, AuthOptions, Role, TextOptions,
+    DEFAULT_ENDPOINT,
+};
 use clap::{ArgAction, Args, Parser, Subcommand, ValueEnum};
 use phf::phf_map;
 use reqwest::header::{HeaderName, HeaderValue};
@@ -49,12 +52,19 @@ fn parse_header(
 
 #[derive(Args, Debug, Clone)]
 pub struct AuthArgs {
-    #[arg(short, long,
-        default_value_t = String::from(DEFAULT_ENDPOINT),
-        help = "Endpoint of Azure Cognitive Services")]
-    pub endpoint: String,
+    #[arg(short, long, help = "Endpoint of TTS API")]
+    pub endpoint: Option<String>,
+    #[arg(
+        short,
+        long,
+        help = "If you are using official endpoints, you can specify a region instead of full endpoint url",
+        conflicts_with = "endpoint"
+    )]
+    pub region: Option<String>,
     #[arg(short, long, help = "Auth token for speech service")]
     pub token: Option<String>,
+    #[arg(short, long, help = "Speech resource key")]
+    pub key: Option<String>,
     #[arg(short = 'H', long,value_parser = parse_header, help = "Additional request headers")]
     pub headers: Vec<(HeaderName, HeaderValue)>,
 }
@@ -64,9 +74,20 @@ impl<'a> TryInto<AuthOptions<'a>> for &'a AuthArgs {
 
     fn try_into(self) -> Result<AuthOptions<'a>, Self::Error> {
         Ok(AuthOptions {
-            endpoint: &self.endpoint,
-            token: self.token.as_deref(),
-            headers: &self.headers,
+            endpoint: self
+                .endpoint
+                .as_deref()
+                .map(Cow::Borrowed)
+                .or_else(|| {
+                    self.region
+                        .as_deref()
+                        .map(get_endpoint_by_region)
+                        .map(Cow::Owned)
+                })
+                .unwrap_or(Cow::Borrowed(DEFAULT_ENDPOINT)),
+            token: self.token.as_deref().map(Cow::Borrowed),
+            key: self.key.as_deref().map(Cow::Borrowed),
+            headers: Cow::Borrowed(&self.headers),
         })
     }
 }

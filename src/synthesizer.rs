@@ -41,8 +41,12 @@ impl<'a> SynthesizerConfig<'a> {
         };
         let mut request = uri.into_client_request()?;
         let headers = request.headers_mut();
-        headers.append("Origin", HeaderValue::from_str(ORIGIN).unwrap());
-        headers.extend(self.auth.headers.to_owned());
+        if !self.auth.headers.is_empty() {
+            // TODO: I don't know if this could be further optimized
+            headers.extend(self.auth.headers.iter().map(Clone::clone));
+        } else {
+            headers.append("Origin", HeaderValue::from_str(ORIGIN).unwrap());
+        }
         debug!("The initial request is {request:?}");
         let (wss, resp) = connect_async(request).await?;
         let (mut write, read) = wss.split();

@@ -9,6 +9,10 @@ pub const ORIGIN: &str = "https://azure.microsoft.com";
 pub const DEFAULT_ENDPOINT: &str =
     "wss://eastus.api.speech.microsoft.com/cognitiveservices/websocket/v1";
 
+pub fn get_endpoint_by_region(region: &str) -> String {
+    format!("wss://{region}.tts.speech.microsoft.com/cognitiveservices/websocket/v1")
+}
+
 pub use error::{AspeakError, Result};
 pub use ssml::interpolate_ssml;
 pub use synthesizer::{callback_play_blocking, Synthesizer, SynthesizerConfig};
