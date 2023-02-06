@@ -1,7 +1,6 @@
 use std::error::Error;
 
 use aspeak::{AspeakError, AudioFormat, AuthOptions, Role, TextOptions, DEFAULT_ENDPOINT};
-use clap::builder::TypedValueParser as _;
 use clap::{ArgAction, Args, Parser, Subcommand, ValueEnum};
 use phf::phf_map;
 use reqwest::header::{HeaderName, HeaderValue};
@@ -139,7 +138,7 @@ pub(crate) enum Commands {
     #[command(about = "Speak text")]
     Text {
         #[command(flatten)]
-        text_options: TextArgs,
+        text_args: TextArgs,
         #[command(flatten)]
         input_args: InputArgs,
         #[command(flatten)]
@@ -161,7 +160,7 @@ pub(crate) enum Commands {
 impl Default for Commands {
     fn default() -> Self {
         Self::Text {
-            text_options: TextArgs::default(),
+            text_args: TextArgs::default(),
             input_args: InputArgs::default(),
             output_args: OutputArgs::default(),
         }

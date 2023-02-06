@@ -13,6 +13,7 @@ use aspeak::{
 };
 use clap::Parser;
 use colored::Colorize;
+use encoding_rs_io::{DecodeReaderBytes, DecodeReaderBytesBuilder};
 use log::debug;
 use phf::phf_map;
 use reqwest::header::{self, HeaderMap, HeaderValue};
@@ -21,9 +22,19 @@ use strum::IntoEnumIterator;
 
 fn process_input(args: InputArgs) -> Result<String> {
     let mut s = String::new();
-    // todo: encoding
+
     if let Some(file) = args.file {
-        File::open(&file)?.read_to_string(&mut s)?;
+        let file = File::open(&file)?;
+        let mut decoder = if let Some(encoding) = args.encoding.as_deref() {
+            let encoding = encoding_rs::Encoding::for_label(encoding.as_bytes())
+                .ok_or(AspeakError::ArgumentError(format!("Unsupported encoding: {}", encoding)))?;
+            DecodeReaderBytesBuilder::new()
+                .encoding(Some(encoding))
+                .build(file)
+        } else {
+            DecodeReaderBytes::new(file)
+        };
+        decoder.read_to_string(&mut s)?;
     } else {
         io::stdin().read_to_string(&mut s)?;
     }
@@ -91,12 +102,12 @@ async fn main() -> color_eyre::eyre::Result<()> {
             synthesizer.synthesize(&ssml, callback).await?;
         }
         Commands::Text {
-            mut text_options,
+            mut text_args,
             input_args,
             output_args,
         } => {
-            text_options.text = Some(
-                text_options
+            text_args.text = Some(
+                text_args
                     .text
                     .ok_or(AspeakError::InputError)
                     .or_else(|_| process_input(input_args))?,
@@ -105,7 +116,7 @@ async fn main() -> color_eyre::eyre::Result<()> {
             let synthesizer = SynthesizerConfig::new((&cli.auth).try_into()?, format)
                 .connect()
                 .await?;
-            let ssml = interpolate_ssml((&text_options).try_into()?)?;
+            let ssml = interpolate_ssml((&text_args).try_into()?)?;
             synthesizer.synthesize(&ssml, callback).await?;
         }
         Commands::ListVoices {

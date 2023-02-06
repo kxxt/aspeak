@@ -65,6 +65,8 @@ dependencies = [
  "clap",
  "color-eyre",
  "colored",
+ "encoding_rs",
+ "encoding_rs_io",
  "env_logger",
  "futures-util",
  "log",
@@ -493,6 +495,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "071a31f4ee85403370b58aca746f01041ede6f0da2730960ad001edc2b71b394"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "encoding_rs_io"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1cc3c5651fb62ab8aa3103998dade57efdd028544bd300516baa31840c252a83"
+dependencies = [
+ "encoding_rs",
 ]
 
 [[package]]
