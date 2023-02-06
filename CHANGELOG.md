@@ -1,5 +1,6 @@
 # aspeak Changelog
 
-# v4.0.0-test.6
+# v4.0.0-alpha.3
 
-Test changelogs.
+- Set up GitHub Actions to build for more platforms.
+- Support region option.
