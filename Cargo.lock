@@ -59,7 +59,7 @@ dependencies = [
 
 [[package]]
 name = "aspeak"
-version = "4.0.0-alpha.1"
+version = "4.0.0-alpha.2"
 dependencies = [
  "chrono",
  "clap",
