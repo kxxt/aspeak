@@ -85,104 +85,109 @@ fn process_output(
     })
 }
 
-#[tokio::main]
-async fn main() -> color_eyre::eyre::Result<()> {
+fn main() -> color_eyre::eyre::Result<()> {
     color_eyre::install()?;
     let cli = Cli::parse();
     env_logger::builder().filter_level(cli.log_level()).init();
     debug!("Commandline args: {cli:?}");
-    match cli.command.unwrap_or_default() {
-        Commands::SSML {
-            ssml,
-            input_args,
-            output_args,
-        } => {
-            let ssml = ssml
-                .ok_or(AspeakError::InputError)
-                .or_else(|_| process_input(input_args))?;
-            let (callback, format) = process_output(output_args)?;
-            let synthesizer = SynthesizerConfig::new((&cli.auth).try_into()?, format)
-                .connect()
-                .await?;
-            synthesizer.synthesize(&ssml, callback).await?;
-        }
-        Commands::Text {
-            mut text_args,
-            input_args,
-            output_args,
-        } => {
-            text_args.text = Some(
-                text_args
-                    .text
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_io()
+        .enable_time()
+        .build()?;
+    rt.block_on(async {
+        match cli.command.unwrap_or_default() {
+            Commands::SSML {
+                ssml,
+                input_args,
+                output_args,
+            } => {
+                let ssml = ssml
                     .ok_or(AspeakError::InputError)
-                    .or_else(|_| process_input(input_args))?,
-            );
-            let (callback, format) = process_output(output_args)?;
-            let synthesizer = SynthesizerConfig::new((&cli.auth).try_into()?, format)
-                .connect()
-                .await?;
-            let ssml = interpolate_ssml((&text_args).try_into()?)?;
-            let result = synthesizer.synthesize(&ssml, callback).await;
-            if let Err(AspeakError::WebSocketError(TungsteniteError::Protocol(
-                ProtocolError::ResetWithoutClosingHandshake,
-            ))) = result
-            {
-                return result.with_note(|| "This error usually indicates a poor internet connection or that the remote API terminates your service.")
-                    .with_suggestion(|| "Retry if you are on a poor internet connection. \
-                                         If this error persists and you are using the trial service, please shorten your input.");
-            } else {
-                result?;
+                    .or_else(|_| process_input(input_args))?;
+                let (callback, format) = process_output(output_args)?;
+                let synthesizer = SynthesizerConfig::new((&cli.auth).try_into()?, format)
+                    .connect()
+                    .await?;
+                synthesizer.synthesize(&ssml, callback).await?
             }
-        }
-        Commands::ListVoices {
-            ref voice,
-            ref locale,
-        } => {
-            let url = "https://eastus.api.speech.microsoft.com/cognitiveservices/voices/list";
-            let headers =
-                HeaderMap::from_iter([(header::ORIGIN, HeaderValue::from_str(ORIGIN).unwrap())]);
-            let client = reqwest::blocking::ClientBuilder::new()
-                .default_headers(headers)
-                .build()
-                .unwrap();
-            let request = client.get(url).build()?;
-            let voices = client.execute(request)?.json::<Vec<Voice>>()?;
-            let voices = voices.iter();
-            let locale_id = locale.as_deref();
-            let voice_id = voice.as_deref();
-            let voices: Box<dyn Iterator<Item = &Voice>> = {
-                if locale_id.is_some() {
-                    Box::new(voices.filter(|voice| Some(voice.locale.as_str()) == locale_id))
-                } else if voice_id.is_some() {
-                    Box::new(voices.filter(|voice| Some(voice.short_name.as_str()) == voice_id))
-                } else {
-                    Box::new(voices)
-                }
-            };
-            for voice in voices {
-                println!("{voice}");
-            }
-        }
-        Commands::ListQualities => {
-            for (container, qualities) in QUALITY_MAP.into_iter() {
-                println!(
-                    "{} {}:",
-                    "Qualities for".cyan(),
-                    container.to_uppercase().cyan()
+            Commands::Text {
+                mut text_args,
+                input_args,
+                output_args,
+            } => {
+                text_args.text = Some(
+                    text_args
+                        .text
+                        .ok_or(AspeakError::InputError)
+                        .or_else(|_| process_input(input_args))?,
                 );
-                for (quality, format) in qualities.into_iter() {
-                    println!("{:>3}: {}", quality, Into::<&str>::into(format));
+                let (callback, format) = process_output(output_args)?;
+                let synthesizer = SynthesizerConfig::new((&cli.auth).try_into()?, format)
+                    .connect()
+                    .await?;
+                let ssml = interpolate_ssml((&text_args).try_into()?)?;
+                let result = synthesizer.synthesize(&ssml, callback).await;
+                if let Err(AspeakError::WebSocketError(TungsteniteError::Protocol(
+                    ProtocolError::ResetWithoutClosingHandshake,
+                ))) = result
+                {
+                    return result.with_note(|| "This error usually indicates a poor internet connection or that the remote API terminates your service.")
+                        .with_suggestion(|| "Retry if you are on a poor internet connection. \
+                                             If this error persists and you are using the trial service, please shorten your input.");
+                } else {
+                    result?;
                 }
-                println!()
+            }
+            Commands::ListVoices {
+                ref voice,
+                ref locale,
+            } => {
+                let url = "https://eastus.api.speech.microsoft.com/cognitiveservices/voices/list";
+                let headers =
+                    HeaderMap::from_iter([(header::ORIGIN, HeaderValue::from_str(ORIGIN).unwrap())]);
+                let client = reqwest::ClientBuilder::new()
+                    .default_headers(headers)
+                    .build()
+                    .unwrap();
+                let request = client.get(url).build()?;
+                let voices = client.execute(request).await?.json::<Vec<Voice>>().await?;
+                let voices = voices.iter();
+                let locale_id = locale.as_deref();
+                let voice_id = voice.as_deref();
+                let voices: Box<dyn Iterator<Item = &Voice>> = {
+                    if locale_id.is_some() {
+                        Box::new(voices.filter(|voice| Some(voice.locale.as_str()) == locale_id))
+                    } else if voice_id.is_some() {
+                        Box::new(voices.filter(|voice| Some(voice.short_name.as_str()) == voice_id))
+                    } else {
+                        Box::new(voices)
+                    }
+                };
+                for voice in voices {
+                    println!("{voice}");
+                }
+            }
+            Commands::ListQualities => {
+                for (container, qualities) in QUALITY_MAP.into_iter() {
+                    println!(
+                        "{} {}:",
+                        "Qualities for".cyan(),
+                        container.to_uppercase().cyan()
+                    );
+                    for (quality, format) in qualities.into_iter() {
+                        println!("{:>3}: {}", quality, Into::<&str>::into(format));
+                    }
+                    println!()
+                }
+            }
+            Commands::ListFormats => {
+                for format in AudioFormat::iter() {
+                    println!("{}", Into::<&str>::into(format));
+                }
             }
         }
-        Commands::ListFormats => {
-            for format in AudioFormat::iter() {
-                println!("{}", Into::<&str>::into(format));
-            }
-        }
-    }
-
+        Ok(())
+    })?;
     Ok(())
 }
 

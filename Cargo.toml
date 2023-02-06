@@ -27,7 +27,7 @@ colored = "2.0.0"
 env_logger = "0.10.0"
 log = "0.4.17"
 phf = { version = "0.11.1", features = ["macros"] }
-reqwest = { version = "0.11.14", default_features = false, features = ["blocking", "json", "rustls-tls-native-roots"] }
+reqwest = { version = "0.11.14", default_features = false, features = ["json", "rustls-tls-native-roots"] }
 rodio = "0.16.0"
 serde = { version = "1.0.152", features = ["derive"] }
 serde_json = "1.0.91"
@@ -38,7 +38,7 @@ xml-rs = "0.8.4"
 pyo3 = { version = "0.18.0", features = ["extension-module"], optional = true }
 color-eyre = "0.6.2"
 tokio-tungstenite = { version = "0.18.0", features = ["rustls-tls-native-roots"] }
-tokio = { version = "1.25.0", features = ["macros"] }
+tokio = { version = "1.25.0", features = ["rt", "macros"] }
 futures-util = "0.3.26"
 encoding_rs_io = "0.1.7"
 encoding_rs = "0.8.32"
