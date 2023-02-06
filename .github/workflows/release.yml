@@ -51,11 +51,6 @@ jobs:
           prefix-key: ${{ runner.os }}-rust
           cache-targets: true
           cache-on-failure: false
-      - uses: actions-rs/install@v0.1
-        with:
-          crate: cross
-          version: latest
-          use-tool-cache: true
       - name: Install native dependencies
         run: sudo apt install libasound2-dev
       - uses: taiki-e/upload-rust-binary-action@v1
