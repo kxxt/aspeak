@@ -85,7 +85,9 @@ async fn main() -> color_eyre::eyre::Result<()> {
                 .ok_or(AspeakError::InputError)
                 .or_else(|_| process_input(input_args))?;
             let (callback, format) = process_output(output_args)?;
-            let synthesizer = SynthesizerConfig::new(cli.auth, format).connect().await?;
+            let synthesizer = SynthesizerConfig::new((&cli.auth).try_into()?, format)
+                .connect()
+                .await?;
             synthesizer.synthesize(&ssml, callback).await?;
         }
         Commands::Text {
@@ -106,7 +108,9 @@ async fn main() -> color_eyre::eyre::Result<()> {
                     .map(|voice| voice.to_string())
             });
             let (callback, format) = process_output(output_args)?;
-            let synthesizer = SynthesizerConfig::new(cli.auth, format).connect().await?;
+            let synthesizer = SynthesizerConfig::new((&cli.auth).try_into()?, format)
+                .connect()
+                .await?;
             let ssml = interpolate_ssml(&text_options)?;
             synthesizer.synthesize(&ssml, callback).await?;
         }

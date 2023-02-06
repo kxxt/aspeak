@@ -1,9 +1,10 @@
-use std::collections::HashMap;
+
 use std::error::Error;
 
-use aspeak::{AudioFormat, AuthOptions, TextOptions, DEFAULT_ENDPOINT};
+use aspeak::{AspeakError, AudioFormat, AuthOptions, TextOptions, DEFAULT_ENDPOINT};
 use clap::builder::TypedValueParser as _;
 use clap::{ArgAction, Args, Parser, Subcommand, ValueEnum};
+use reqwest::header::{HeaderName, HeaderValue};
 use strum::AsRefStr;
 
 #[derive(Parser, Debug)]
@@ -20,7 +21,7 @@ pub(crate) struct Cli {
         help = "Log verbosity, -v for INFO, -vv for DEBUG, -vvv for TRACE")]
     verbose: u8,
     #[command(flatten)]
-    pub auth: AuthOptions,
+    pub auth: AuthArgs,
 }
 
 impl Cli {
@@ -31,6 +32,43 @@ impl Cli {
             2 => log::LevelFilter::Debug,
             _ => log::LevelFilter::Trace,
         }
+    }
+}
+
+/// Parse a single key-value pair
+fn parse_header(
+    s: &str,
+) -> Result<(HeaderName, HeaderValue), Box<dyn Error + Send + Sync + 'static>> {
+    let pos = s
+        .find('=')
+        .ok_or_else(|| format!("invalid KEY=value: no `=` found in `{s}`"))?;
+    Ok((
+        HeaderName::from_bytes(s[..pos].as_bytes())?,
+        HeaderValue::from_str(&s[pos + 1..])?,
+    ))
+}
+
+#[derive(Args, Debug, Clone)]
+pub struct AuthArgs {
+    #[arg(short, long,
+        default_value_t = String::from(DEFAULT_ENDPOINT),
+        help = "Endpoint of Azure Cognitive Services")]
+    pub endpoint: String,
+    #[arg(short, long, help = "Auth token for speech service")]
+    pub token: Option<String>,
+    #[arg(short = 'H', long,value_parser = parse_header, help = "Additional request headers")]
+    pub headers: Vec<(HeaderName, HeaderValue)>,
+}
+
+impl<'a> TryInto<AuthOptions<'a>> for &'a AuthArgs {
+    type Error = AspeakError;
+
+    fn try_into(self) -> Result<AuthOptions<'a>, Self::Error> {
+        Ok(AuthOptions {
+            endpoint: &self.endpoint,
+            token: self.token.as_deref(),
+            headers: &self.headers,
+        })
     }
 }
 

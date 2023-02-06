@@ -29,7 +29,7 @@ pub type Result<T> = std::result::Result<T, AspeakError>;
 #[cfg(feature = "python")]
 mod python {
     use super::AspeakError::{self, *};
-    use pyo3::exceptions::{PyException, PyOSError, PyValueError};
+    use pyo3::exceptions::{PyOSError, PyValueError};
     use pyo3::prelude::*;
 
     impl From<AspeakError> for PyErr {

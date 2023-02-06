@@ -14,17 +14,16 @@ use tokio_tungstenite::{
 };
 use uuid::Uuid;
 
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 #[derive(Debug, Clone)]
-pub struct SynthesizerConfig {
-    pub(crate) auth: AuthOptions,
+pub struct SynthesizerConfig<'a> {
+    pub(crate) auth: AuthOptions<'a>,
     pub(crate) audio_format: AudioFormat,
 }
 
 const CLIENT_INFO_PAYLOAD: &str = r#"{"context":{"system":{"version":"1.25.0","name":"SpeechSDK","build":"Windows-x64"},"os":{"platform":"Windows","name":"Client","version":"10"}}}"#; // r#"{"context":{"system":{"name":"SpeechSDK","version":"1.12.1-rc.1","build":"JavaScript","lang":"JavaScript","os":{"platform":"Browser/Linux x86_64","name":"Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0","version":"5.0 (X11)"}}}}"#;
 
-impl SynthesizerConfig {
-    pub fn new(auth: AuthOptions, audio_format: AudioFormat) -> Self {
+impl<'a> SynthesizerConfig<'a> {
+    pub fn new(auth: AuthOptions<'a>, audio_format: AudioFormat) -> Self {
         info!("Successfully created SynthesizerConfig");
         return Self { auth, audio_format };
     }
@@ -43,7 +42,7 @@ impl SynthesizerConfig {
         let mut request = uri.into_client_request()?;
         let headers = request.headers_mut();
         headers.append("Origin", HeaderValue::from_str(ORIGIN).unwrap());
-        headers.extend(self.auth.headers);
+        headers.extend(self.auth.headers.to_owned());
         debug!("The initial request is {request:?}");
         let (wss, resp) = connect_async(request).await?;
         let (mut write, read) = wss.split();
@@ -140,6 +139,6 @@ pub(crate) fn register_python_items(
     m: &pyo3::types::PyModule,
 ) -> pyo3::PyResult<()> {
     m.add_class::<Synthesizer>()?;
-    m.add_class::<SynthesizerConfig>()?;
+    // m.add_class::<SynthesizerConfig>()?;
     Ok(())
 }

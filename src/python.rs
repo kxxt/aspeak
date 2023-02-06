@@ -13,30 +13,30 @@ fn aspeak(py: Python, m: &PyModule) -> PyResult<()> {
     Ok(())
 }
 
-#[pymethods]
-impl SynthesizerConfig {
-    #[new]
-    #[pyo3(signature = (audio_format,**options))]
-    fn pynew(audio_format: AudioFormat, options: Option<&PyDict>) -> PyResult<Self> {
-        let endpoint = options
-            .and_then(|dict| dict.get_item("endpoint"))
-            .map(|endpoint| endpoint.extract::<String>())
-            .transpose()?;
-        Ok(Self {
-            auth: todo!(),
-            audio_format,
-        })
-    }
+// #[pymethods]
+// impl SynthesizerConfig {
+//     #[new]
+//     #[pyo3(signature = (audio_format,**options))]
+//     fn pynew(audio_format: AudioFormat, options: Option<&PyDict>) -> PyResult<Self> {
+//         let endpoint = options
+//             .and_then(|dict| dict.get_item("endpoint"))
+//             .map(|endpoint| endpoint.extract::<String>())
+//             .transpose()?;
+//         Ok(Self {
+//             auth: todo!(),
+//             audio_format,
+//         })
+//     }
 
-    #[pyo3(name = "connect")]
-    fn pyconnect(&self) -> PyResult<Synthesizer> {
-        let rt = tokio::runtime::Builder::new_current_thread()
-            .enable_all()
-            .build()?;
-        let config = self.clone();
-        Ok(rt.block_on(config.connect())?)
-    }
-}
+//     #[pyo3(name = "connect")]
+//     fn pyconnect(&self) -> PyResult<Synthesizer> {
+//         let rt = tokio::runtime::Builder::new_current_thread()
+//             .enable_all()
+//             .build()?;
+//         let config = self.clone();
+//         Ok(rt.block_on(config.connect())?)
+//     }
+// }
 
 #[pymethods]
 impl Synthesizer {
