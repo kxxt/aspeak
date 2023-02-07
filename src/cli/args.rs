@@ -10,7 +10,7 @@ use reqwest::header::{HeaderName, HeaderValue};
 use serde::Deserialize;
 use strum::AsRefStr;
 
-use super::config::{AuthConfig, Config, OutputFormatConfig};
+use super::config::{AuthConfig, Config, OutputConfig};
 
 #[derive(Debug, Clone, Copy, Default, ValueEnum, AsRefStr, Deserialize)]
 #[strum(serialize_all = "kebab-case")]
@@ -174,15 +174,24 @@ pub(crate) struct OutputArgs {
 impl OutputArgs {
     pub(crate) fn get_audio_format(
         &self,
-        config: Option<&OutputFormatConfig>,
+        config: Option<&OutputConfig>,
     ) -> color_eyre::Result<AudioFormat> {
         Ok(
-            match (self.format, self.container_format, self.quality, config) {
+            match (
+                self.format,
+                self.container_format,
+                self.quality,
+                config
+                    .map(|c| (c.format.as_ref(), c.container.as_ref(), c.quality.as_ref()))
+                    .unwrap_or((None, None, None)),
+            ) {
+                // Explicitly specified format
                 (Some(format), _, _, _) => format,
-                (_, Some(container), quality, _) => QUALITY_MAP
+                // Explicitly specified container
+                (None, Some(container), quality, (_, _, alt_quality)) => QUALITY_MAP
                     .get(container.as_ref())
                     .unwrap()
-                    .get(&(quality.unwrap_or_default() as i8))
+                    .get(&(quality.or(alt_quality.map(|x| *x)).unwrap_or_default() as i8))
                     .map(|x| *x)
                     .ok_or_else(|| {
                         anyhow!(format!(
@@ -191,24 +200,35 @@ impl OutputArgs {
                             container.as_ref()
                         ))
                     })?,
-                (_, _, Some(_quality), _) => {
-                    todo!()
-                }
-                (_, _, _, Some(OutputFormatConfig::AudioFormat { format })) => *format,
-                (_, _, _, Some(OutputFormatConfig::ContaierAndQuality { container, quality })) => {
-                    QUALITY_MAP
-                        .get(container.unwrap_or_default().as_ref())
-                        .unwrap()
-                        .get(&(quality.unwrap_or_default() as i8))
-                        .map(|x| *x)
-                        .ok_or_else(|| {
-                            anyhow!(format!(
-                                "Invalid quality {:?} for container type {:?}",
-                                quality, container
-                            ))
-                        })?
-                }
-                (None, None, None, None) => Default::default(),
+                // Explicitly specified quality
+                (None, None, Some(quality), (_, alt_container, _)) => QUALITY_MAP
+                    .get(alt_container.map(|x| *x).unwrap_or_default().as_ref())
+                    .unwrap()
+                    .get(&(quality as i8))
+                    .map(|x| *x)
+                    .ok_or_else(|| {
+                        anyhow!(format!(
+                            "Invalid quality {:?} for container type {}",
+                            quality,
+                            alt_container.unwrap_or(&ContainerFormat::Wav).as_ref()
+                        ))
+                    })?,
+                // Format from config
+                (None, None, None, (Some(format), _, _)) => *format,
+                // Container and/or quality from config
+                (None, None, None, (None, container, quality)) => QUALITY_MAP
+                    .get(container.map(|x| *x).unwrap_or_default().as_ref())
+                    .unwrap()
+                    .get(&(quality.map(|x| *x).unwrap_or_default() as i8))
+                    .map(|x| *x)
+                    .ok_or_else(|| {
+                        anyhow!(format!(
+                            "Invalid quality {:?} for container type {}",
+                            quality,
+                            container.unwrap_or(&ContainerFormat::Wav).as_ref()
+                        ))
+                    })?,
+                (None, None, None, (None, None, None)) => Default::default(),
             },
         )
     }

@@ -40,7 +40,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 let ssml = ssml
                     .ok_or(AspeakError::InputError)
                     .or_else(|_| Cli::process_input(input_args))?;
-                let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref().map(|o|&o.format)))?;
+                let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref()))?;
                 let callback = Cli::process_output(audio_format,output_args.output)?;
                 let auth_options = auth.to_auth_options(config.as_ref().and_then(|c|c.auth.as_ref()))?;
                 let synthesizer = SynthesizerConfig::new(auth_options, audio_format)
@@ -60,7 +60,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                         .ok_or(AspeakError::InputError)
                         .or_else(|_| Cli::process_input(input_args))?,
                 );
-                let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref().map(|o|&o.format)))?;
+                let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref()))?;
                 let callback = Cli::process_output(audio_format,output_args.output)?;
                 let auth_options = auth.to_auth_options(config.as_ref().and_then(|c|c.auth.as_ref()))?;
                 let synthesizer = SynthesizerConfig::new(auth_options,audio_format)

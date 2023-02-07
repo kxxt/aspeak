@@ -124,18 +124,7 @@ impl TryFrom<VoiceConfig> for String {
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct OutputConfig {
-    #[serde(flatten)]
-    pub format: OutputFormatConfig,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(untagged, rename_all = "kebab-case")]
-pub(crate) enum OutputFormatConfig {
-    AudioFormat {
-        format: AudioFormat,
-    },
-    ContaierAndQuality {
-        container: Option<ContainerFormat>,
-        quality: Option<i32>,
-    },
+    pub format: Option<AudioFormat>,
+    pub container: Option<ContainerFormat>,
+    pub quality: Option<i32>,
 }
