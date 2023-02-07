@@ -45,7 +45,7 @@ impl Config {
     pub fn default_location() -> color_eyre::Result<PathBuf> {
         let path = dirs::home_dir()
             .ok_or(anyhow!("Could not find home directory"))?
-            .join(".aspeak.toml");
+            .join(DEFAULT_PROFILE_NAME);
         Ok::<PathBuf, color_eyre::eyre::ErrReport>(path)
     }
 }
