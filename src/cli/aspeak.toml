@@ -13,6 +13,20 @@ verbosity = 0
 #
 
 [auth]
+# Endpoint for TTS
+# endpoint = "wss://eastus.api.speech.microsoft.com/cognitiveservices/websocket/v1"
+
+# Alternatively, you can specify the region if you are using official endpoints
+# region = "eastus"
+
+# Azure Subscription Key
+# key = "YOUR_KEY"
+
+# Authentication Token
+# token = "Your Authentication Token"
+
+# Extra http headers (for experts)
+# headers = [["X-My-Header", "My-Value"], ["X-My-Header2: My-Value2"]]
 
 #
 # Configuration for text subcommand
@@ -43,5 +57,8 @@ style = "general"
 container = "wav"
 # Audio Quality. Run `aspeak list-qualities` to see available qualities.
 quality = 0
-# Audio Format(for experts). Note that it takes precedence over container and quality!
-format = "audio-16khz-128kbitrate-mono-mp3"
+# Audio Format(for experts). Run `aspeak list-formats` to see available formats.
+# Note that it takes precedence over container and quality!
+# Warning: If you misspelled the format, aspeak will fallback to container and quality 
+#          settings instead of reporting an error. So be careful!
+# format = "audio-16khz-128kbitrate-mono-mp4"
