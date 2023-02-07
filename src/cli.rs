@@ -22,6 +22,10 @@ pub(crate) struct Cli {
     #[arg(short, long, action = ArgAction::Count,
         help = "Log verbosity, -v for INFO, -vv for DEBUG, -vvv for TRACE")]
     verbose: u8,
+    #[arg(long, action = ArgAction::SetTrue, help = "Do not use profile")]
+    no_profile: bool,
+    #[arg(long, conflicts_with = "no_profile", help = "The profile to use")]
+    profile: Option<String>,
     #[command(flatten)]
     pub auth: AuthArgs,
 }
@@ -172,6 +176,11 @@ pub(crate) enum Commands {
         #[command(flatten)]
         output_args: OutputArgs,
     },
+    #[command(about = "Configure settings of aspeak")]
+    Config {
+        #[command(subcommand)]
+        command: ConfigCommand,
+    },
 }
 
 impl Default for Commands {
@@ -184,8 +193,23 @@ impl Default for Commands {
     }
 }
 
+#[derive(Debug, Subcommand)]
+pub(crate) enum ConfigCommand {
+    #[command(about = "Open the default profile in your default editor")]
+    Edit,
+    #[command(about = "Initialize a new profile with default settings")]
+    Init {
+        #[arg(short, long, help = "Path to new profile, default to `~/.aspeak.toml`")]
+        path: Option<String>,
+        #[arg(long, action = ArgAction::SetTrue, help="Overwrite existing profile")]
+        force: bool,
+    },
+    #[command(about = "Show full path to the default profile")]
+    Where,
+}
+
 #[derive(Args, Debug, Default)]
-pub struct TextArgs {
+pub(crate) struct TextArgs {
     #[clap(help = "The text to speak. \
                 If neither text nor input file is specified, the text will be read from stdin.")]
     pub text: Option<String>,

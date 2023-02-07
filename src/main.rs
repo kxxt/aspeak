@@ -185,6 +185,9 @@ fn main() -> color_eyre::eyre::Result<()> {
                     println!("{}", Into::<&str>::into(format));
                 }
             }
+            Commands::Config { .. } => {
+
+            }
         }
         Ok(())
     })?;
