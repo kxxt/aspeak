@@ -2,14 +2,15 @@ use std::{borrow::Cow, error::Error};
 
 use aspeak::{
     get_endpoint_by_region, AspeakError, AudioFormat, AuthOptions, Role, TextOptions,
-    DEFAULT_ENDPOINT, DEFAULT_VOICES,
+    DEFAULT_ENDPOINT, DEFAULT_VOICES, QUALITY_MAP,
 };
 use clap::{ArgAction, Args, ValueEnum};
+use color_eyre::eyre::anyhow;
 use reqwest::header::{HeaderName, HeaderValue};
 use serde::Deserialize;
 use strum::AsRefStr;
 
-use super::config::{AuthConfig, Config};
+use super::config::{AuthConfig, Config, OutputFormatConfig};
 
 #[derive(Debug, Clone, Copy, Default, ValueEnum, AsRefStr, Deserialize)]
 #[strum(serialize_all = "kebab-case")]
@@ -35,7 +36,7 @@ impl ProfileArgs {
         if self.no_profile {
             Ok(None)
         } else {
-            Ok(Some(Config::load(self.profile.as_ref())?))
+            Ok(Config::load(self.profile.as_ref())?)
         }
     }
 }
@@ -81,17 +82,36 @@ impl AuthArgs {
                         .flatten()
                 })
                 .unwrap_or(Cow::Borrowed(DEFAULT_ENDPOINT)),
-            token: self.token.as_deref().map(Cow::Borrowed).or_else(|| {
-                auth_config
-                    .map(|c| c.token.as_deref().map(Cow::Borrowed))
-                    .flatten()
-            }),
-            key: self.key.as_deref().map(Cow::Borrowed).or_else(|| {
-                auth_config
-                    .map(|c| c.key.as_deref().map(Cow::Borrowed))
-                    .flatten()
-            }),
-            headers: Cow::Borrowed(&self.headers),
+            token: match (self.token.as_deref(), auth_config) {
+                (Some(token), _) => Some(Cow::Borrowed(token)),
+                (None, Some(config)) => config.token.as_ref().map(Cow::from),
+                (None, None) => None,
+            },
+            key: match (self.key.as_deref(), auth_config) {
+                (Some(key), _) => Some(Cow::Borrowed(key)),
+                (None, Some(config)) => config.key.as_ref().map(Cow::from),
+                (None, None) => None,
+            },
+            headers: if let Some(AuthConfig {
+                headers: Some(headers),
+                ..
+            }) = auth_config
+            {
+                let vec: color_eyre::Result<Vec<(HeaderName, HeaderValue)>> = headers
+                    .iter()
+                    .map(|(k, v)| {
+                        Ok((
+                            HeaderName::from_bytes(k.as_bytes())?,
+                            HeaderValue::from_bytes(v.as_bytes())?,
+                        ))
+                    })
+                    .collect();
+                let mut vec = vec?;
+                vec.extend_from_slice(&self.headers);
+                Cow::Owned(vec)
+            } else {
+                Cow::Borrowed(&self.headers)
+            },
         })
     }
 }
@@ -149,6 +169,49 @@ pub(crate) struct OutputArgs {
         help = "Set output audio format (experts only). Run `aspeak list-formats` to list available formats"
     )]
     pub format: Option<AudioFormat>,
+}
+
+impl OutputArgs {
+    pub(crate) fn get_audio_format(
+        &self,
+        config: Option<&OutputFormatConfig>,
+    ) -> color_eyre::Result<AudioFormat> {
+        Ok(
+            match (self.format, self.container_format, self.quality, config) {
+                (Some(format), _, _, _) => format,
+                (_, Some(container), quality, _) => QUALITY_MAP
+                    .get(container.as_ref())
+                    .unwrap()
+                    .get(&(quality.unwrap_or_default() as i8))
+                    .map(|x| *x)
+                    .ok_or_else(|| {
+                        anyhow!(format!(
+                            "Invalid quality {:?} for container type {}",
+                            quality,
+                            container.as_ref()
+                        ))
+                    })?,
+                (_, _, Some(_quality), _) => {
+                    todo!()
+                }
+                (_, _, _, Some(OutputFormatConfig::AudioFormat { format })) => *format,
+                (_, _, _, Some(OutputFormatConfig::ContaierAndQuality { container, quality })) => {
+                    QUALITY_MAP
+                        .get(container.unwrap_or_default().as_ref())
+                        .unwrap()
+                        .get(&(quality.unwrap_or_default() as i8))
+                        .map(|x| *x)
+                        .ok_or_else(|| {
+                            anyhow!(format!(
+                                "Invalid quality {:?} for container type {:?}",
+                                quality, container
+                            ))
+                        })?
+                }
+                (None, None, None, None) => Default::default(),
+            },
+        )
+    }
 }
 
 #[derive(Args, Debug, Default)]

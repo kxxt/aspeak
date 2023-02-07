@@ -1,10 +1,10 @@
 use clap::{ArgAction, Parser};
 
 use self::{
-    args::{AuthArgs, InputArgs, OutputArgs, ProfileArgs},
+    args::{AuthArgs, InputArgs, ProfileArgs},
     commands::Command,
 };
-use aspeak::{callback_play_blocking, AspeakError, AudioFormat, Result, QUALITY_MAP};
+use aspeak::{callback_play_blocking, AspeakError, AudioFormat, Result};
 use std::{
     fs::File,
     io::{self, BufWriter, Read, Write},
@@ -72,41 +72,22 @@ impl Cli {
     }
 
     pub(crate) fn process_output(
-        args: OutputArgs,
-    ) -> Result<(Box<dyn FnMut(Option<&[u8]>) -> Result<()>>, AudioFormat)> {
-        let format = args
-            .format
-            .ok_or(AspeakError::ArgumentError(String::new()))
-            .or_else(|_| {
-                let container = args.container_format.unwrap_or_default();
-                let container = container.as_ref();
-                let quality = args.quality.unwrap_or_default();
-                QUALITY_MAP
-                    .get(container)
-                    .unwrap()
-                    .get(&(quality as i8))
-                    .map(|x| *x)
-                    .ok_or(AspeakError::ArgumentError(format!(
-                        "Invalid quality {} for container type {}",
-                        quality, container
-                    )))
-            })?;
-        Ok(if let Some(file) = args.output {
+        _format: AudioFormat,
+        output: Option<String>,
+    ) -> Result<Box<dyn FnMut(Option<&[u8]>) -> Result<()>>> {
+        Ok(if let Some(file) = output {
             // todo: file already exists?
             let file = File::create(file)?;
             let mut buf_writer = BufWriter::new(file);
-            (
-                Box::new(move |data| {
-                    Ok(if let Some(data) = data {
-                        buf_writer.write_all(data)?
-                    } else {
-                        buf_writer.flush()?
-                    })
-                }),
-                format,
-            )
+            Box::new(move |data| {
+                Ok(if let Some(data) = data {
+                    buf_writer.write_all(data)?
+                } else {
+                    buf_writer.flush()?
+                })
+            })
         } else {
-            (callback_play_blocking(), format)
+            callback_play_blocking()
         })
     }
 }

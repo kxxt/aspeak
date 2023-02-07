@@ -29,19 +29,21 @@ fn main() -> color_eyre::eyre::Result<()> {
         .enable_time()
         .build()?;
     rt.block_on(async {
-        let Cli { profile: profile_args, command, ..} = cli;
+        let Cli { profile: profile_args, command, auth, ..} = cli;
         match command.unwrap_or_default() {
             Command::SSML {
                 ssml,
                 input_args,
                 output_args,
             } => {
-                let _config = profile_args.load_profile()?;
+                let config = profile_args.load_profile()?;
                 let ssml = ssml
                     .ok_or(AspeakError::InputError)
                     .or_else(|_| Cli::process_input(input_args))?;
-                let (callback, format) = Cli::process_output(output_args)?;
-                let synthesizer = SynthesizerConfig::new((&cli.auth).try_into()?, format)
+                let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref().map(|o|&o.format)))?;
+                let callback = Cli::process_output(audio_format,output_args.output)?;
+                let auth_options = auth.to_auth_options(config.as_ref().and_then(|c|c.auth.as_ref()))?;
+                let synthesizer = SynthesizerConfig::new(auth_options, audio_format)
                     .connect()
                     .await?;
                 synthesizer.synthesize(&ssml, callback).await?
@@ -51,15 +53,17 @@ fn main() -> color_eyre::eyre::Result<()> {
                 input_args,
                 output_args,
             } => {
-                let _config = profile_args.load_profile()?;
+                let config = profile_args.load_profile()?;
                 text_args.text = Some(
                     text_args
                         .text
                         .ok_or(AspeakError::InputError)
                         .or_else(|_| Cli::process_input(input_args))?,
                 );
-                let (callback, format) = Cli::process_output(output_args)?;
-                let synthesizer = SynthesizerConfig::new((&cli.auth).try_into()?, format)
+                let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref().map(|o|&o.format)))?;
+                let callback = Cli::process_output(audio_format,output_args.output)?;
+                let auth_options = auth.to_auth_options(config.as_ref().and_then(|c|c.auth.as_ref()))?;
+                let synthesizer = SynthesizerConfig::new(auth_options,audio_format)
                     .connect()
                     .await?;
                 let ssml = interpolate_ssml((&text_args).try_into()?)?;

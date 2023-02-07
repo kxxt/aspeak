@@ -50,13 +50,18 @@ impl Config {
         Ok::<PathBuf, color_eyre::eyre::ErrReport>(path)
     }
 
-    pub fn load<P: AsRef<Path>>(path: Option<P>) -> color_eyre::Result<Self> {
+    pub fn load<P: AsRef<Path>>(path: Option<P>) -> color_eyre::Result<Option<Self>> {
         let text = if let Some(path) = path {
-            fs::read_to_string(path)?
+            Some(fs::read_to_string(path)?)
         } else {
-            fs::read_to_string(Self::default_location()?)?
+            // return None if the default config file does not exist
+            let path = Self::default_location()?;
+            if !path.exists() {
+                return Ok(None);
+            }
+            Some(fs::read_to_string(path)?)
         };
-        Ok(toml::from_str(&text)?)
+        Ok(text.as_deref().map(toml::from_str).transpose()?)
     }
 }
 
