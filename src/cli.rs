@@ -1,6 +1,17 @@
 use clap::{ArgAction, Parser};
 
-use self::{args::AuthArgs, commands::Command};
+use self::{
+    args::{AuthArgs, InputArgs, OutputArgs},
+    commands::Command,
+};
+use aspeak::{callback_play_blocking, AspeakError, AudioFormat, Result, QUALITY_MAP};
+use std::{
+    fs::File,
+    io::{self, BufWriter, Read, Write},
+};
+
+use color_eyre::Help;
+use encoding_rs_io::{DecodeReaderBytes, DecodeReaderBytesBuilder};
 
 pub(crate) mod args;
 pub(crate) mod commands;
@@ -35,5 +46,69 @@ impl Cli {
             2 => log::LevelFilter::Debug,
             _ => log::LevelFilter::Trace,
         }
+    }
+
+    pub(crate) fn process_input(args: InputArgs) -> color_eyre::Result<String> {
+        let mut s = String::new();
+
+        let file: Box<dyn io::Read> = if let Some(file) = args.file {
+            Box::new(File::open(&file)?)
+        } else {
+            Box::new(io::stdin())
+        };
+        let mut decoder = if let Some(encoding) = args.encoding.as_deref() {
+            let encoding = encoding_rs::Encoding::for_label(encoding.as_bytes()).ok_or(
+                AspeakError::ArgumentError(format!("Unsupported encoding: {}", encoding)),
+            )?;
+            DecodeReaderBytesBuilder::new()
+                .encoding(Some(encoding))
+                .build(file)
+        } else {
+            DecodeReaderBytes::new(file)
+        };
+        decoder.read_to_string(&mut s).with_note(|| {
+            "It is possibly due to incorrect encoding. \
+             Please specify an encoding for your file manually"
+        })?;
+        Ok(s)
+    }
+
+    pub(crate) fn process_output(
+        args: OutputArgs,
+    ) -> Result<(Box<dyn FnMut(Option<&[u8]>) -> Result<()>>, AudioFormat)> {
+        let format = args
+            .format
+            .ok_or(AspeakError::ArgumentError(String::new()))
+            .or_else(|_| {
+                let container = args.container_format.unwrap_or_default();
+                let container = container.as_ref();
+                let quality = args.quality.unwrap_or_default();
+                QUALITY_MAP
+                    .get(container)
+                    .unwrap()
+                    .get(&(quality as i8))
+                    .map(|x| *x)
+                    .ok_or(AspeakError::ArgumentError(format!(
+                        "Invalid quality {} for container type {}",
+                        quality, container
+                    )))
+            })?;
+        Ok(if let Some(file) = args.output {
+            // todo: file already exists?
+            let file = File::create(file)?;
+            let mut buf_writer = BufWriter::new(file);
+            (
+                Box::new(move |data| {
+                    Ok(if let Some(data) = data {
+                        buf_writer.write_all(data)?
+                    } else {
+                        buf_writer.flush()?
+                    })
+                }),
+                format,
+            )
+        } else {
+            (callback_play_blocking(), format)
+        })
     }
 }

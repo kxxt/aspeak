@@ -1,89 +1,19 @@
 mod cli;
 
-use std::{
-    fs::File,
-    io::{self, BufWriter, Read, Write},
-};
-
-use cli::{args::*, commands::Command, Cli};
+use cli::{commands::Command, Cli};
 
 use aspeak::{
-    callback_play_blocking, interpolate_ssml, AspeakError, AudioFormat, Result, SynthesizerConfig,
-    Voice, ORIGIN,
+    interpolate_ssml, AspeakError, AudioFormat, SynthesizerConfig, Voice, ORIGIN, QUALITY_MAP,
 };
 use clap::Parser;
 use color_eyre::Help;
 use colored::Colorize;
-use encoding_rs_io::{DecodeReaderBytes, DecodeReaderBytesBuilder};
+
 use log::debug;
-use phf::phf_map;
+
 use reqwest::header::{self, HeaderMap, HeaderValue};
 use strum::IntoEnumIterator;
 use tokio_tungstenite::tungstenite::{error::ProtocolError, Error as TungsteniteError};
-
-fn process_input(args: InputArgs) -> color_eyre::Result<String> {
-    let mut s = String::new();
-
-    let file: Box<dyn io::Read> = if let Some(file) = args.file {
-        Box::new(File::open(&file)?)
-    } else {
-        Box::new(io::stdin())
-    };
-    let mut decoder = if let Some(encoding) = args.encoding.as_deref() {
-        let encoding = encoding_rs::Encoding::for_label(encoding.as_bytes()).ok_or(
-            AspeakError::ArgumentError(format!("Unsupported encoding: {}", encoding)),
-        )?;
-        DecodeReaderBytesBuilder::new()
-            .encoding(Some(encoding))
-            .build(file)
-    } else {
-        DecodeReaderBytes::new(file)
-    };
-    decoder.read_to_string(&mut s).with_note(|| {
-        "It is possibly due to incorrect encoding. \
-         Please specify an encoding for your file manually"
-    })?;
-    Ok(s)
-}
-
-fn process_output(
-    args: OutputArgs,
-) -> Result<(Box<dyn FnMut(Option<&[u8]>) -> Result<()>>, AudioFormat)> {
-    let format = args
-        .format
-        .ok_or(AspeakError::ArgumentError(String::new()))
-        .or_else(|_| {
-            let container = args.container_format.unwrap_or_default();
-            let container = container.as_ref();
-            let quality = args.quality.unwrap_or_default();
-            QUALITY_MAP
-                .get(container)
-                .unwrap()
-                .get(&(quality as i8))
-                .map(|x| *x)
-                .ok_or(AspeakError::ArgumentError(format!(
-                    "Invalid quality {} for container type {}",
-                    quality, container
-                )))
-        })?;
-    Ok(if let Some(file) = args.output {
-        // todo: file already exists?
-        let file = File::create(file)?;
-        let mut buf_writer = BufWriter::new(file);
-        (
-            Box::new(move |data| {
-                Ok(if let Some(data) = data {
-                    buf_writer.write_all(data)?
-                } else {
-                    buf_writer.flush()?
-                })
-            }),
-            format,
-        )
-    } else {
-        (callback_play_blocking(), format)
-    })
-}
 
 fn main() -> color_eyre::eyre::Result<()> {
     color_eyre::install()?;
@@ -103,8 +33,8 @@ fn main() -> color_eyre::eyre::Result<()> {
             } => {
                 let ssml = ssml
                     .ok_or(AspeakError::InputError)
-                    .or_else(|_| process_input(input_args))?;
-                let (callback, format) = process_output(output_args)?;
+                    .or_else(|_| Cli::process_input(input_args))?;
+                let (callback, format) = Cli::process_output(output_args)?;
                 let synthesizer = SynthesizerConfig::new((&cli.auth).try_into()?, format)
                     .connect()
                     .await?;
@@ -119,9 +49,9 @@ fn main() -> color_eyre::eyre::Result<()> {
                     text_args
                         .text
                         .ok_or(AspeakError::InputError)
-                        .or_else(|_| process_input(input_args))?,
+                        .or_else(|_| Cli::process_input(input_args))?,
                 );
-                let (callback, format) = process_output(output_args)?;
+                let (callback, format) = Cli::process_output(output_args)?;
                 let synthesizer = SynthesizerConfig::new((&cli.auth).try_into()?, format)
                     .connect()
                     .await?;
@@ -193,42 +123,3 @@ fn main() -> color_eyre::eyre::Result<()> {
     })?;
     Ok(())
 }
-
-type QualityMap = phf::Map<i8, AudioFormat>;
-
-static WAV_QUALITY_MAP: QualityMap = phf_map! {
-    -2i8 => AudioFormat::Riff8Khz16BitMonoPcm,
-    -1i8 => AudioFormat::Riff16Khz16BitMonoPcm,
-    0i8  => AudioFormat::Riff24Khz16BitMonoPcm,
-    1i8  => AudioFormat::Riff24Khz16BitMonoPcm,
-};
-
-static MP3_QUALITY_MAP: QualityMap = phf_map! {
-    -4i8 => AudioFormat::Audio16Khz32KBitRateMonoMp3,
-    -3i8 => AudioFormat::Audio16Khz64KBitRateMonoMp3,
-    -2i8 => AudioFormat::Audio16Khz128KBitRateMonoMp3,
-    -1i8 => AudioFormat::Audio24Khz48KBitRateMonoMp3,
-    0i8  => AudioFormat::Audio24Khz96KBitRateMonoMp3,
-    1i8  => AudioFormat::Audio24Khz160KBitRateMonoMp3,
-    2i8  => AudioFormat::Audio48Khz96KBitRateMonoMp3,
-    3i8  => AudioFormat::Audio48Khz192KBitRateMonoMp3,
-};
-
-static OGG_QUALITY_MAP: QualityMap = phf_map! {
-    -1i8 => AudioFormat::Ogg16Khz16BitMonoOpus,
-    0i8  => AudioFormat::Ogg24Khz16BitMonoOpus,
-    1i8  => AudioFormat::Ogg48Khz16BitMonoOpus,
-};
-
-static WEBM_QUALITY_MAP: QualityMap = phf_map! {
-    -1i8 => AudioFormat::Webm16Khz16BitMonoOpus,
-    0i8  => AudioFormat::Webm24Khz16BitMonoOpus,
-    1i8  => AudioFormat::Webm24Khz16Bit24KbpsMonoOpus,
-};
-
-static QUALITY_MAP: phf::Map<&'static str, &'static QualityMap> = phf_map! {
-    "wav" => &WAV_QUALITY_MAP,
-    "mp3" => &MP3_QUALITY_MAP,
-    "ogg" => &OGG_QUALITY_MAP,
-    "webm" => &WEBM_QUALITY_MAP,
-};

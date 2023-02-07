@@ -4,7 +4,7 @@ use aspeak::{
     get_endpoint_by_region, AspeakError, AudioFormat, AuthOptions, Role, TextOptions,
     DEFAULT_ENDPOINT, DEFAULT_VOICES,
 };
-use clap::{Args, Parser, ValueEnum};
+use clap::{Args, ValueEnum};
 use reqwest::header::{HeaderName, HeaderValue};
 use strum::AsRefStr;
 

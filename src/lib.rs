@@ -23,6 +23,45 @@ pub use voice::Voice;
 #[cfg(feature = "python")]
 pub mod python;
 
+pub type QualityMap = phf::Map<i8, AudioFormat>;
+
+pub static WAV_QUALITY_MAP: QualityMap = phf_map! {
+    -2i8 => AudioFormat::Riff8Khz16BitMonoPcm,
+    -1i8 => AudioFormat::Riff16Khz16BitMonoPcm,
+    0i8  => AudioFormat::Riff24Khz16BitMonoPcm,
+    1i8  => AudioFormat::Riff24Khz16BitMonoPcm,
+};
+
+pub static MP3_QUALITY_MAP: QualityMap = phf_map! {
+    -4i8 => AudioFormat::Audio16Khz32KBitRateMonoMp3,
+    -3i8 => AudioFormat::Audio16Khz64KBitRateMonoMp3,
+    -2i8 => AudioFormat::Audio16Khz128KBitRateMonoMp3,
+    -1i8 => AudioFormat::Audio24Khz48KBitRateMonoMp3,
+    0i8  => AudioFormat::Audio24Khz96KBitRateMonoMp3,
+    1i8  => AudioFormat::Audio24Khz160KBitRateMonoMp3,
+    2i8  => AudioFormat::Audio48Khz96KBitRateMonoMp3,
+    3i8  => AudioFormat::Audio48Khz192KBitRateMonoMp3,
+};
+
+pub static OGG_QUALITY_MAP: QualityMap = phf_map! {
+    -1i8 => AudioFormat::Ogg16Khz16BitMonoOpus,
+    0i8  => AudioFormat::Ogg24Khz16BitMonoOpus,
+    1i8  => AudioFormat::Ogg48Khz16BitMonoOpus,
+};
+
+pub static WEBM_QUALITY_MAP: QualityMap = phf_map! {
+    -1i8 => AudioFormat::Webm16Khz16BitMonoOpus,
+    0i8  => AudioFormat::Webm24Khz16BitMonoOpus,
+    1i8  => AudioFormat::Webm24Khz16Bit24KbpsMonoOpus,
+};
+
+pub static QUALITY_MAP: phf::Map<&'static str, &'static QualityMap> = phf_map! {
+    "wav" => &WAV_QUALITY_MAP,
+    "mp3" => &MP3_QUALITY_MAP,
+    "ogg" => &OGG_QUALITY_MAP,
+    "webm" => &WEBM_QUALITY_MAP,
+};
+
 pub static DEFAULT_VOICES: phf::Map<&'static str, &'static str> = phf_map! {
     "af-ZA"=> "af-ZA-AdriNeural",
     "am-ET"=> "am-ET-AmehaNeural",
