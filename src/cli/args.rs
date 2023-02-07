@@ -4,10 +4,12 @@ use aspeak::{
     get_endpoint_by_region, AspeakError, AudioFormat, AuthOptions, Role, TextOptions,
     DEFAULT_ENDPOINT, DEFAULT_VOICES,
 };
-use clap::{Args, ValueEnum};
+use clap::{ArgAction, Args, ValueEnum};
 use reqwest::header::{HeaderName, HeaderValue};
 use serde::Deserialize;
 use strum::AsRefStr;
+
+use super::config::Config;
 
 #[derive(Debug, Clone, Copy, Default, ValueEnum, AsRefStr, Deserialize)]
 #[strum(serialize_all = "kebab-case")]
@@ -18,6 +20,24 @@ pub(crate) enum ContainerFormat {
     Webm,
     #[default]
     Wav,
+}
+
+#[derive(Args, Debug)]
+pub struct ProfileArgs {
+    #[arg(long, action = ArgAction::SetTrue, help = "Do not use profile")]
+    no_profile: bool,
+    #[arg(long, conflicts_with = "no_profile", help = "The profile to use")]
+    profile: Option<String>,
+}
+
+impl ProfileArgs {
+    pub(crate) fn load_profile(&self) -> color_eyre::Result<Option<Config>> {
+        if self.no_profile {
+            Ok(None)
+        } else {
+            Ok(Some(Config::load(self.profile.as_ref())?))
+        }
+    }
 }
 
 #[derive(Args, Debug, Clone)]

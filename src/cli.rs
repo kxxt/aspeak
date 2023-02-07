@@ -1,7 +1,7 @@
 use clap::{ArgAction, Parser};
 
 use self::{
-    args::{AuthArgs, InputArgs, OutputArgs},
+    args::{AuthArgs, InputArgs, OutputArgs, ProfileArgs},
     commands::Command,
 };
 use aspeak::{callback_play_blocking, AspeakError, AudioFormat, Result, QUALITY_MAP};
@@ -30,10 +30,8 @@ pub(crate) struct Cli {
     #[arg(short, long, action = ArgAction::Count,
         help = "Log verbosity, -v for INFO, -vv for DEBUG, -vvv for TRACE")]
     verbose: u8,
-    #[arg(long, action = ArgAction::SetTrue, help = "Do not use profile")]
-    no_profile: bool,
-    #[arg(long, conflicts_with = "no_profile", help = "The profile to use")]
-    profile: Option<String>,
+    #[command(flatten)]
+    pub profile: ProfileArgs,
     #[command(flatten)]
     pub auth: AuthArgs,
 }

@@ -1,11 +1,11 @@
 use std::{
-    io,
+    fs,
     path::{Path, PathBuf},
 };
 
 use aspeak::{get_endpoint_by_region, AspeakError, AudioFormat, Role, DEFAULT_VOICES};
 use color_eyre::eyre::{anyhow, bail};
-use colored::Color;
+
 use serde::Deserialize;
 
 use super::args::ContainerFormat;
@@ -47,6 +47,15 @@ impl Config {
             .ok_or(anyhow!("Could not find home directory"))?
             .join(DEFAULT_PROFILE_NAME);
         Ok::<PathBuf, color_eyre::eyre::ErrReport>(path)
+    }
+
+    pub fn load<P: AsRef<Path>>(path: Option<P>) -> color_eyre::Result<Self> {
+        let text = if let Some(path) = path {
+            fs::read_to_string(path)?
+        } else {
+            fs::read_to_string(Self::default_location()?)?
+        };
+        Ok(toml::from_str(&text)?)
     }
 }
 

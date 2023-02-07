@@ -29,12 +29,14 @@ fn main() -> color_eyre::eyre::Result<()> {
         .enable_time()
         .build()?;
     rt.block_on(async {
-        match cli.command.unwrap_or_default() {
+        let Cli { profile: profile_args, command, ..} = cli;
+        match command.unwrap_or_default() {
             Command::SSML {
                 ssml,
                 input_args,
                 output_args,
             } => {
+                let _config = profile_args.load_profile()?;
                 let ssml = ssml
                     .ok_or(AspeakError::InputError)
                     .or_else(|_| Cli::process_input(input_args))?;
@@ -49,6 +51,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 input_args,
                 output_args,
             } => {
+                let _config = profile_args.load_profile()?;
                 text_args.text = Some(
                     text_args
                         .text
@@ -76,6 +79,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 ref voice,
                 ref locale,
             } => {
+                let _config = profile_args.load_profile()?;
                 let url = "https://eastus.api.speech.microsoft.com/cognitiveservices/voices/list";
                 let headers =
                     HeaderMap::from_iter([(header::ORIGIN, HeaderValue::from_str(ORIGIN).unwrap())]);
