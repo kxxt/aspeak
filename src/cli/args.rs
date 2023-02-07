@@ -11,6 +11,7 @@ use strum::AsRefStr;
 
 #[derive(Debug, Clone, Copy, Default, ValueEnum, AsRefStr, Deserialize)]
 #[strum(serialize_all = "kebab-case")]
+#[serde(rename_all = "kebab-case")]
 pub(crate) enum ContainerFormat {
     Mp3,
     Ogg,

@@ -1,12 +1,14 @@
 mod cli;
 
+use std::path::PathBuf;
+
 use cli::{commands::Command, Cli};
 
 use aspeak::{
     interpolate_ssml, AspeakError, AudioFormat, SynthesizerConfig, Voice, ORIGIN, QUALITY_MAP,
 };
 use clap::Parser;
-use color_eyre::Help;
+use color_eyre::{eyre::anyhow, Help};
 use colored::Colorize;
 
 use log::debug;
@@ -15,7 +17,7 @@ use reqwest::header::{self, HeaderMap, HeaderValue};
 use strum::IntoEnumIterator;
 use tokio_tungstenite::tungstenite::{error::ProtocolError, Error as TungsteniteError};
 
-use crate::cli::config::Config;
+use crate::cli::{commands::ConfigCommand, config::Config};
 
 fn main() -> color_eyre::eyre::Result<()> {
     color_eyre::install()?;
@@ -117,9 +119,26 @@ fn main() -> color_eyre::eyre::Result<()> {
                     println!("{}", Into::<&str>::into(format));
                 }
             }
-            Command::Config { .. } => {
-                let config: Config = toml::from_str(std::fs::read_to_string("src/cli/aspeak.toml")?.as_str())?;
-                debug!("Config: {config:?}");
+            Command::Config { command } => match command {
+                ConfigCommand::Edit => {
+                    let path = Config::default_location()?;
+                    if !path.exists() {
+                        Config::initialize(path.as_path(), false)?;
+                    }
+                    open::that(path)?;
+                },
+                ConfigCommand::Init { path, force } => {
+                    Config::initialize(
+                        path.map(|path| PathBuf::from(path))
+                            .ok_or(anyhow!("Unreachable code!"))
+                            .or_else(|_|
+                                Config::default_location()
+                            )?.as_path(), force
+                    )?;
+                },
+                ConfigCommand::Where => {
+                    println!("{}", Config::default_location()?.display());
+                }
             }
         }
         Ok(())
