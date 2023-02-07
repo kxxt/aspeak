@@ -1,10 +1,4 @@
-
-
-
 use clap::{ArgAction, Parser};
-
-
-
 
 use self::{args::AuthArgs, commands::Command};
 
