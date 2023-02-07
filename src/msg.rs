@@ -1,6 +1,6 @@
 use std::str;
 
-use log::debug;
+use log::trace;
 use tokio_tungstenite::{tungstenite::protocol::CloseFrame, tungstenite::Message};
 
 use crate::error::AspeakError;
@@ -32,7 +32,7 @@ impl<'a> TryFrom<&'a Message> for WebSocketMessage<'a> {
                     let headers = header.split("\r\n");
                     let mut is_audio = false;
                     for header in headers {
-                        debug!("Found header {header}");
+                        trace!("Found header {header}");
                         if header.starts_with("Path") && header.ends_with("audio") {
                             is_audio = true;
                             break;
@@ -52,7 +52,7 @@ impl<'a> TryFrom<&'a Message> for WebSocketMessage<'a> {
                 let (header_text, body) = text.split_once("\r\n\r\n").ok_or_else(err_construct)?;
                 let mut result = None;
                 for header in header_text.split("\r\n") {
-                    debug!("Found header {header}");
+                    trace!("Found header {header}");
                     let (k, v) = header.split_once(':').ok_or_else(err_construct)?;
                     if k == "Path" {
                         match v.trim() {
