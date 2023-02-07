@@ -1,4 +1,5 @@
 use std::{
+    borrow::Cow,
     fs,
     path::{Path, PathBuf},
 };
@@ -73,11 +74,13 @@ pub(crate) enum EndpointConfig {
     Region { region: String },
 }
 
-impl From<EndpointConfig> for String {
-    fn from(endpoint: EndpointConfig) -> Self {
+impl<'a> From<&'a EndpointConfig> for Cow<'a, str> {
+    fn from(endpoint: &'a EndpointConfig) -> Self {
         match endpoint {
-            EndpointConfig::Endpoint { endpoint } => endpoint,
-            EndpointConfig::Region { region } => get_endpoint_by_region(region.as_str()),
+            EndpointConfig::Endpoint { endpoint } => Cow::Borrowed(endpoint),
+            EndpointConfig::Region { region } => {
+                Cow::Owned(get_endpoint_by_region(region.as_str()))
+            }
         }
     }
 }

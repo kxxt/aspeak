@@ -9,7 +9,7 @@ use reqwest::header::{HeaderName, HeaderValue};
 use serde::Deserialize;
 use strum::AsRefStr;
 
-use super::config::Config;
+use super::config::{AuthConfig, Config};
 
 #[derive(Debug, Clone, Copy, Default, ValueEnum, AsRefStr, Deserialize)]
 #[strum(serialize_all = "kebab-case")]
@@ -57,6 +57,43 @@ pub struct AuthArgs {
     pub key: Option<String>,
     #[arg(short = 'H', long,value_parser = parse_header, help = "Additional request headers")]
     pub headers: Vec<(HeaderName, HeaderValue)>,
+}
+
+impl AuthArgs {
+    pub(crate) fn to_auth_options<'a>(
+        &'a self,
+        auth_config: Option<&'a AuthConfig>,
+    ) -> color_eyre::Result<AuthOptions<'a>> {
+        Ok(AuthOptions {
+            endpoint: self
+                .endpoint
+                .as_deref()
+                .map(Cow::Borrowed)
+                .or_else(|| {
+                    self.region
+                        .as_deref()
+                        .map(get_endpoint_by_region)
+                        .map(Cow::Owned)
+                })
+                .or_else(|| {
+                    auth_config
+                        .map(|c| c.endpoint.as_ref().map(Cow::from))
+                        .flatten()
+                })
+                .unwrap_or(Cow::Borrowed(DEFAULT_ENDPOINT)),
+            token: self.token.as_deref().map(Cow::Borrowed).or_else(|| {
+                auth_config
+                    .map(|c| c.token.as_deref().map(Cow::Borrowed))
+                    .flatten()
+            }),
+            key: self.key.as_deref().map(Cow::Borrowed).or_else(|| {
+                auth_config
+                    .map(|c| c.key.as_deref().map(Cow::Borrowed))
+                    .flatten()
+            }),
+            headers: Cow::Borrowed(&self.headers),
+        })
+    }
 }
 
 impl<'a> TryInto<AuthOptions<'a>> for &'a AuthArgs {
