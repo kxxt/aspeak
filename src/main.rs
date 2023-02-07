@@ -15,6 +15,8 @@ use reqwest::header::{self, HeaderMap, HeaderValue};
 use strum::IntoEnumIterator;
 use tokio_tungstenite::tungstenite::{error::ProtocolError, Error as TungsteniteError};
 
+use crate::cli::config::Config;
+
 fn main() -> color_eyre::eyre::Result<()> {
     color_eyre::install()?;
     let cli = Cli::parse();
@@ -116,7 +118,8 @@ fn main() -> color_eyre::eyre::Result<()> {
                 }
             }
             Command::Config { .. } => {
-
+                let config: Config = toml::from_str(std::fs::read_to_string("src/cli/aspeak.toml")?.as_str())?;
+                debug!("Config: {config:?}");
             }
         }
         Ok(())

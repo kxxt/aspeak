@@ -6,9 +6,10 @@ use aspeak::{
 };
 use clap::{Args, ValueEnum};
 use reqwest::header::{HeaderName, HeaderValue};
+use serde::Deserialize;
 use strum::AsRefStr;
 
-#[derive(Debug, Clone, Copy, Default, ValueEnum, AsRefStr)]
+#[derive(Debug, Clone, Copy, Default, ValueEnum, AsRefStr, Deserialize)]
 #[strum(serialize_all = "kebab-case")]
 pub(crate) enum ContainerFormat {
     Mp3,
