@@ -5,7 +5,7 @@ use std::{
     io::{self, BufWriter, Read, Write},
 };
 
-use cli::{Cli, Commands, InputArgs, OutputArgs};
+use cli::{args::*, commands::Command, Cli};
 
 use aspeak::{
     callback_play_blocking, interpolate_ssml, AspeakError, AudioFormat, Result, SynthesizerConfig,
@@ -96,7 +96,7 @@ fn main() -> color_eyre::eyre::Result<()> {
         .build()?;
     rt.block_on(async {
         match cli.command.unwrap_or_default() {
-            Commands::SSML {
+            Command::SSML {
                 ssml,
                 input_args,
                 output_args,
@@ -110,7 +110,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                     .await?;
                 synthesizer.synthesize(&ssml, callback).await?
             }
-            Commands::Text {
+            Command::Text {
                 mut text_args,
                 input_args,
                 output_args,
@@ -138,7 +138,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                     result?;
                 }
             }
-            Commands::ListVoices {
+            Command::ListVoices {
                 ref voice,
                 ref locale,
             } => {
@@ -167,7 +167,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                     println!("{voice}");
                 }
             }
-            Commands::ListQualities => {
+            Command::ListQualities => {
                 for (container, qualities) in QUALITY_MAP.into_iter() {
                     println!(
                         "{} {}:",
@@ -180,12 +180,12 @@ fn main() -> color_eyre::eyre::Result<()> {
                     println!()
                 }
             }
-            Commands::ListFormats => {
+            Command::ListFormats => {
                 for format in AudioFormat::iter() {
                     println!("{}", Into::<&str>::into(format));
                 }
             }
-            Commands::Config { .. } => {
+            Command::Config { .. } => {
 
             }
         }

@@ -42,3 +42,4 @@ tokio = { version = "1.25.0", features = ["rt", "macros"] }
 futures-util = "0.3.26"
 encoding_rs_io = "0.1.7"
 encoding_rs = "0.8.32"
+toml = "0.7.1"
