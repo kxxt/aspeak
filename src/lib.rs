@@ -62,7 +62,16 @@ pub static QUALITY_MAP: phf::Map<&'static str, &'static QualityMap> = phf_map! {
     "webm" => &WEBM_QUALITY_MAP,
 };
 
-pub static DEFAULT_VOICES: phf::Map<&'static str, &'static str> = phf_map! {
+pub fn get_default_voice_by_locale(locale: &str) -> Result<&'static str> {
+    DEFAULT_VOICES.get(locale).copied().ok_or_else(|| {
+        AspeakError::ArgumentError(format!(
+            "No default voice found for locale: {}. Please check if the locale is correct.",
+            locale
+        ))
+    })
+}
+
+pub(crate) static DEFAULT_VOICES: phf::Map<&'static str, &'static str> = phf_map! {
     "af-ZA"=> "af-ZA-AdriNeural",
     "am-ET"=> "am-ET-AmehaNeural",
     "ar-AE"=> "ar-AE-FatimaNeural",

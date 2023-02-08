@@ -40,7 +40,7 @@ pub fn interpolate_ssml(options: TextOptions) -> Result<String> {
             .attr("xml:lang", "en-US"),
     )?;
 
-    writer.write(XmlEvent::start_element("voice").attr("name", options.voice))?;
+    writer.write(XmlEvent::start_element("voice").attr("name", &options.voice))?;
 
     // Make the borrow checker happy
     let style_degree = options.style_degree.map(|x| x.to_string());

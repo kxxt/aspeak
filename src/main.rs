@@ -22,24 +22,32 @@ use crate::cli::{commands::ConfigCommand, config::Config};
 fn main() -> color_eyre::eyre::Result<()> {
     color_eyre::install()?;
     let cli = Cli::parse();
-    env_logger::builder().filter_level(cli.log_level()).init();
+    let config = cli.profile.load_profile()?;
+    env_logger::builder()
+        .filter_level(cli.get_log_level(config.as_ref().and_then(|c| c.verbosity)))
+        .init();
     debug!("Commandline args: {cli:?}");
+    debug!("Profile: {config:?}");
+    let Cli {
+        profile: ref profile_args,
+        command,
+        auth,
+        ..
+    } = cli;
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_io()
         .enable_time()
         .build()?;
     rt.block_on(async {
-        let Cli { profile: profile_args, command, auth, ..} = cli;
         match command.unwrap_or_default() {
             Command::SSML {
                 ssml,
                 input_args,
                 output_args,
             } => {
-                let config = profile_args.load_profile()?;
                 let ssml = ssml
                     .ok_or(AspeakError::InputError)
-                    .or_else(|_| Cli::process_input(input_args))?;
+                    .or_else(|_| Cli::process_input_text(&input_args))?;
                 let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref()))?;
                 let callback = Cli::process_output(audio_format,output_args.output)?;
                 let auth_options = auth.to_auth_options(config.as_ref().and_then(|c|c.auth.as_ref()))?;
@@ -53,12 +61,11 @@ fn main() -> color_eyre::eyre::Result<()> {
                 input_args,
                 output_args,
             } => {
-                let config = profile_args.load_profile()?;
                 text_args.text = Some(
                     text_args
                         .text
                         .ok_or(AspeakError::InputError)
-                        .or_else(|_| Cli::process_input(input_args))?,
+                        .or_else(|_| Cli::process_input_text(&input_args))?,
                 );
                 let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref()))?;
                 let callback = Cli::process_output(audio_format,output_args.output)?;
@@ -66,7 +73,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 let synthesizer = SynthesizerConfig::new(auth_options,audio_format)
                     .connect()
                     .await?;
-                let ssml = interpolate_ssml((&text_args).try_into()?)?;
+                let ssml = interpolate_ssml(Cli::process_text_options(&text_args, config.as_ref().and_then(|c|c.text.as_ref()))?)?;
                 let result = synthesizer.synthesize(&ssml, callback).await;
                 if let Err(AspeakError::WebSocketError(TungsteniteError::Protocol(
                     ProtocolError::ResetWithoutClosingHandshake,

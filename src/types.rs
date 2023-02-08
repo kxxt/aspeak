@@ -30,13 +30,13 @@ pub struct AuthOptions<'a> {
     pub headers: Cow<'a, [(HeaderName, HeaderValue)]>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct TextOptions<'a> {
     pub text: &'a str,
-    pub voice: &'a str,
-    pub pitch: Option<&'a str>,
-    pub rate: Option<&'a str>,
-    pub style: Option<&'a str>,
+    pub voice: Cow<'a, str>,
+    pub pitch: Option<Cow<'a, str>>,
+    pub rate: Option<Cow<'a, str>>,
+    pub style: Option<Cow<'a, str>>,
     pub role: Option<Role>,
     pub style_degree: Option<f32>,
 }

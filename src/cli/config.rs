@@ -4,7 +4,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use aspeak::{get_endpoint_by_region, AspeakError, AudioFormat, Role, DEFAULT_VOICES};
+use aspeak::{get_default_voice_by_locale, get_endpoint_by_region, AudioFormat, Role};
 use color_eyre::eyre::{anyhow, bail};
 
 use serde::Deserialize;
@@ -101,6 +101,36 @@ pub(crate) struct TextConfig {
     pub style: Option<String>,
 }
 
+impl TextConfig {
+    pub fn rate(&self) -> Result<Option<Cow<'_, str>>, String> {
+        Ok(match self.rate.as_ref() {
+            Some(toml::Value::String(s)) => Some(super::parse::parse_rate(s)?),
+            Some(toml::Value::Integer(i)) => {
+                Some(Cow::Owned(format!("{:.2}%", (*i as f32) * 100f32)))
+            }
+            Some(toml::Value::Float(f)) => {
+                Some(Cow::Owned(format!("{:.2}%", (*f as f32) * 100f32)))
+            }
+            None => None,
+            _ => return Err(format!("Got invalid rate from profile: {:?}", self.rate)),
+        })
+    }
+
+    pub fn pitch(&self) -> Result<Option<Cow<'_, str>>, String> {
+        Ok(match self.pitch.as_ref() {
+            Some(toml::Value::String(s)) => Some(super::parse::parse_pitch(s)?),
+            Some(toml::Value::Integer(i)) => {
+                Some(Cow::Owned(format!("{:.2}%", (*i as f32) * 100f32)))
+            }
+            Some(toml::Value::Float(f)) => {
+                Some(Cow::Owned(format!("{:.2}%", (*f as f32) * 100f32)))
+            }
+            None => None,
+            _ => return Err(format!("Got invalid pitch from profile: {:?}", self.pitch)),
+        })
+    }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(untagged, rename_all = "kebab-case")]
 pub(crate) enum VoiceConfig {
@@ -108,16 +138,11 @@ pub(crate) enum VoiceConfig {
     Locale { locale: String },
 }
 
-impl TryFrom<VoiceConfig> for String {
-    type Error = AspeakError;
-
-    fn try_from(voice: VoiceConfig) -> Result<Self, Self::Error> {
-        Ok(match voice {
-            VoiceConfig::Voice { voice } => voice,
-            VoiceConfig::Locale { locale } => DEFAULT_VOICES
-                .get(locale.as_str())
-                .ok_or_else(|| AspeakError::ArgumentError(format!("Invalid locale: {}", locale)))?
-                .to_string(),
+impl VoiceConfig {
+    pub fn try_as_str<'a>(&'a self) -> color_eyre::Result<&'a str> {
+        Ok(match self {
+            VoiceConfig::Voice { voice } => voice.as_str(),
+            VoiceConfig::Locale { locale } => get_default_voice_by_locale(locale)?,
         })
     }
 }

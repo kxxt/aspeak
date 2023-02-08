@@ -1,16 +1,15 @@
-use std::{borrow::Cow, error::Error};
+use std::borrow::Cow;
 
+use super::config::{AuthConfig, Config, OutputConfig};
+use super::parse;
 use aspeak::{
-    get_endpoint_by_region, AspeakError, AudioFormat, AuthOptions, Role, TextOptions,
-    DEFAULT_ENDPOINT, DEFAULT_VOICES, QUALITY_MAP,
+    get_endpoint_by_region, AudioFormat, AuthOptions, Role, DEFAULT_ENDPOINT, QUALITY_MAP,
 };
 use clap::{ArgAction, Args, ValueEnum};
 use color_eyre::eyre::anyhow;
 use reqwest::header::{HeaderName, HeaderValue};
 use serde::Deserialize;
 use strum::AsRefStr;
-
-use super::config::{AuthConfig, Config, OutputConfig};
 
 #[derive(Debug, Clone, Copy, Default, ValueEnum, AsRefStr, Deserialize)]
 #[strum(serialize_all = "kebab-case")]
@@ -56,7 +55,7 @@ pub struct AuthArgs {
     pub token: Option<String>,
     #[arg(short, long, help = "Speech resource key")]
     pub key: Option<String>,
-    #[arg(short = 'H', long,value_parser = parse_header, help = "Additional request headers")]
+    #[arg(short = 'H', long, value_parser = parse::parse_header, help = "Additional request headers")]
     pub headers: Vec<(HeaderName, HeaderValue)>,
 }
 
@@ -112,29 +111,6 @@ impl AuthArgs {
             } else {
                 Cow::Borrowed(&self.headers)
             },
-        })
-    }
-}
-
-impl<'a> TryInto<AuthOptions<'a>> for &'a AuthArgs {
-    type Error = AspeakError;
-
-    fn try_into(self) -> Result<AuthOptions<'a>, Self::Error> {
-        Ok(AuthOptions {
-            endpoint: self
-                .endpoint
-                .as_deref()
-                .map(Cow::Borrowed)
-                .or_else(|| {
-                    self.region
-                        .as_deref()
-                        .map(get_endpoint_by_region)
-                        .map(Cow::Owned)
-                })
-                .unwrap_or(Cow::Borrowed(DEFAULT_ENDPOINT)),
-            token: self.token.as_deref().map(Cow::Borrowed),
-            key: self.key.as_deref().map(Cow::Borrowed),
-            headers: Cow::Borrowed(&self.headers),
         })
     }
 }
@@ -223,15 +199,21 @@ impl OutputArgs {
                     .map(|x| *x)
                     .ok_or_else(|| {
                         anyhow!(format!(
-                            "Invalid quality {:?} for container type {}",
-                            quality,
-                            container.unwrap_or(&ContainerFormat::Wav).as_ref()
+                            "Invalid quality {:?} for container type {:?}",
+                            quality, container
                         ))
                     })?,
-                (None, None, None, (None, None, None)) => Default::default(),
             },
         )
     }
+}
+
+fn parse_pitch(pitch: &str) -> Result<String, String> {
+    parse::parse_pitch(pitch).map(String::from)
+}
+
+fn parse_rate(rate: &str) -> Result<String, String> {
+    parse::parse_rate(rate).map(String::from)
 }
 
 #[derive(Args, Debug, Default)]
@@ -246,7 +228,7 @@ pub(crate) struct TextArgs {
               and relative values like -20Hz, +2st and string values like x-low. \
               See the documentation for more details.")]
     pub pitch: Option<String>,
-    #[arg(short, long, value_parser = parse_rate,
+    #[arg(short, long, value_parser = parse_rate ,
         help=r#"Set speech rate, default to 0. \
                 Valid values include floats(will be converted to percentages), \
                 percentages like -20%%, floats with postfix "f" \
@@ -260,7 +242,7 @@ pub(crate) struct TextArgs {
     #[arg(
         short = 'd',
         long,
-        value_parser = parse_style_degree,
+        value_parser = parse::parse_style_degree,
         help = "Specifies the intensity of the speaking style. This only works for some Chinese voices!"
     )]
     pub style_degree: Option<f32>,
@@ -268,98 +250,4 @@ pub(crate) struct TextArgs {
     pub voice: Option<String>,
     #[arg(short, long, help = "Locale to use, default to en-US")]
     pub locale: Option<String>,
-}
-
-impl<'a> TryInto<TextOptions<'a>> for &'a TextArgs {
-    type Error = AspeakError;
-
-    fn try_into(self) -> Result<TextOptions<'a>, Self::Error> {
-        Ok(TextOptions {
-            text: self.text.as_deref().unwrap(),
-            voice: self
-                .voice
-                .as_deref()
-                .or_else(|| {
-                    DEFAULT_VOICES
-                        .get(self.locale.as_deref().unwrap_or("en-US"))
-                        .map(|x| *x)
-                })
-                .unwrap(),
-            pitch: self.pitch.as_deref(),
-            rate: self.rate.as_deref(),
-            style: self.style.as_deref(),
-            role: self.role,
-            style_degree: self.style_degree,
-        })
-    }
-}
-
-/// Parse a single key-value pair
-fn parse_header(
-    s: &str,
-) -> Result<(HeaderName, HeaderValue), Box<dyn Error + Send + Sync + 'static>> {
-    let pos = s
-        .find('=')
-        .ok_or_else(|| format!("invalid KEY=value: no `=` found in `{s}`"))?;
-    Ok((
-        HeaderName::from_bytes(s[..pos].as_bytes())?,
-        HeaderValue::from_str(&s[pos + 1..])?,
-    ))
-}
-
-fn is_float(s: &str) -> bool {
-    return s.parse::<f32>().is_ok();
-}
-
-pub(crate) fn parse_pitch(arg: &str) -> Result<String, String> {
-    if (arg.ends_with("Hz") && is_float(&arg[..arg.len() - 2]))
-        || (arg.ends_with("%") && is_float(&arg[..arg.len() - 1]))
-        || (arg.ends_with("st")
-            && (arg.starts_with('+') || arg.starts_with('-'))
-            && is_float(&arg[..arg.len() - 2]))
-        || ["default", "x-low", "low", "medium", "high", "x-high"].contains(&arg)
-    {
-        Ok(arg.to_owned())
-    } else if let Ok(v) = arg.parse::<f32>() {
-        // float values that will be converted to percentages
-        Ok(format!("{:.2}", v * 100f32))
-    } else {
-        Err(format!(
-            "Please read the documentation for possible values of pitch."
-        ))
-    }
-}
-
-pub(crate) fn parse_rate(arg: &str) -> Result<String, String> {
-    if (arg.ends_with("%") && is_float(&arg[..arg.len() - 1]))
-        || ["default", "x-slow", "slow", "medium", "fast", "x-fast"].contains(&arg)
-    {
-        Ok(arg.to_owned())
-    } else if arg.ends_with('f') && is_float(&arg[..arg.len() - 1]) {
-        // raw float
-        Ok(arg[..arg.len() - 1].to_owned())
-    } else if let Ok(v) = arg.parse::<f32>() {
-        // float values that will be converted to percentages
-        Ok(format!("{:.2}", v * 100f32))
-    } else {
-        Err(format!(
-            "Please read the documentation for possible values of rate."
-        ))
-    }
-}
-
-fn parse_style_degree(arg: &str) -> Result<f32, String> {
-    if let Ok(v) = arg.parse::<f32>() {
-        if validate_style_degree(v) {
-            Ok(v)
-        } else {
-            Err(format!("Value {v} out of range [0.01, 2]"))
-        }
-    } else {
-        Err("Not a floating point number!".to_owned())
-    }
-}
-
-pub(crate) fn validate_style_degree(degree: f32) -> bool {
-    0.01f32 <= degree && degree <= 2.0f32
 }

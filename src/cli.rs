@@ -1,21 +1,27 @@
 use clap::{ArgAction, Parser};
 
 use self::{
-    args::{AuthArgs, InputArgs, ProfileArgs},
+    args::{AuthArgs, InputArgs, ProfileArgs, TextArgs},
     commands::Command,
+    config::TextConfig,
 };
-use aspeak::{callback_play_blocking, AspeakError, AudioFormat, Result};
+use aspeak::{
+    callback_play_blocking, get_default_voice_by_locale, AspeakError, AudioFormat, Result,
+    TextOptions,
+};
 use std::{
+    borrow::Cow,
     fs::File,
     io::{self, BufWriter, Read, Write},
 };
 
-use color_eyre::Help;
+use color_eyre::{eyre::anyhow, Help};
 use encoding_rs_io::{DecodeReaderBytes, DecodeReaderBytesBuilder};
 
 pub(crate) mod args;
 pub(crate) mod commands;
 pub(crate) mod config;
+mod parse;
 
 #[derive(Parser, Debug)]
 #[command(author, version,
@@ -37,8 +43,8 @@ pub(crate) struct Cli {
 }
 
 impl Cli {
-    pub(crate) fn log_level(&self) -> log::LevelFilter {
-        match self.verbose {
+    fn log_level_by_verbosity(verbosity: u8) -> log::LevelFilter {
+        match verbosity {
             0 => log::LevelFilter::Warn,
             1 => log::LevelFilter::Info,
             2 => log::LevelFilter::Debug,
@@ -46,10 +52,19 @@ impl Cli {
         }
     }
 
-    pub(crate) fn process_input(args: InputArgs) -> color_eyre::Result<String> {
+    pub(crate) fn get_log_level(&self, verbosity_config: Option<u8>) -> log::LevelFilter {
+        match self.verbose {
+            0 => verbosity_config
+                .map(Self::log_level_by_verbosity)
+                .unwrap_or(log::LevelFilter::Warn),
+            v => Self::log_level_by_verbosity(v),
+        }
+    }
+
+    pub(crate) fn process_input_text(args: &InputArgs) -> color_eyre::Result<String> {
         let mut s = String::new();
 
-        let file: Box<dyn io::Read> = if let Some(file) = args.file {
+        let file: Box<dyn io::Read> = if let Some(file) = &args.file {
             Box::new(File::open(&file)?)
         } else {
             Box::new(io::stdin())
@@ -88,6 +103,57 @@ impl Cli {
             })
         } else {
             callback_play_blocking()
+        })
+    }
+
+    pub(crate) fn process_text_options<'a>(
+        args: &'a TextArgs,
+        config: Option<&'a TextConfig>,
+    ) -> color_eyre::Result<TextOptions<'a>> {
+        Ok(TextOptions {
+            text: args.text.as_deref().unwrap(),
+            voice: Cow::Borrowed(
+                match (args.voice.as_deref(), args.locale.as_deref(), &config) {
+                    (Some(voice), _, _) => voice,
+                    (None, Some(locale), _) => get_default_voice_by_locale(locale)?,
+                    (None, None, config) => config
+                        .map(|c| c.voice.as_ref().map(|v| v.try_as_str()).transpose())
+                        .transpose()?
+                        .flatten()
+                        .unwrap_or_else(|| get_default_voice_by_locale("en-US").unwrap()),
+                },
+            ),
+            pitch: {
+                if let Some(pitch) = args.pitch.as_deref().map(Cow::Borrowed) {
+                    Some(pitch)
+                } else {
+                    config
+                        .map(|c| c.pitch())
+                        .transpose()
+                        .map_err(|e| anyhow!(e))?
+                        .flatten()
+                }
+            },
+            rate: {
+                if let Some(rate) = args.rate.as_deref().map(Cow::Borrowed) {
+                    Some(rate)
+                } else {
+                    config
+                        .map(|c| c.rate())
+                        .transpose()
+                        .map_err(|e| anyhow!(e))?
+                        .flatten()
+                }
+            },
+            style: args
+                .style
+                .as_deref()
+                .or_else(|| config.and_then(|c| c.style.as_deref()))
+                .map(Cow::Borrowed),
+            role: args.role.or_else(|| config.and_then(|c| c.role)),
+            style_degree: args
+                .style_degree
+                .or_else(|| config.and_then(|c| c.style_degree)),
         })
     }
 }
