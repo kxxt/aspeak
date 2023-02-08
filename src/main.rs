@@ -28,12 +28,7 @@ fn main() -> color_eyre::eyre::Result<()> {
         .init();
     debug!("Commandline args: {cli:?}");
     debug!("Profile: {config:?}");
-    let Cli {
-        profile: ref profile_args,
-        command,
-        auth,
-        ..
-    } = cli;
+    let Cli { command, auth, .. } = cli;
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_io()
         .enable_time()
@@ -90,7 +85,6 @@ fn main() -> color_eyre::eyre::Result<()> {
                 ref voice,
                 ref locale,
             } => {
-                let _config = profile_args.load_profile()?;
                 let url = "https://eastus.api.speech.microsoft.com/cognitiveservices/voices/list";
                 let headers =
                     HeaderMap::from_iter([(header::ORIGIN, HeaderValue::from_str(ORIGIN).unwrap())]);

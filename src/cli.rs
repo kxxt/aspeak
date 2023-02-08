@@ -28,7 +28,7 @@ mod parse;
     bin_name = "aspeak",
     about = "Try speech synthesis service(Powered by Azure Cognitive Services) in your terminal!", 
     long_about = None,
-    after_help = "Attention: If the result audio is longer than 10 minutes, the audio will be truncated to 10 minutes and the program will not report an error. Unreasonable high/low values for pitch and rate will be clipped to reasonable values by Azure Cognitive Services. Please refer to the documentation for other limitations at https://github.com/kxxt/aspeak/blob/main/README.md#limitations. By the way, we don\'t store your data, and Microsoft doesn\'t store your data according to information available on https://azure.microsoft.com/en-us/services/cognitive-services/text-to-speech/"
+    after_help = "Please refer to the documentation for limitations at https://github.com/kxxt/aspeak/blob/main/README.md#limitations."
 )]
 pub(crate) struct Cli {
     #[command(subcommand)]
