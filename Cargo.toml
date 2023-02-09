@@ -25,7 +25,7 @@ chrono = { version = "0.4.23", features = ["std", "clock"] }
 clap = { version = "4.1.4", features = ["derive"] }
 colored = "2.0.0"
 env_logger = "0.10.0"
-log = "0.4.17"
+log = { version = "0.4.17", features = ["release_max_level_info"] }
 phf = { version = "0.11.1", features = ["macros"] }
 reqwest = { version = "0.11.14", default_features = false, features = ["json", "rustls-tls-native-roots"] }
 rodio = "0.16.0"
