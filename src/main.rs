@@ -4,9 +4,7 @@ use std::path::PathBuf;
 
 use cli::{commands::Command, Cli};
 
-use aspeak::{
-    interpolate_ssml, AspeakError, AudioFormat, SynthesizerConfig, Voice, ORIGIN, QUALITY_MAP,
-};
+use aspeak::{interpolate_ssml, AspeakError, AudioFormat, SynthesizerConfig, Voice, ORIGIN, QUALITY_MAP};
 use clap::Parser;
 use color_eyre::{eyre::anyhow, Help};
 use colored::Colorize;

@@ -7,6 +7,8 @@ use serde::Deserialize;
 use strum::{self, EnumString};
 use strum::{EnumIter, IntoEnumIterator, IntoStaticStr};
 
+use crate::{AspeakError, QUALITY_MAP, QUALITY_RANGE_MAP};
+
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, ValueEnum, IntoStaticStr, Deserialize)]
@@ -156,6 +158,33 @@ pub enum AudioFormat {
     #[strum(to_string = "webm-24khz-16bit-mono-opus")]
     #[serde(rename = "webm-24khz-16bit-mono-opus")]
     Webm24Khz16BitMonoOpus,
+}
+
+impl AudioFormat {
+    pub fn from_container_and_quality(
+        container: &str,
+        quality: i8,
+        use_closest: bool,
+    ) -> crate::Result<AudioFormat> {
+        let map = QUALITY_MAP.get(container).ok_or_else(|| {
+            AspeakError::ArgumentError(format!(
+                "No quality map found for container: {}. Please check if the container is correct.",
+                container
+            ))
+        })?;
+        if let Some(format) = map.get(&quality).copied() {
+            Ok(format)
+        } else if use_closest {
+            let (min, max) = QUALITY_RANGE_MAP.get(container).unwrap();
+            let closest = if quality < *min { *min } else { *max };
+            Ok(*map.get(&closest).unwrap())
+        } else {
+            Err(AspeakError::ArgumentError(format!(
+                        "Invalid quality found for container: {} and quality: {}. Please check if the quality is correct.",
+                        container, quality
+            )))
+        }
+    }
 }
 
 /// We can't derive `ValueEnum` for `AudioFormat`

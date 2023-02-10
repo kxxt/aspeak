@@ -2,11 +2,8 @@ use std::borrow::Cow;
 
 use super::config::{AuthConfig, Config, OutputConfig};
 use super::parse;
-use aspeak::{
-    get_endpoint_by_region, AudioFormat, AuthOptions, Role, DEFAULT_ENDPOINT, QUALITY_MAP,
-};
+use aspeak::{get_endpoint_by_region, AudioFormat, AuthOptions, Role, DEFAULT_ENDPOINT};
 use clap::{ArgAction, Args, ValueEnum};
-use color_eyre::eyre::anyhow;
 use reqwest::header::{HeaderName, HeaderValue};
 use serde::Deserialize;
 use strum::AsRefStr;
@@ -163,46 +160,40 @@ impl OutputArgs {
             ) {
                 // Explicitly specified format
                 (Some(format), _, _, _) => format,
+                // Explicitly specified container and quality
+                (None, Some(container), Some(quality), (_, _, _)) => {
+                    AudioFormat::from_container_and_quality(
+                        container.as_ref(),
+                        quality as i8,
+                        false,
+                    )?
+                }
                 // Explicitly specified container
-                (None, Some(container), quality, (_, _, alt_quality)) => QUALITY_MAP
-                    .get(container.as_ref())
-                    .unwrap()
-                    .get(&(quality.or(alt_quality.map(|x| *x)).unwrap_or_default() as i8))
-                    .map(|x| *x)
-                    .ok_or_else(|| {
-                        anyhow!(format!(
-                            "Invalid quality {:?} for container type {}",
-                            quality,
-                            container.as_ref()
-                        ))
-                    })?,
+                (None, Some(container), None, (_, _, quality)) => {
+                    AudioFormat::from_container_and_quality(
+                        container.as_ref(),
+                        quality.copied().unwrap_or_default() as i8,
+                        true,
+                    )?
+                }
                 // Explicitly specified quality
-                (None, None, Some(quality), (_, alt_container, _)) => QUALITY_MAP
-                    .get(alt_container.map(|x| *x).unwrap_or_default().as_ref())
-                    .unwrap()
-                    .get(&(quality as i8))
-                    .map(|x| *x)
-                    .ok_or_else(|| {
-                        anyhow!(format!(
-                            "Invalid quality {:?} for container type {}",
-                            quality,
-                            alt_container.unwrap_or(&ContainerFormat::Wav).as_ref()
-                        ))
-                    })?,
+                (None, None, Some(quality), (_, alt_container, _)) => {
+                    AudioFormat::from_container_and_quality(
+                        alt_container.copied().unwrap_or_default().as_ref(),
+                        quality as i8,
+                        false,
+                    )?
+                }
                 // Format from config
                 (None, None, None, (Some(format), _, _)) => *format,
                 // Container and/or quality from config
-                (None, None, None, (None, container, quality)) => QUALITY_MAP
-                    .get(container.map(|x| *x).unwrap_or_default().as_ref())
-                    .unwrap()
-                    .get(&(quality.map(|x| *x).unwrap_or_default() as i8))
-                    .map(|x| *x)
-                    .ok_or_else(|| {
-                        anyhow!(format!(
-                            "Invalid quality {:?} for container type {:?}",
-                            quality, container
-                        ))
-                    })?,
+                (None, None, None, (None, container, quality)) => {
+                    AudioFormat::from_container_and_quality(
+                        container.copied().unwrap_or_default().as_ref(),
+                        quality.copied().unwrap_or_default() as i8,
+                        true,
+                    )?
+                }
             },
         )
     }

@@ -25,14 +25,14 @@ pub mod python;
 
 pub type QualityMap = phf::Map<i8, AudioFormat>;
 
-pub static WAV_QUALITY_MAP: QualityMap = phf_map! {
+static WAV_QUALITY_MAP: QualityMap = phf_map! {
     -2i8 => AudioFormat::Riff8Khz16BitMonoPcm,
     -1i8 => AudioFormat::Riff16Khz16BitMonoPcm,
     0i8  => AudioFormat::Riff24Khz16BitMonoPcm,
     1i8  => AudioFormat::Riff24Khz16BitMonoPcm,
 };
 
-pub static MP3_QUALITY_MAP: QualityMap = phf_map! {
+static MP3_QUALITY_MAP: QualityMap = phf_map! {
     -4i8 => AudioFormat::Audio16Khz32KBitRateMonoMp3,
     -3i8 => AudioFormat::Audio16Khz64KBitRateMonoMp3,
     -2i8 => AudioFormat::Audio16Khz128KBitRateMonoMp3,
@@ -43,13 +43,13 @@ pub static MP3_QUALITY_MAP: QualityMap = phf_map! {
     3i8  => AudioFormat::Audio48Khz192KBitRateMonoMp3,
 };
 
-pub static OGG_QUALITY_MAP: QualityMap = phf_map! {
+static OGG_QUALITY_MAP: QualityMap = phf_map! {
     -1i8 => AudioFormat::Ogg16Khz16BitMonoOpus,
     0i8  => AudioFormat::Ogg24Khz16BitMonoOpus,
     1i8  => AudioFormat::Ogg48Khz16BitMonoOpus,
 };
 
-pub static WEBM_QUALITY_MAP: QualityMap = phf_map! {
+static WEBM_QUALITY_MAP: QualityMap = phf_map! {
     -1i8 => AudioFormat::Webm16Khz16BitMonoOpus,
     0i8  => AudioFormat::Webm24Khz16BitMonoOpus,
     1i8  => AudioFormat::Webm24Khz16Bit24KbpsMonoOpus,
@@ -61,6 +61,14 @@ pub static QUALITY_MAP: phf::Map<&'static str, &'static QualityMap> = phf_map! {
     "ogg" => &OGG_QUALITY_MAP,
     "webm" => &WEBM_QUALITY_MAP,
 };
+
+pub static QUALITY_RANGE_MAP: phf::Map<&'static str, (i8, i8)> = phf_map! {
+    "wav" => (-2, 1),
+    "mp3" => (-4, 3),
+    "ogg" => (-1, 1),
+    "webm" => (-1, 1),
+};
+
 
 pub fn get_default_voice_by_locale(locale: &str) -> Result<&'static str> {
     DEFAULT_VOICES.get(locale).copied().ok_or_else(|| {
