@@ -4,6 +4,7 @@
 # Output verbosity
 # 0   - Default
 # 1   - Verbose
+# The following output verbosity levels are only supported on debug build
 # 2   - Debug
 # >=3 - Trace
 verbosity = 0
@@ -56,9 +57,10 @@ style = "general"
 # Container Format, Only wav/mp3/ogg/webm is supported.
 container = "wav"
 # Audio Quality. Run `aspeak list-qualities` to see available qualities.
+#
+# If you choose a container format that does not support the quality level you specified here, 
+# we will automatically select the closest level for you.
 quality = 0
 # Audio Format(for experts). Run `aspeak list-formats` to see available formats.
 # Note that it takes precedence over container and quality!
-# Warning: If you misspelled the format, aspeak will fallback to container and quality 
-#          settings instead of reporting an error. So be careful!
 # format = "audio-16khz-128kbitrate-mono-mp4"
