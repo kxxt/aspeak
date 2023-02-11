@@ -102,7 +102,7 @@ impl Cli {
                     .open(file)?,
                 (true, false) => {
                     return Err(anyhow!("File {} already exists!", file.display())
-                        .suggestion("Add --overwrite to overwrite this file."))
+                        .suggestion("You can use --overwrite to overwrite this file."))
                 }
             };
             let mut buf_writer = BufWriter::new(file);
