@@ -69,7 +69,6 @@ pub static QUALITY_RANGE_MAP: phf::Map<&'static str, (i8, i8)> = phf_map! {
     "webm" => (-1, 1),
 };
 
-
 pub fn get_default_voice_by_locale(locale: &str) -> Result<&'static str> {
     DEFAULT_VOICES.get(locale).copied().ok_or_else(|| {
         AspeakError::ArgumentError(format!(

@@ -6,13 +6,13 @@ use self::{
     config::TextConfig,
 };
 use aspeak::{
-    callback_play_blocking, get_default_voice_by_locale, AspeakError, AudioFormat, Result,
-    TextOptions,
+    callback_play_blocking, get_default_voice_by_locale, AspeakError, Result, TextOptions,
 };
 use std::{
     borrow::Cow,
-    fs::File,
+    fs::{File, OpenOptions},
     io::{self, BufWriter, Read, Write},
+    path::Path,
 };
 
 use color_eyre::{eyre::anyhow, Help};
@@ -87,12 +87,24 @@ impl Cli {
     }
 
     pub(crate) fn process_output(
-        _format: AudioFormat,
         output: Option<String>,
-    ) -> Result<Box<dyn FnMut(Option<&[u8]>) -> Result<()>>> {
-        Ok(if let Some(file) = output {
+        overwrite: bool,
+    ) -> color_eyre::Result<Box<dyn FnMut(Option<&[u8]>) -> Result<()>>> {
+        Ok(if let Some(file) = output.as_deref() {
             // todo: file already exists?
-            let file = File::create(file)?;
+            let file = Path::new(file);
+            let file = match (file.exists(), overwrite) {
+                (_, true) => File::create(file)?,
+                (false, false) => OpenOptions::new()
+                    .read(true)
+                    .write(true)
+                    .create_new(true)
+                    .open(file)?,
+                (true, false) => {
+                    return Err(anyhow!("File {} already exists!", file.display())
+                        .suggestion("Add --overwrite to overwrite this file."))
+                }
+            };
             let mut buf_writer = BufWriter::new(file);
             Box::new(move |data| {
                 Ok(if let Some(data) = data {

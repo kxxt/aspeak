@@ -142,6 +142,8 @@ pub(crate) struct OutputArgs {
         help = "Set output audio format (experts only). Run `aspeak list-formats` to list available formats"
     )]
     pub format: Option<AudioFormat>,
+    #[arg(long, action = ArgAction::SetTrue, help="Overwrite existing file")]
+    pub overwrite: bool,
 }
 
 impl OutputArgs {
