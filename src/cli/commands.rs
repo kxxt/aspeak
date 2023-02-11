@@ -66,7 +66,7 @@ pub(crate) enum ConfigCommand {
         #[arg(short, long, help = "Path to new profile, default to `~/.aspeak.toml`")]
         path: Option<String>,
         #[arg(long, action = ArgAction::SetTrue, help="Overwrite existing profile")]
-        force: bool,
+        overwrite: bool,
     },
     #[command(about = "Show full path to the default profile")]
     Where,

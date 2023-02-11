@@ -4,7 +4,9 @@ use std::path::PathBuf;
 
 use cli::{commands::Command, Cli};
 
-use aspeak::{interpolate_ssml, AspeakError, AudioFormat, SynthesizerConfig, Voice, ORIGIN, QUALITY_MAP};
+use aspeak::{
+    interpolate_ssml, AspeakError, AudioFormat, SynthesizerConfig, Voice, ORIGIN, QUALITY_MAP,
+};
 use clap::Parser;
 use color_eyre::{eyre::anyhow, Help};
 use colored::Colorize;
@@ -134,13 +136,13 @@ fn main() -> color_eyre::eyre::Result<()> {
                     }
                     open::that(path)?;
                 },
-                ConfigCommand::Init { path, force } => {
+                ConfigCommand::Init { path, overwrite } => {
                     Config::initialize(
                         path.map(|path| PathBuf::from(path))
                             .ok_or(anyhow!("Unreachable code!"))
                             .or_else(|_|
                                 Config::default_location()
-                            )?.as_path(), force
+                            )?.as_path(), overwrite
                     )?;
                 },
                 ConfigCommand::Where => {
