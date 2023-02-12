@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use super::config::{AuthConfig, Config, OutputConfig};
 use super::parse;
-use aspeak::{get_endpoint_by_region, AudioFormat, AuthOptions, Role, DEFAULT_ENDPOINT};
+use aspeak::{get_endpoint_by_region, AudioFormat, AuthOptions, Role, DEFAULT_ENDPOINT, AspeakError};
 use clap::{ArgAction, Args, ValueEnum};
 use reqwest::header::{HeaderName, HeaderValue};
 use serde::Deserialize;
@@ -201,11 +201,11 @@ impl OutputArgs {
     }
 }
 
-fn parse_pitch(pitch: &str) -> Result<String, String> {
+fn parse_pitch(pitch: &str) -> Result<String, AspeakError> {
     parse::parse_pitch(pitch).map(String::from)
 }
 
-fn parse_rate(rate: &str) -> Result<String, String> {
+fn parse_rate(rate: &str) -> Result<String, AspeakError> {
     parse::parse_rate(rate).map(String::from)
 }
 

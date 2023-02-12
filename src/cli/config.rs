@@ -102,7 +102,7 @@ pub(crate) struct TextConfig {
 }
 
 impl TextConfig {
-    pub fn rate(&self) -> Result<Option<Cow<'_, str>>, String> {
+    pub fn rate(&self) -> color_eyre::Result<Option<Cow<'_, str>>> {
         Ok(match self.rate.as_ref() {
             Some(toml::Value::String(s)) => Some(super::parse::parse_rate(s)?),
             Some(toml::Value::Integer(i)) => {
@@ -112,11 +112,11 @@ impl TextConfig {
                 Some(Cow::Owned(format!("{:.2}%", (*f as f32) * 100f32)))
             }
             None => None,
-            _ => return Err(format!("Got invalid rate from profile: {:?}", self.rate)),
+            _ => return Err(anyhow!("Got invalid rate from profile: {:?}", self.rate)),
         })
     }
 
-    pub fn pitch(&self) -> Result<Option<Cow<'_, str>>, String> {
+    pub fn pitch(&self) -> color_eyre::Result<Option<Cow<'_, str>>> {
         Ok(match self.pitch.as_ref() {
             Some(toml::Value::String(s)) => Some(super::parse::parse_pitch(s)?),
             Some(toml::Value::Integer(i)) => {
@@ -126,7 +126,7 @@ impl TextConfig {
                 Some(Cow::Owned(format!("{:.2}%", (*f as f32) * 100f32)))
             }
             None => None,
-            _ => return Err(format!("Got invalid pitch from profile: {:?}", self.pitch)),
+            _ => return Err(anyhow!("Got invalid pitch from profile: {:?}", self.pitch)),
         })
     }
 }

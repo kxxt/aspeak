@@ -1,5 +1,6 @@
 mod error;
 mod msg;
+mod parse;
 mod ssml;
 mod synthesizer;
 mod types;
@@ -20,8 +21,8 @@ pub use synthesizer::{callback_play_blocking, Synthesizer, SynthesizerConfig};
 pub use types::*;
 pub use voice::Voice;
 
-// #[cfg(feature = "python")]
-// pub mod python;
+#[cfg(feature = "python")]
+pub mod python;
 
 pub type QualityMap = phf::Map<i8, AudioFormat>;
 
