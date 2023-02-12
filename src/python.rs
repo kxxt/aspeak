@@ -17,6 +17,7 @@ use crate::{
 fn aspeak(py: Python, m: &PyModule) -> PyResult<()> {
     crate::types::register_python_items(py, m)?;
     crate::synthesizer::register_python_items(py, m)?;
+    m.add_class::<SpeechService>()?;
     Ok(())
 }
 
@@ -172,7 +173,7 @@ impl SpeechService {
                             })
                         })
                         .transpose()?
-                        .unwrap(),
+                        .unwrap_or_default(),
                     callback_play_blocking(),
                 ),
         )?;
