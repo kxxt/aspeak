@@ -25,7 +25,7 @@ impl<'a> StartElementBuilderExt<'a> for StartElementBuilder<'a> {
 
 const DEFAULT_PITCH_RATE_STR: &str = "0%";
 
-pub fn interpolate_ssml(text: impl AsRef<str>, options: TextOptions) -> Result<String> {
+pub fn interpolate_ssml(text: impl AsRef<str>, options: &TextOptions) -> Result<String> {
     let mut buf = Vec::new();
     let mut writer = EventWriter::new_with_config(
         &mut buf,

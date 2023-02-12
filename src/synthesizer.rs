@@ -1,4 +1,7 @@
-use crate::{msg::WebSocketMessage, AspeakError, AudioFormat, AuthOptions, Result, ORIGIN};
+use crate::{
+    interpolate_ssml, msg::WebSocketMessage, AspeakError, AudioFormat, AuthOptions, Result,
+    TextOptions, ORIGIN,
+};
 use chrono::Utc;
 use futures_util::{
     stream::{SplitSink, SplitStream},
@@ -74,6 +77,9 @@ impl<'a> SynthesizerConfig<'a> {
     }
 }
 
+pub trait SynthesisCallback: FnMut(Option<&[u8]>) -> Result<()> {}
+impl<T> SynthesisCallback for T where T: FnMut(Option<&[u8]>) -> Result<()> {}
+
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 pub struct Synthesizer {
     request_id: String,
@@ -82,10 +88,10 @@ pub struct Synthesizer {
 }
 
 impl Synthesizer {
-    pub async fn synthesize(
+    pub async fn synthesize_ssml(
         &self,
         ssml: &str,
-        mut callback: impl FnMut(Option<&[u8]>) -> Result<()>,
+        mut callback: impl SynthesisCallback,
     ) -> Result<()> {
         let now = Utc::now();
         let request_id = &self.request_id;
@@ -116,6 +122,16 @@ impl Synthesizer {
             }
         }
         Ok(())
+    }
+
+    pub async fn synthesize_text(
+        &self,
+        text: impl AsRef<str>,
+        options: &TextOptions<'_>,
+        callback: impl SynthesisCallback,
+    ) -> Result<()> {
+        let ssml = interpolate_ssml(text, options)?;
+        self.synthesize_ssml(&ssml, callback).await
     }
 }
 

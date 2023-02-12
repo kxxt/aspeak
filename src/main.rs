@@ -5,7 +5,7 @@ use std::{path::PathBuf, borrow::Cow};
 use cli::{commands::Command, Cli};
 
 use aspeak::{
-    interpolate_ssml, AspeakError, AudioFormat, SynthesizerConfig, Voice, ORIGIN, QUALITY_MAP,
+    AspeakError, AudioFormat, SynthesizerConfig, Voice, ORIGIN, QUALITY_MAP,
 };
 use clap::Parser;
 use color_eyre::{eyre::anyhow, Help};
@@ -49,7 +49,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 let synthesizer = SynthesizerConfig::new(auth_options, audio_format)
                     .connect()
                     .await?;
-                synthesizer.synthesize(&ssml, callback).await?
+                synthesizer.synthesize_ssml(&ssml, callback).await?
             }
             Command::Text {
                 text_args,
@@ -69,8 +69,8 @@ fn main() -> color_eyre::eyre::Result<()> {
                 let synthesizer = SynthesizerConfig::new(auth_options,audio_format)
                     .connect()
                     .await?;
-                let ssml = interpolate_ssml(&text,Cli::process_text_options(&text_args, config.as_ref().and_then(|c|c.text.as_ref()))?)?;
-                let result = synthesizer.synthesize(&ssml, callback).await;
+                let options = &Cli::process_text_options(&text_args, config.as_ref().and_then(|c|c.text.as_ref()))?;
+                let result = synthesizer.synthesize_text(text, options, callback).await;
                 if let Err(AspeakError::WebSocketError(TungsteniteError::Protocol(
                     ProtocolError::ResetWithoutClosingHandshake,
                 ))) = result
