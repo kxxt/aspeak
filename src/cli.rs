@@ -123,7 +123,6 @@ impl Cli {
         config: Option<&'a TextConfig>,
     ) -> color_eyre::Result<TextOptions<'a>> {
         Ok(TextOptions {
-            text: args.text.as_deref().unwrap(),
             voice: Cow::Borrowed(
                 match (args.voice.as_deref(), args.locale.as_deref(), &config) {
                     (Some(voice), _, _) => voice,

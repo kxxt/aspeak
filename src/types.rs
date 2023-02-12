@@ -34,7 +34,6 @@ pub struct AuthOptions<'a> {
 
 #[derive(Debug, Clone)]
 pub struct TextOptions<'a> {
-    pub text: &'a str,
     pub voice: Cow<'a, str>,
     pub pitch: Option<Cow<'a, str>>,
     pub rate: Option<Cow<'a, str>>,
