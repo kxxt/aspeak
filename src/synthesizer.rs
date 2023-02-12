@@ -88,6 +88,7 @@ pub struct Synthesizer {
 }
 
 impl Synthesizer {
+    #[allow(clippy::await_holding_refcell_ref)]
     pub async fn synthesize_ssml(
         &self,
         ssml: &str,
