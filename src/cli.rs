@@ -6,7 +6,8 @@ use self::{
     config::TextConfig,
 };
 use aspeak::{
-    callback_play_blocking, get_default_voice_by_locale, AspeakError, Result, TextOptions,
+    callback_play_blocking, get_default_voice_by_locale, AspeakError, SynthesisCallback,
+    TextOptions,
 };
 use std::{
     borrow::Cow,
@@ -65,13 +66,13 @@ impl Cli {
         let mut s = String::new();
 
         let file: Box<dyn io::Read> = if let Some(file) = &args.file {
-            Box::new(File::open(&file)?)
+            Box::new(File::open(file)?)
         } else {
             Box::new(io::stdin())
         };
         let mut decoder = if let Some(encoding) = args.encoding.as_deref() {
             let encoding = encoding_rs::Encoding::for_label(encoding.as_bytes()).ok_or(
-                AspeakError::ArgumentError(format!("Unsupported encoding: {}", encoding)),
+                AspeakError::ArgumentError(format!("Unsupported encoding: {encoding}")),
             )?;
             DecodeReaderBytesBuilder::new()
                 .encoding(Some(encoding))
@@ -89,7 +90,7 @@ impl Cli {
     pub(crate) fn process_output(
         output: Option<String>,
         overwrite: bool,
-    ) -> color_eyre::Result<Box<dyn FnMut(Option<&[u8]>) -> Result<()>>> {
+    ) -> color_eyre::Result<Box<dyn SynthesisCallback>> {
         Ok(if let Some(file) = output.as_deref() {
             // todo: file already exists?
             let file = Path::new(file);
@@ -107,11 +108,12 @@ impl Cli {
             };
             let mut buf_writer = BufWriter::new(file);
             Box::new(move |data| {
-                Ok(if let Some(data) = data {
-                    buf_writer.write_all(data)?
+                if let Some(data) = data {
+                    buf_writer.write_all(data)?;
                 } else {
-                    buf_writer.flush()?
-                })
+                    buf_writer.flush()?;
+                }
+                Ok(())
             })
         } else {
             callback_play_blocking()

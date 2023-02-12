@@ -30,7 +30,7 @@ pub(crate) enum Command {
         output_args: OutputArgs,
     },
     #[command(about = "Speak SSML")]
-    SSML {
+    Ssml {
         #[clap(help = "The SSML to speak. \
                     If neither SSML nor input file is specified, the SSML will be read from stdin. \
                     Do not include the document type definition in your SSML.")]

@@ -167,8 +167,7 @@ impl AudioFormat {
     ) -> crate::Result<AudioFormat> {
         let map = QUALITY_MAP.get(container).ok_or_else(|| {
             AspeakError::ArgumentError(format!(
-                "No quality map found for container: {}. Please check if the container is correct.",
-                container
+                "No quality map found for container: {container}. Please check if the container is correct."
             ))
         })?;
         if let Some(format) = map.get(&quality).copied() {
@@ -179,8 +178,7 @@ impl AudioFormat {
             Ok(*map.get(&closest).unwrap())
         } else {
             Err(AspeakError::ArgumentError(format!(
-                        "Invalid quality found for container: {} and quality: {}. Please check if the quality is correct.",
-                        container, quality
+                        "Invalid quality found for container: {container} and quality: {quality}. Please check if the quality is correct."
             )))
         }
     }

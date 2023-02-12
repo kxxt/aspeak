@@ -16,6 +16,6 @@ pub(super) fn parse_header(
 }
 
 #[path = "../parse.rs"]
-mod parse;
+mod parse_common;
 
-pub(crate) use parse::*;
+pub(crate) use parse_common::*;

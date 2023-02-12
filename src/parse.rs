@@ -2,10 +2,10 @@ use crate::AspeakError;
 use std::borrow::Cow;
 
 fn is_float(s: &str) -> bool {
-    return s.parse::<f32>().is_ok();
+    s.parse::<f32>().is_ok()
 }
 
-pub(crate) fn parse_pitch<'a>(arg: &'a str) -> Result<Cow<'a, str>, AspeakError> {
+pub(crate) fn parse_pitch(arg: &str) -> Result<Cow<'_, str>, AspeakError> {
     if (arg.ends_with("Hz") && is_float(&arg[..arg.len() - 2]))
         || (arg.ends_with('%') && is_float(&arg[..arg.len() - 1]))
         || (arg.ends_with("st")
@@ -24,7 +24,7 @@ pub(crate) fn parse_pitch<'a>(arg: &'a str) -> Result<Cow<'a, str>, AspeakError>
     }
 }
 
-pub(crate) fn parse_rate<'a>(arg: &'a str) -> Result<Cow<'a, str>, AspeakError> {
+pub(crate) fn parse_rate(arg: &str) -> Result<Cow<'_, str>, AspeakError> {
     if (arg.ends_with('%') && is_float(&arg[..arg.len() - 1]))
         || ["default", "x-slow", "slow", "medium", "fast", "x-fast"].contains(&arg)
     {
@@ -59,5 +59,5 @@ pub(crate) fn parse_style_degree(arg: &str) -> Result<f32, AspeakError> {
 }
 
 pub(crate) fn validate_style_degree(degree: f32) -> bool {
-    0.01f32 <= degree && degree <= 2.0f32
+    (0.01f32..=2.0f32).contains(&degree)
 }

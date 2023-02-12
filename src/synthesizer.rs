@@ -28,7 +28,7 @@ const CLIENT_INFO_PAYLOAD: &str = r#"{"context":{"system":{"version":"1.25.0","n
 impl<'a> SynthesizerConfig<'a> {
     pub fn new(auth: AuthOptions<'a>, audio_format: AudioFormat) -> Self {
         info!("Successfully created SynthesizerConfig");
-        return Self { auth, audio_format };
+        Self { auth, audio_format }
     }
 
     pub async fn connect(self) -> Result<Synthesizer> {
@@ -37,7 +37,7 @@ impl<'a> SynthesizerConfig<'a> {
         let uri = {
             let uri = format!("{}?X-ConnectionId={}", self.auth.endpoint, request_id);
             if let Some(auth_token) = self.auth.token {
-                format!("{}&Authorization={}", uri, auth_token)
+                format!("{uri}&Authorization={auth_token}")
             } else {
                 uri
             }
@@ -61,7 +61,7 @@ impl<'a> SynthesizerConfig<'a> {
         now = Utc::now();
         let synthesis_context = format!(
             r#"{{"synthesis":{{"audio":{{"metadataOptions":{{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false}},"outputFormat":"{}"}}}}}}"#,
-            Into::<&str>::into(&self.audio_format)
+            Into::<&str>::into(self.audio_format)
         );
         info!("Synthesis context is: {}", synthesis_context);
         write.send(Message::Text(format!(
@@ -135,7 +135,7 @@ impl Synthesizer {
     }
 }
 
-pub fn callback_play_blocking() -> Box<dyn FnMut(Option<&[u8]>) -> Result<()>> {
+pub fn callback_play_blocking() -> Box<dyn SynthesisCallback> {
     let mut buffer = Vec::new();
     Box::new(move |data| {
         if let Some(data) = data {

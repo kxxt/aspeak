@@ -139,7 +139,7 @@ pub(crate) enum VoiceConfig {
 }
 
 impl VoiceConfig {
-    pub fn try_as_str<'a>(&'a self) -> color_eyre::Result<&'a str> {
+    pub fn try_as_str(&self) -> color_eyre::Result<&str> {
         Ok(match self {
             VoiceConfig::Voice { voice } => voice.as_str(),
             VoiceConfig::Locale { locale } => get_default_voice_by_locale(locale)?,

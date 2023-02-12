@@ -2,15 +2,15 @@ use std::borrow::Cow;
 use std::cell::RefCell;
 
 use pyo3::exceptions::{PyOSError, PyValueError};
-use pyo3::types::{PyIterator, PyList, PySequence};
+use pyo3::types::{PyIterator, PySequence};
 use pyo3::{prelude::*, types::PyDict};
 use reqwest::header::{HeaderName, HeaderValue};
 use tokio::runtime::Runtime;
 
 use crate::parse::{parse_pitch, parse_rate, parse_style_degree};
 use crate::{
-    callback_play_blocking, get_default_voice_by_locale, get_endpoint_by_region, interpolate_ssml,
-    AudioFormat, AuthOptions, Synthesizer, SynthesizerConfig, TextOptions, DEFAULT_ENDPOINT,
+    callback_play_blocking, get_default_voice_by_locale, get_endpoint_by_region, AudioFormat,
+    AuthOptions, Synthesizer, SynthesizerConfig, TextOptions, DEFAULT_ENDPOINT,
 };
 
 #[pymodule]
@@ -78,10 +78,10 @@ impl SpeechService {
                         let value = header.get_item(1)?.extract::<&str>()?;
                         Ok((
                             HeaderName::from_bytes(name.as_bytes()).map_err(|e| {
-                                PyValueError::new_err(format!("Invalid header name: {}", e))
+                                PyValueError::new_err(format!("Invalid header name: {e}"))
                             })?,
                             HeaderValue::from_str(value).map_err(|e| {
-                                PyValueError::new_err(format!("Invalid header value: {}", e))
+                                PyValueError::new_err(format!("Invalid header value: {e}"))
                             })?,
                         ))
                     })
@@ -107,7 +107,7 @@ impl SpeechService {
                 SynthesizerConfig::new(
                     AuthOptions {
                         endpoint: Cow::Borrowed(&self.endpoint),
-                        key: self.key.as_deref().map(|s| Cow::Borrowed(s)),
+                        key: self.key.as_deref().map(Cow::Borrowed),
                         headers: Cow::Borrowed(self.headers.as_slice()),
                         token: self.auth_token.as_deref().map(Cow::Borrowed),
                     },

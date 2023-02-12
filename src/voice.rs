@@ -38,10 +38,10 @@ impl Display for Voice {
             self.words_per_minute.as_deref().unwrap_or("N/A")
         )?;
         if let Some(style_list) = self.style_list.as_ref() {
-            writeln!(f, "Styles: {:?}", style_list)?;
+            writeln!(f, "Styles: {style_list:?}")?;
         }
         if let Some(role_play_list) = self.role_play_list.as_ref() {
-            writeln!(f, "Roles: {:?}", role_play_list)?;
+            writeln!(f, "Roles: {role_play_list:?}")?;
         }
         Ok(())
     }

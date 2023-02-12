@@ -17,7 +17,7 @@ pub fn get_endpoint_by_region(region: &str) -> String {
 pub use error::{AspeakError, Result};
 use phf::phf_map;
 pub use ssml::interpolate_ssml;
-pub use synthesizer::{callback_play_blocking, Synthesizer, SynthesizerConfig};
+pub use synthesizer::{callback_play_blocking, SynthesisCallback, Synthesizer, SynthesizerConfig};
 pub use types::*;
 pub use voice::Voice;
 
@@ -73,8 +73,7 @@ pub static QUALITY_RANGE_MAP: phf::Map<&'static str, (i8, i8)> = phf_map! {
 pub fn get_default_voice_by_locale(locale: &str) -> Result<&'static str> {
     DEFAULT_VOICES.get(locale).copied().ok_or_else(|| {
         AspeakError::ArgumentError(format!(
-            "No default voice found for locale: {}. Please check if the locale is correct.",
-            locale
+            "No default voice found for locale: {locale}. Please check if the locale is correct."
         ))
     })
 }

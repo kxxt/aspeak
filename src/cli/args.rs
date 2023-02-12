@@ -74,8 +74,7 @@ impl AuthArgs {
                 })
                 .or_else(|| {
                     auth_config
-                        .map(|c| c.endpoint.as_ref().map(Cow::from))
-                        .flatten()
+                        .and_then(|c| c.endpoint.as_ref().map(Cow::from))
                 })
                 .unwrap_or(Cow::Borrowed(DEFAULT_ENDPOINT)),
             token: match (self.token.as_deref(), auth_config) {

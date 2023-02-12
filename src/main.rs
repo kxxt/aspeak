@@ -35,7 +35,7 @@ fn main() -> color_eyre::eyre::Result<()> {
         .build()?;
     rt.block_on(async {
         match command.unwrap_or_default() {
-            Command::SSML {
+            Command::Ssml {
                 ssml,
                 input_args,
                 output_args,
@@ -139,7 +139,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 },
                 ConfigCommand::Init { path, overwrite } => {
                     Config::initialize(
-                        path.map(|path| PathBuf::from(path))
+                        path.map(PathBuf::from)
                             .ok_or(anyhow!("Unreachable code!"))
                             .or_else(|_|
                                 Config::default_location()

@@ -13,8 +13,8 @@ trait StartElementBuilderExt<'a> {
 
 impl<'a> StartElementBuilderExt<'a> for StartElementBuilder<'a> {
     fn optional_attrs(self, attrs: &'a [(&str, Option<&str>)]) -> Self {
-        attrs.into_iter().fold(self, |acc, (name, value)| {
-            if let Some(ref v) = value {
+        attrs.iter().fold(self, |acc, (name, value)| {
+            if let Some(v) = value {
                 acc.attr(*name, v)
             } else {
                 acc
@@ -70,5 +70,5 @@ pub fn interpolate_ssml(text: impl AsRef<str>, options: &TextOptions) -> Result<
     writer.write(XmlEvent::end_element())?;
     let ssml = String::from_utf8(buf).unwrap();
     info!("Created SSML: {}", &ssml);
-    return Ok(ssml);
+    Ok(ssml)
 }
