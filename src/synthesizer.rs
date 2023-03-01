@@ -9,8 +9,7 @@ use futures_util::{
 };
 use log::{debug, info};
 use phf::phf_map;
-use rodio::{Decoder, OutputStream, Sink};
-use std::{cell::RefCell, io::Cursor};
+use std::cell::RefCell;
 
 use tokio::net::TcpStream;
 use tokio_tungstenite::{
@@ -72,7 +71,6 @@ impl<'a> SynthesizerConfig<'a> {
         // ).await?;
         info!("Successfully created Synthesizer");
         Ok(Synthesizer {
-            request_id,
             audio_format: self.audio_format,
             write: RefCell::new(write),
             read: RefCell::new(read),
@@ -85,7 +83,6 @@ impl<T> SynthesisCallback for T where T: FnMut(Option<&[u8]>) -> Result<()> {}
 
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 pub struct Synthesizer {
-    request_id: String,
     audio_format: AudioFormat,
     write: RefCell<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>>,
     read: RefCell<SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>>,
@@ -94,8 +91,9 @@ pub struct Synthesizer {
 impl Synthesizer {
     #[allow(clippy::await_holding_refcell_ref)]
     pub async fn synthesize_ssml(&self, ssml: &str) -> Result<Vec<u8>> {
+        let uuid = Uuid::new_v4();
+        let request_id = uuid.as_simple().to_string();
         let now = Utc::now();
-        let request_id = &self.request_id;
         let synthesis_context = format!(
             r#"{{"synthesis":{{"audio":{{"metadataOptions":{{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false,"sessionEndEnabled":false}},"outputFormat":"{}"}}}}}}"#,
             Into::<&str>::into(AudioFormat::Riff24Khz16BitMonoPcm)
