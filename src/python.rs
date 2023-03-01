@@ -9,8 +9,8 @@ use tokio::runtime::Runtime;
 
 use crate::parse::{parse_pitch, parse_rate, parse_style_degree};
 use crate::{
-    callback_play_blocking, get_default_voice_by_locale, get_endpoint_by_region, AudioFormat,
-    AuthOptions, Synthesizer, SynthesizerConfig, TextOptions, DEFAULT_ENDPOINT,
+    get_default_voice_by_locale, get_endpoint_by_region, AudioFormat, AuthOptions, Synthesizer,
+    SynthesizerConfig, TextOptions, DEFAULT_ENDPOINT,
 };
 
 #[pymodule]

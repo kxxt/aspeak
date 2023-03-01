@@ -42,6 +42,8 @@ pub(crate) struct Cli {
     pub auth: AuthArgs,
 }
 
+type OutputProcessor = Box<dyn FnOnce(&[u8]) -> color_eyre::Result<()> + Send>;
+
 impl Cli {
     fn log_level_by_verbosity(verbosity: u8) -> log::LevelFilter {
         match verbosity {
@@ -89,7 +91,7 @@ impl Cli {
     pub(crate) fn process_output(
         output: Option<String>,
         overwrite: bool,
-    ) -> color_eyre::Result<Box<dyn FnOnce(&[u8]) -> color_eyre::Result<()>>> {
+    ) -> color_eyre::Result<OutputProcessor> {
         Ok(if let Some(file) = output.as_deref() {
             // todo: header for audio?
             // todo: file already exists?

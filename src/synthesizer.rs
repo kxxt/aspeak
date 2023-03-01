@@ -137,7 +137,7 @@ impl Synthesizer {
             match msg {
                 WebSocketMessage::TurnStart | WebSocketMessage::Response { body: _ } => continue,
                 WebSocketMessage::Audio { data } => {
-                    buffer.extend_from_slice(&data);
+                    buffer.extend_from_slice(data);
                 }
                 WebSocketMessage::TurnEnd => {
                     if audio_format_str.starts_with("riff") {
@@ -175,25 +175,6 @@ impl Synthesizer {
         let ssml = interpolate_ssml(text, options)?;
         self.synthesize_ssml(&ssml).await
     }
-}
-
-pub fn callback_play_blocking() -> Box<dyn SynthesisCallback> {
-    let mut buffer = Vec::new();
-    Box::new(move |data| {
-        if let Some(data) = data {
-            buffer.extend_from_slice(data);
-        } else {
-            info!("Playing audio... ({} bytes)", buffer.len());
-            let (_stream, stream_handle) = OutputStream::try_default()?;
-            let sink = Sink::try_new(&stream_handle).unwrap();
-            let cursor = Cursor::new(Vec::from(&buffer[..]));
-            let source = Decoder::new(cursor)?;
-            sink.append(source);
-            sink.sleep_until_end();
-            debug!("Done playing audio");
-        }
-        Ok(())
-    })
 }
 
 struct WavInfo {

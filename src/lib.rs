@@ -19,7 +19,7 @@ pub use audio::{AudioFormat, QUALITY_MAP, QUALITY_RANGE_MAP};
 pub use error::{AspeakError, Result};
 use phf::phf_map;
 pub use ssml::interpolate_ssml;
-pub use synthesizer::{callback_play_blocking, SynthesisCallback, Synthesizer, SynthesizerConfig};
+pub use synthesizer::{SynthesisCallback, Synthesizer, SynthesizerConfig};
 pub use types::*;
 pub use voice::Voice;
 
