@@ -1,3 +1,4 @@
+mod audio;
 mod error;
 mod msg;
 mod parse;
@@ -14,6 +15,7 @@ pub fn get_endpoint_by_region(region: &str) -> String {
     format!("wss://{region}.tts.speech.microsoft.com/cognitiveservices/websocket/v1")
 }
 
+pub use audio::{AudioFormat, QUALITY_MAP, QUALITY_RANGE_MAP};
 pub use error::{AspeakError, Result};
 use phf::phf_map;
 pub use ssml::interpolate_ssml;
@@ -23,52 +25,6 @@ pub use voice::Voice;
 
 #[cfg(feature = "python")]
 pub mod python;
-
-pub type QualityMap = phf::Map<i8, AudioFormat>;
-
-static WAV_QUALITY_MAP: QualityMap = phf_map! {
-    -2i8 => AudioFormat::Riff8Khz16BitMonoPcm,
-    -1i8 => AudioFormat::Riff16Khz16BitMonoPcm,
-    0i8  => AudioFormat::Riff24Khz16BitMonoPcm,
-    1i8  => AudioFormat::Riff24Khz16BitMonoPcm,
-};
-
-static MP3_QUALITY_MAP: QualityMap = phf_map! {
-    -4i8 => AudioFormat::Audio16Khz32KBitRateMonoMp3,
-    -3i8 => AudioFormat::Audio16Khz64KBitRateMonoMp3,
-    -2i8 => AudioFormat::Audio16Khz128KBitRateMonoMp3,
-    -1i8 => AudioFormat::Audio24Khz48KBitRateMonoMp3,
-    0i8  => AudioFormat::Audio24Khz96KBitRateMonoMp3,
-    1i8  => AudioFormat::Audio24Khz160KBitRateMonoMp3,
-    2i8  => AudioFormat::Audio48Khz96KBitRateMonoMp3,
-    3i8  => AudioFormat::Audio48Khz192KBitRateMonoMp3,
-};
-
-static OGG_QUALITY_MAP: QualityMap = phf_map! {
-    -1i8 => AudioFormat::Ogg16Khz16BitMonoOpus,
-    0i8  => AudioFormat::Ogg24Khz16BitMonoOpus,
-    1i8  => AudioFormat::Ogg48Khz16BitMonoOpus,
-};
-
-static WEBM_QUALITY_MAP: QualityMap = phf_map! {
-    -1i8 => AudioFormat::Webm16Khz16BitMonoOpus,
-    0i8  => AudioFormat::Webm24Khz16BitMonoOpus,
-    1i8  => AudioFormat::Webm24Khz16Bit24KbpsMonoOpus,
-};
-
-pub static QUALITY_MAP: phf::Map<&'static str, &'static QualityMap> = phf_map! {
-    "wav" => &WAV_QUALITY_MAP,
-    "mp3" => &MP3_QUALITY_MAP,
-    "ogg" => &OGG_QUALITY_MAP,
-    "webm" => &WEBM_QUALITY_MAP,
-};
-
-pub static QUALITY_RANGE_MAP: phf::Map<&'static str, (i8, i8)> = phf_map! {
-    "wav" => (-2, 1),
-    "mp3" => (-4, 3),
-    "ogg" => (-1, 1),
-    "webm" => (-1, 1),
-};
 
 pub fn get_default_voice_by_locale(locale: &str) -> Result<&'static str> {
     DEFAULT_VOICES.get(locale).copied().ok_or_else(|| {
