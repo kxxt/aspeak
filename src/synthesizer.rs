@@ -173,7 +173,7 @@ impl Synthesizer {
     ) -> Result<Vec<u8>> {
         debug!("Synthesizing text: {}", text.as_ref());
         let ssml = interpolate_ssml(text, options)?;
-        Ok(self.synthesize_ssml(&ssml).await?)
+        self.synthesize_ssml(&ssml).await
     }
 }
 
@@ -194,16 +194,6 @@ pub fn callback_play_blocking() -> Box<dyn SynthesisCallback> {
         }
         Ok(())
     })
-}
-
-#[cfg(feature = "python")]
-pub(crate) fn register_python_items(
-    _py: pyo3::Python<'_>,
-    m: &pyo3::types::PyModule,
-) -> pyo3::PyResult<()> {
-    m.add_class::<Synthesizer>()?;
-    // m.add_class::<SynthesizerConfig>()?;
-    Ok(())
 }
 
 struct WavInfo {

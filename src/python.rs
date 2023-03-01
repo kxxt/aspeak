@@ -2,7 +2,7 @@ use std::borrow::Cow;
 use std::cell::RefCell;
 
 use pyo3::exceptions::{PyOSError, PyValueError};
-use pyo3::types::{PyIterator, PySequence};
+use pyo3::types::{PyBytes, PyIterator, PySequence};
 use pyo3::{prelude::*, types::PyDict};
 use reqwest::header::{HeaderName, HeaderValue};
 use tokio::runtime::Runtime;
@@ -16,7 +16,7 @@ use crate::{
 #[pymodule]
 fn aspeak(py: Python, m: &PyModule) -> PyResult<()> {
     crate::types::register_python_items(py, m)?;
-    crate::synthesizer::register_python_items(py, m)?;
+    crate::audio::register_python_items(py, m)?;
     m.add_class::<SpeechService>()?;
     Ok(())
 }
@@ -120,9 +120,25 @@ impl SpeechService {
         Ok(())
     }
 
+    fn synthesize_ssml<'a>(&self, ssml: &str, py: Python<'a>) -> PyResult<&'a PyBytes> {
+        let data = self.runtime.block_on(
+            self.synthesizer
+                .borrow()
+                .as_ref()
+                .ok_or(PyOSError::new_err("Synthesizer not connected"))?
+                .synthesize_ssml(ssml),
+        )?;
+        Ok(PyBytes::new(py, &data))
+    }
+
     #[pyo3(signature = (text, **options))]
-    fn speak_text(&self, text: &str, options: Option<&PyDict>) -> PyResult<()> {
-        self.runtime.block_on(
+    fn synthesize_text<'a>(
+        &self,
+        text: &str,
+        options: Option<&PyDict>,
+        py: Python<'a>,
+    ) -> PyResult<&'a PyBytes> {
+        let data = self.runtime.block_on(
             self.synthesizer
                 .borrow()
                 .as_ref()
@@ -174,52 +190,8 @@ impl SpeechService {
                         })
                         .transpose()?
                         .unwrap_or_default(),
-                    callback_play_blocking(),
                 ),
         )?;
-        Ok(())
+        Ok(PyBytes::new(py, &data))
     }
 }
-
-// #[pymethods]
-// impl TextArgs {
-//     #[new]
-//     #[pyo3(signature = (**kwargs))]
-//     fn new(kwargs: Option<&PyDict>) -> PyResult<Self> {
-//         let mut options = Self::default();
-//         if let Some(dict) = kwargs {
-//             if let Some(text) = dict.get_item("text") {
-//                 options.text = Some(text.extract()?);
-//             }
-//             if let Some(pitch) = dict.get_item("pitch") {
-//                 options.pitch =
-//                     Some(parse_pitch(pitch.extract()?).map_err(|e| PyValueError::new_err(e))?);
-//             }
-//             if let Some(rate) = dict.get_item("rate") {
-//                 options.rate =
-//                     Some(parse_rate(rate.extract()?).map_err(|e| PyValueError::new_err(e))?);
-//             }
-//             if let Some(style) = dict.get_item("style") {
-//                 options.style = Some(style.extract()?);
-//             }
-//             if let Some(role) = dict.get_item("role") {
-//                 options.role = Some(role.extract()?);
-//             }
-//             if let Some(style_degree) = dict.get_item("style_degree") {
-//                 let degree: f32 = style_degree.extract()?;
-//                 if !validate_style_degree(degree) {
-//                     return Err(PyValueError::new_err("Style degree out of range [0.01, 2]"));
-//                 }
-//                 options.style_degree = Some(degree);
-//             }
-//             if let Some(locale) = dict.get_item("locale") {
-//                 // todo: default voice for locale
-//                 options.locale = Some(locale.extract()?);
-//             }
-//             if let Some(voice) = dict.get_item("voice") {
-//                 options.voice = Some(voice.extract()?);
-//             }
-//         }
-//         Ok(options)
-//     }
-// }

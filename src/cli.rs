@@ -115,7 +115,7 @@ impl Cli {
                 info!("Playing audio... ({} bytes)", buffer.len());
                 let (_stream, stream_handle) = OutputStream::try_default()?;
                 let sink = Sink::try_new(&stream_handle).unwrap();
-                let cursor = Cursor::new(Vec::from(&buffer[..]));
+                let cursor = Cursor::new(Vec::from(buffer));
                 let source = Decoder::new(cursor)?;
                 sink.append(source);
                 sink.sleep_until_end();
