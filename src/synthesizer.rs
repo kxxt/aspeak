@@ -108,27 +108,6 @@ impl Synthesizer {
         ))).await?;
         const HEADER_SIZE: usize = 44;
         let mut buffer = Vec::with_capacity(HEADER_SIZE);
-        let audio_format_str: &'static str = self.audio_format.into();
-        if audio_format_str.starts_with("riff") {
-            let wav_info = WAV_INFO_MAP.get(audio_format_str).unwrap();
-            // fill wav header
-            buffer.extend_from_slice(b"RIFF");
-            // HEADER_SIZE as u32 + offset - 8
-            buffer.extend_from_slice(&0u32.to_le_bytes());
-            buffer.extend_from_slice(b"WAVEfmt ");
-            buffer.extend_from_slice(&16u32.to_le_bytes());
-            buffer.extend_from_slice(&wav_info.format_type.to_le_bytes());
-            buffer.extend_from_slice(&wav_info.channels.to_le_bytes());
-            buffer.extend_from_slice(&wav_info.samples_per_second.to_le_bytes());
-            buffer.extend_from_slice(&wav_info.avg_bytes_per_second.to_le_bytes());
-            buffer.extend_from_slice(
-                &(wav_info.channels * (wav_info.bits_per_sample / 8)).to_le_bytes(),
-            );
-            buffer.extend_from_slice(&(wav_info.bits_per_sample).to_le_bytes());
-            buffer.extend_from_slice(b"data");
-            buffer.extend_from_slice(&0u32.to_le_bytes());
-            assert_eq!(buffer.len(), HEADER_SIZE);
-        }
         while let Some(raw_msg) = self.read.borrow_mut().next().await {
             let raw_msg = raw_msg?;
             let msg = WebSocketMessage::try_from(&raw_msg)?;
@@ -138,13 +117,6 @@ impl Synthesizer {
                     buffer.extend_from_slice(data);
                 }
                 WebSocketMessage::TurnEnd => {
-                    if audio_format_str.starts_with("riff") {
-                        // Update the header
-                        let buffer_len = buffer.len();
-                        let audio_len = buffer_len - HEADER_SIZE;
-                        buffer[4..8].copy_from_slice(&(buffer_len as u32 - 8).to_le_bytes());
-                        buffer[40..44].copy_from_slice(&(audio_len as u32).to_le_bytes());
-                    }
                     break;
                 }
                 WebSocketMessage::Close(frame) => {
@@ -175,69 +147,3 @@ impl Synthesizer {
     }
 }
 
-struct WavInfo {
-    bits_per_sample: u16,
-    channels: u16,
-    samples_per_second: u32,
-    avg_bytes_per_second: u32,
-    format_type: u16,
-}
-
-static WAV_INFO_MAP: phf::Map<&'static str, WavInfo> = phf_map! {
-    "riff-16khz-16bit-mono-pcm" => WavInfo {
-        bits_per_sample: 16,
-        channels: 1,
-        samples_per_second: 16000,
-        avg_bytes_per_second: 32000,
-        format_type: 1,
-    },
-    "riff-22050hz-16bit-mono-pcm" => WavInfo {
-        bits_per_sample: 16,
-        channels: 1,
-        samples_per_second: 22050,
-        avg_bytes_per_second: 44100,
-        format_type: 1,
-    },
-    "riff-24khz-16bit-mono-pcm" => WavInfo {
-        bits_per_sample: 16,
-        channels: 1,
-        samples_per_second: 24000,
-        avg_bytes_per_second: 48000,
-        format_type: 1,
-    },
-    "riff-44100hz-16bit-mono-pcm" => WavInfo {
-        bits_per_sample: 16,
-        channels: 1,
-        samples_per_second: 44100,
-        avg_bytes_per_second: 88200,
-        format_type: 1,
-    },
-    "riff-48khz-16bit-mono-pcm" => WavInfo {
-        bits_per_sample: 16,
-        channels: 1,
-        samples_per_second: 48000,
-        avg_bytes_per_second: 96000,
-        format_type: 1,
-    },
-    "riff-8khz-16bit-mono-pcm" => WavInfo {
-        bits_per_sample: 16,
-        channels: 1,
-        samples_per_second: 8000,
-        avg_bytes_per_second: 16000,
-        format_type: 1,
-    },
-    "riff-8khz-8bit-mono-alaw" => WavInfo {
-        bits_per_sample: 8,
-        channels: 1,
-        samples_per_second: 8000,
-        avg_bytes_per_second: 8000,
-        format_type: 8,
-    },
-    "riff-8khz-8bit-mono-mulaw" => WavInfo {
-        bits_per_sample: 8,
-        channels: 1,
-        samples_per_second: 8000,
-        avg_bytes_per_second: 8000,
-        format_type: 2,
-    },
-};
