@@ -92,6 +92,7 @@ impl Cli {
         overwrite: bool,
     ) -> color_eyre::Result<Box<dyn SynthesisCallback>> {
         Ok(if let Some(file) = output.as_deref() {
+            // todo: header for audio?
             // todo: file already exists?
             let file = Path::new(file);
             let file = match (file.exists(), overwrite) {

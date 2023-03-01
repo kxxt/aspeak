@@ -11,7 +11,7 @@ use clap::Parser;
 use color_eyre::{eyre::anyhow, Help};
 use colored::Colorize;
 
-use log::debug;
+use log::{debug, info};
 
 use reqwest::header::{self, HeaderMap, HeaderValue};
 use strum::IntoEnumIterator;
@@ -49,7 +49,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 let synthesizer = SynthesizerConfig::new(auth_options, audio_format)
                     .connect()
                     .await?;
-                synthesizer.synthesize_ssml(&ssml, callback).await?
+                synthesizer.synthesize_ssml_with_callback(&ssml, callback).await?
             }
             Command::Text {
                 text_args,
@@ -70,7 +70,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                     .connect()
                     .await?;
                 let options = &Cli::process_text_options(&text_args, config.as_ref().and_then(|c|c.text.as_ref()))?;
-                let result = synthesizer.synthesize_text(text, options, callback).await;
+                let result = synthesizer.synthesize_text_with_callback(&text, options, callback).await;
                 if let Err(AspeakError::WebSocketError(TungsteniteError::Protocol(
                     ProtocolError::ResetWithoutClosingHandshake,
                 ))) = result

@@ -53,21 +53,21 @@ impl<'a> SynthesizerConfig<'a> {
         debug!("The initial request is {request:?}");
         let (wss, resp) = connect_async(request).await?;
         let (mut write, read) = wss.split();
-        let mut now = Utc::now();
+        let now = Utc::now();
         debug!("The response to the initial request is {:?}", resp);
         write.send(Message::Text(format!(
             "Path: speech.config\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{CLIENT_INFO_PAYLOAD}"
         ,request_id = &request_id))).await?;
-        now = Utc::now();
-        let synthesis_context = format!(
-            r#"{{"synthesis":{{"audio":{{"metadataOptions":{{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false}},"outputFormat":"{}"}}}}}}"#,
-            Into::<&str>::into(self.audio_format)
-        );
-        info!("Synthesis context is: {}", synthesis_context);
-        write.send(Message::Text(format!(
-            "Path: synthesis.context\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{synthesis_context}", 
-            request_id = &request_id)),
-        ).await?;
+        // now = Utc::now();
+        // let synthesis_context = format!(
+        //     r#"{{"synthesis":{{"audio":{{"metadataOptions":{{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false}},"outputFormat":"{}"}}}}}}"#,
+        //     Into::<&str>::into(self.audio_format)
+        // );
+        // info!("Synthesis context is: {}", synthesis_context);
+        // write.send(Message::Text(format!(
+        //     "Path: synthesis.context\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{synthesis_context}", 
+        //     request_id = &request_id)),
+        // ).await?;
         info!("Successfully created Synthesizer");
         Ok(Synthesizer {
             request_id,
@@ -89,13 +89,22 @@ pub struct Synthesizer {
 
 impl Synthesizer {
     #[allow(clippy::await_holding_refcell_ref)]
-    pub async fn synthesize_ssml(
+    pub async fn synthesize_ssml_with_callback(
         &self,
         ssml: &str,
         mut callback: impl SynthesisCallback,
     ) -> Result<()> {
         let now = Utc::now();
         let request_id = &self.request_id;
+        let synthesis_context = format!(
+            r#"{{"synthesis":{{"audio":{{"metadataOptions":{{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false}},"outputFormat":"{}"}}}}}}"#,
+            Into::<&str>::into(AudioFormat::Riff24Khz16BitMonoPcm)
+        );
+        self.write.borrow_mut().send(Message::Text(format!(
+            "Path: synthesis.context\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{synthesis_context}", 
+            request_id = &request_id)),
+        ).await?;
+        info!("Before sending the SSML to the server");
         self.write.borrow_mut().send(Message::Text(format!(
             "Path: ssml\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}\r\nContent-Type: application/ssml+xml\r\n\r\n{ssml}"
         ))).await?;
@@ -125,14 +134,44 @@ impl Synthesizer {
         Ok(())
     }
 
-    pub async fn synthesize_text(
+    pub async fn synthesize_text_with_callback(
         &self,
         text: impl AsRef<str>,
         options: &TextOptions<'_>,
         callback: impl SynthesisCallback,
     ) -> Result<()> {
         let ssml = interpolate_ssml(text, options)?;
-        self.synthesize_ssml(&ssml, callback).await
+        self.synthesize_ssml_with_callback(&ssml, callback).await
+    }
+
+    pub async fn synthesize_text(
+        &self,
+        text: impl AsRef<str>,
+        options: &TextOptions<'_>,
+    ) -> Result<Vec<u8>> {
+        let mut buffer = Vec::new();
+        debug!("Synthesizing text: {}", text.as_ref());
+        self.synthesize_text_with_callback(text, options, |data| {
+            debug!("Received data: {:?}", data);
+            if let Some(data) = data {
+                buffer.extend_from_slice(data);
+            }
+            Ok(())
+        })
+        .await?;
+        Ok(buffer)
+    }
+
+    pub async fn synthesize_ssml(&self, ssml: &str) -> Result<Vec<u8>> {
+        let mut buffer = Vec::new();
+        self.synthesize_ssml_with_callback(ssml, |data| {
+            if let Some(data) = data {
+                buffer.extend_from_slice(data);
+            }
+            Ok(())
+        })
+        .await?;
+        Ok(buffer)
     }
 }
 
@@ -149,6 +188,7 @@ pub fn callback_play_blocking() -> Box<dyn SynthesisCallback> {
             let source = Decoder::new(cursor)?;
             sink.append(source);
             sink.sleep_until_end();
+            debug!("Done playing audio");
         }
         Ok(())
     })
