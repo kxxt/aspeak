@@ -2,7 +2,9 @@ use std::borrow::Cow;
 
 use super::config::{AuthConfig, Config, OutputConfig};
 use super::parse;
-use aspeak::{get_endpoint_by_region, AudioFormat, AuthOptions, Role, DEFAULT_ENDPOINT, AspeakError};
+use aspeak::{
+    get_endpoint_by_region, AspeakError, AudioFormat, AuthOptions, Role, DEFAULT_ENDPOINT,
+};
 use clap::{ArgAction, Args, ValueEnum};
 use reqwest::header::{HeaderName, HeaderValue};
 use serde::Deserialize;
@@ -72,10 +74,7 @@ impl AuthArgs {
                         .map(get_endpoint_by_region)
                         .map(Cow::Owned)
                 })
-                .or_else(|| {
-                    auth_config
-                        .and_then(|c| c.endpoint.as_ref().map(Cow::from))
-                })
+                .or_else(|| auth_config.and_then(|c| c.endpoint.as_ref().map(Cow::from)))
                 .unwrap_or(Cow::Borrowed(DEFAULT_ENDPOINT)),
             token: match (self.token.as_deref(), auth_config) {
                 (Some(token), _) => Some(Cow::Borrowed(token)),

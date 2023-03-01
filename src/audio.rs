@@ -151,8 +151,8 @@ pub enum AudioFormat {
     #[strum(to_string = "riff-8khz-16bit-mono-pcm")]
     #[serde(rename = "riff-8khz-16bit-mono-pcm")]
     Riff8Khz16BitMonoPcm,
-    #[strum(to_string = "riff-8khz-8bit-mono-alow")]
-    #[serde(rename = "riff-8khz-8bit-mono-alow")]
+    #[strum(to_string = "riff-8khz-8bit-mono-alaw")]
+    #[serde(rename = "riff-8khz-8bit-mono-alaw")]
     Riff8Khz8BitMonoALaw,
     #[strum(to_string = "riff-8khz-8bit-mono-mulaw")]
     #[serde(rename = "riff-8khz-8bit-mono-mulaw")]

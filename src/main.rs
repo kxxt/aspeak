@@ -1,17 +1,15 @@
 mod cli;
 
-use std::{path::PathBuf, borrow::Cow};
+use std::{borrow::Cow, path::PathBuf};
 
 use cli::{commands::Command, Cli};
 
-use aspeak::{
-    AspeakError, AudioFormat, SynthesizerConfig, Voice, ORIGIN, QUALITY_MAP,
-};
+use aspeak::{AspeakError, AudioFormat, SynthesizerConfig, Voice, ORIGIN, QUALITY_MAP};
 use clap::Parser;
 use color_eyre::{eyre::anyhow, Help};
 use colored::Colorize;
 
-use log::{debug, info};
+use log::debug;
 
 use reqwest::header::{self, HeaderMap, HeaderValue};
 use strum::IntoEnumIterator;
@@ -49,14 +47,15 @@ fn main() -> color_eyre::eyre::Result<()> {
                 let synthesizer = SynthesizerConfig::new(auth_options, audio_format)
                     .connect()
                     .await?;
-                synthesizer.synthesize_ssml_with_callback(&ssml, callback).await?
+                let audio_data = synthesizer.synthesize_ssml(&ssml).await?;
+                callback(&audio_data)?;
             }
             Command::Text {
                 text_args,
                 input_args,
                 output_args,
             } => {
-                let text = 
+                let text =
                     text_args
                         .text.as_deref()
                         .map(Cow::Borrowed)
@@ -70,16 +69,17 @@ fn main() -> color_eyre::eyre::Result<()> {
                     .connect()
                     .await?;
                 let options = &Cli::process_text_options(&text_args, config.as_ref().and_then(|c|c.text.as_ref()))?;
-                let result = synthesizer.synthesize_text_with_callback(&text, options, callback).await;
-                if let Err(AspeakError::WebSocketError(TungsteniteError::Protocol(
+                let result = synthesizer.synthesize_text(&text, options).await;
+                if let Err(e @ AspeakError::WebSocketError(TungsteniteError::Protocol(
                     ProtocolError::ResetWithoutClosingHandshake,
                 ))) = result
                 {
-                    return result.with_note(|| "This error usually indicates a poor internet connection or that the remote API terminates your service.")
+                    return Err(e).with_note(|| "This error usually indicates a poor internet connection or that the remote API terminates your service.")
                         .with_suggestion(|| "Retry if you are on a poor internet connection. \
                                              If this error persists and you are using the trial service, please shorten your input.");
                 } else {
-                    result?;
+                    let audio_data = result?;
+                    callback(&audio_data)?;
                 }
             }
             Command::ListVoices {

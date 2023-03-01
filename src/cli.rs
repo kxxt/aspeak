@@ -1,18 +1,17 @@
 use clap::{ArgAction, Parser};
+use log::{debug, info};
+use rodio::{Decoder, OutputStream, Sink};
 
 use self::{
     args::{AuthArgs, InputArgs, ProfileArgs, TextArgs},
     commands::Command,
     config::TextConfig,
 };
-use aspeak::{
-    callback_play_blocking, get_default_voice_by_locale, AspeakError, SynthesisCallback,
-    TextOptions,
-};
+use aspeak::{get_default_voice_by_locale, AspeakError, TextOptions};
 use std::{
     borrow::Cow,
     fs::{File, OpenOptions},
-    io::{self, BufWriter, Read, Write},
+    io::{self, Cursor, Read, Write},
     path::Path,
 };
 
@@ -90,12 +89,12 @@ impl Cli {
     pub(crate) fn process_output(
         output: Option<String>,
         overwrite: bool,
-    ) -> color_eyre::Result<Box<dyn SynthesisCallback>> {
+    ) -> color_eyre::Result<Box<dyn FnOnce(&[u8]) -> color_eyre::Result<()>>> {
         Ok(if let Some(file) = output.as_deref() {
             // todo: header for audio?
             // todo: file already exists?
             let file = Path::new(file);
-            let file = match (file.exists(), overwrite) {
+            let mut file = match (file.exists(), overwrite) {
                 (_, true) => File::create(file)?,
                 (false, false) => OpenOptions::new()
                     .read(true)
@@ -107,17 +106,22 @@ impl Cli {
                         .suggestion("You can use --overwrite to overwrite this file."))
                 }
             };
-            let mut buf_writer = BufWriter::new(file);
-            Box::new(move |data| {
-                if let Some(data) = data {
-                    buf_writer.write_all(data)?;
-                } else {
-                    buf_writer.flush()?;
-                }
+            Box::new(move |buffer| {
+                file.write_all(buffer)?;
                 Ok(())
             })
         } else {
-            callback_play_blocking()
+            Box::new(|buffer| {
+                info!("Playing audio... ({} bytes)", buffer.len());
+                let (_stream, stream_handle) = OutputStream::try_default()?;
+                let sink = Sink::try_new(&stream_handle).unwrap();
+                let cursor = Cursor::new(Vec::from(&buffer[..]));
+                let source = Decoder::new(cursor)?;
+                sink.append(source);
+                sink.sleep_until_end();
+                debug!("Done playing audio");
+                Ok(())
+            })
         })
     }
 

@@ -8,8 +8,10 @@ use futures_util::{
     SinkExt, StreamExt,
 };
 use log::{debug, info};
+use phf::phf_map;
 use rodio::{Decoder, OutputStream, Sink};
 use std::{cell::RefCell, io::Cursor};
+
 use tokio::net::TcpStream;
 use tokio_tungstenite::{
     connect_async, tungstenite::client::IntoClientRequest, tungstenite::http::HeaderValue,
@@ -65,12 +67,13 @@ impl<'a> SynthesizerConfig<'a> {
         // );
         // info!("Synthesis context is: {}", synthesis_context);
         // write.send(Message::Text(format!(
-        //     "Path: synthesis.context\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{synthesis_context}", 
+        //     "Path: synthesis.context\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{synthesis_context}",
         //     request_id = &request_id)),
         // ).await?;
         info!("Successfully created Synthesizer");
         Ok(Synthesizer {
             request_id,
+            audio_format: self.audio_format,
             write: RefCell::new(write),
             read: RefCell::new(read),
         })
@@ -83,21 +86,18 @@ impl<T> SynthesisCallback for T where T: FnMut(Option<&[u8]>) -> Result<()> {}
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 pub struct Synthesizer {
     request_id: String,
+    audio_format: AudioFormat,
     write: RefCell<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>>,
     read: RefCell<SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>>,
 }
 
 impl Synthesizer {
     #[allow(clippy::await_holding_refcell_ref)]
-    pub async fn synthesize_ssml_with_callback(
-        &self,
-        ssml: &str,
-        mut callback: impl SynthesisCallback,
-    ) -> Result<()> {
+    pub async fn synthesize_ssml(&self, ssml: &str) -> Result<Vec<u8>> {
         let now = Utc::now();
         let request_id = &self.request_id;
         let synthesis_context = format!(
-            r#"{{"synthesis":{{"audio":{{"metadataOptions":{{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false}},"outputFormat":"{}"}}}}}}"#,
+            r#"{{"synthesis":{{"audio":{{"metadataOptions":{{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false,"sessionEndEnabled":false}},"outputFormat":"{}"}}}}}}"#,
             Into::<&str>::into(AudioFormat::Riff24Khz16BitMonoPcm)
         );
         self.write.borrow_mut().send(Message::Text(format!(
@@ -108,15 +108,47 @@ impl Synthesizer {
         self.write.borrow_mut().send(Message::Text(format!(
             "Path: ssml\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}\r\nContent-Type: application/ssml+xml\r\n\r\n{ssml}"
         ))).await?;
+        const HEADER_SIZE: usize = 44;
+        let mut buffer = Vec::with_capacity(HEADER_SIZE);
+        let audio_format_str: &'static str = self.audio_format.into();
+        if audio_format_str.starts_with("riff") {
+            let wav_info = WAV_INFO_MAP.get(audio_format_str).unwrap();
+            // fill wav header
+            buffer.extend_from_slice(b"RIFF");
+            // HEADER_SIZE as u32 + offset - 8
+            buffer.extend_from_slice(&0u32.to_le_bytes());
+            buffer.extend_from_slice(b"WAVEfmt ");
+            buffer.extend_from_slice(&16u32.to_le_bytes());
+            buffer.extend_from_slice(&wav_info.format_type.to_le_bytes());
+            buffer.extend_from_slice(&wav_info.channels.to_le_bytes());
+            buffer.extend_from_slice(&wav_info.samples_per_second.to_le_bytes());
+            buffer.extend_from_slice(&wav_info.avg_bytes_per_second.to_le_bytes());
+            buffer.extend_from_slice(
+                &(wav_info.channels * (wav_info.bits_per_sample / 8)).to_le_bytes(),
+            );
+            buffer.extend_from_slice(&(wav_info.bits_per_sample).to_le_bytes());
+            buffer.extend_from_slice(b"data");
+            buffer.extend_from_slice(&0u32.to_le_bytes());
+            assert_eq!(buffer.len(), HEADER_SIZE);
+        }
         while let Some(raw_msg) = self.read.borrow_mut().next().await {
             let raw_msg = raw_msg?;
             let msg = WebSocketMessage::try_from(&raw_msg)?;
             match msg {
                 WebSocketMessage::TurnStart | WebSocketMessage::Response { body: _ } => continue,
                 WebSocketMessage::Audio { data } => {
-                    callback(Some(data))?;
+                    buffer.extend_from_slice(&data);
                 }
-                WebSocketMessage::TurnEnd => return callback(None),
+                WebSocketMessage::TurnEnd => {
+                    if audio_format_str.starts_with("riff") {
+                        // Update the header
+                        let buffer_len = buffer.len();
+                        let audio_len = buffer_len - HEADER_SIZE;
+                        buffer[4..8].copy_from_slice(&(buffer_len as u32 - 8).to_le_bytes());
+                        buffer[40..44].copy_from_slice(&(audio_len as u32).to_le_bytes());
+                    }
+                    break;
+                }
                 WebSocketMessage::Close(frame) => {
                     return Err(frame.map_or_else(
                         || AspeakError::ConnectionCloseError {
@@ -131,17 +163,7 @@ impl Synthesizer {
                 }
             }
         }
-        Ok(())
-    }
-
-    pub async fn synthesize_text_with_callback(
-        &self,
-        text: impl AsRef<str>,
-        options: &TextOptions<'_>,
-        callback: impl SynthesisCallback,
-    ) -> Result<()> {
-        let ssml = interpolate_ssml(text, options)?;
-        self.synthesize_ssml_with_callback(&ssml, callback).await
+        Ok(buffer)
     }
 
     pub async fn synthesize_text(
@@ -149,29 +171,9 @@ impl Synthesizer {
         text: impl AsRef<str>,
         options: &TextOptions<'_>,
     ) -> Result<Vec<u8>> {
-        let mut buffer = Vec::new();
         debug!("Synthesizing text: {}", text.as_ref());
-        self.synthesize_text_with_callback(text, options, |data| {
-            debug!("Received data: {:?}", data);
-            if let Some(data) = data {
-                buffer.extend_from_slice(data);
-            }
-            Ok(())
-        })
-        .await?;
-        Ok(buffer)
-    }
-
-    pub async fn synthesize_ssml(&self, ssml: &str) -> Result<Vec<u8>> {
-        let mut buffer = Vec::new();
-        self.synthesize_ssml_with_callback(ssml, |data| {
-            if let Some(data) = data {
-                buffer.extend_from_slice(data);
-            }
-            Ok(())
-        })
-        .await?;
-        Ok(buffer)
+        let ssml = interpolate_ssml(text, options)?;
+        Ok(self.synthesize_ssml(&ssml).await?)
     }
 }
 
@@ -203,3 +205,70 @@ pub(crate) fn register_python_items(
     // m.add_class::<SynthesizerConfig>()?;
     Ok(())
 }
+
+struct WavInfo {
+    bits_per_sample: u16,
+    channels: u16,
+    samples_per_second: u32,
+    avg_bytes_per_second: u32,
+    format_type: u16,
+}
+
+static WAV_INFO_MAP: phf::Map<&'static str, WavInfo> = phf_map! {
+    "riff-16khz-16bit-mono-pcm" => WavInfo {
+        bits_per_sample: 16,
+        channels: 1,
+        samples_per_second: 16000,
+        avg_bytes_per_second: 32000,
+        format_type: 1,
+    },
+    "riff-22050hz-16bit-mono-pcm" => WavInfo {
+        bits_per_sample: 16,
+        channels: 1,
+        samples_per_second: 22050,
+        avg_bytes_per_second: 44100,
+        format_type: 1,
+    },
+    "riff-24khz-16bit-mono-pcm" => WavInfo {
+        bits_per_sample: 16,
+        channels: 1,
+        samples_per_second: 24000,
+        avg_bytes_per_second: 48000,
+        format_type: 1,
+    },
+    "riff-44100hz-16bit-mono-pcm" => WavInfo {
+        bits_per_sample: 16,
+        channels: 1,
+        samples_per_second: 44100,
+        avg_bytes_per_second: 88200,
+        format_type: 1,
+    },
+    "riff-48khz-16bit-mono-pcm" => WavInfo {
+        bits_per_sample: 16,
+        channels: 1,
+        samples_per_second: 48000,
+        avg_bytes_per_second: 96000,
+        format_type: 1,
+    },
+    "riff-8khz-16bit-mono-pcm" => WavInfo {
+        bits_per_sample: 16,
+        channels: 1,
+        samples_per_second: 8000,
+        avg_bytes_per_second: 16000,
+        format_type: 1,
+    },
+    "riff-8khz-8bit-mono-alaw" => WavInfo {
+        bits_per_sample: 8,
+        channels: 1,
+        samples_per_second: 8000,
+        avg_bytes_per_second: 8000,
+        format_type: 8,
+    },
+    "riff-8khz-8bit-mono-mulaw" => WavInfo {
+        bits_per_sample: 8,
+        channels: 1,
+        samples_per_second: 8000,
+        avg_bytes_per_second: 8000,
+        format_type: 2,
+    },
+};

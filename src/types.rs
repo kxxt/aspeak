@@ -4,10 +4,10 @@ use clap::ValueEnum;
 
 use reqwest::header::{HeaderName, HeaderValue};
 use serde::Deserialize;
-use strum::{self, EnumString};
-use strum::{EnumIter, IntoEnumIterator, IntoStaticStr};
+use strum::IntoStaticStr;
+use strum::{self};
 
-use crate::{get_default_voice_by_locale, AspeakError, QUALITY_MAP, QUALITY_RANGE_MAP};
+use crate::get_default_voice_by_locale;
 
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 #[non_exhaustive]
@@ -54,7 +54,6 @@ impl Default for TextOptions<'_> {
         }
     }
 }
-
 
 #[cfg(feature = "python")]
 pub(crate) fn register_python_items(

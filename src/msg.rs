@@ -1,6 +1,7 @@
 use std::str;
 
 use log::trace;
+
 use tokio_tungstenite::{tungstenite::protocol::CloseFrame, tungstenite::Message};
 
 use crate::error::AspeakError;
