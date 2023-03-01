@@ -8,7 +8,6 @@ use futures_util::{
     SinkExt, StreamExt,
 };
 use log::{debug, info};
-use phf::phf_map;
 use std::cell::RefCell;
 
 use tokio::net::TcpStream;
@@ -59,19 +58,8 @@ impl<'a> SynthesizerConfig<'a> {
         write.send(Message::Text(format!(
             "Path: speech.config\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{CLIENT_INFO_PAYLOAD}"
         ,request_id = &request_id))).await?;
-        // now = Utc::now();
-        // let synthesis_context = format!(
-        //     r#"{{"synthesis":{{"audio":{{"metadataOptions":{{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false}},"outputFormat":"{}"}}}}}}"#,
-        //     Into::<&str>::into(self.audio_format)
-        // );
-        // info!("Synthesis context is: {}", synthesis_context);
-        // write.send(Message::Text(format!(
-        //     "Path: synthesis.context\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{synthesis_context}",
-        //     request_id = &request_id)),
-        // ).await?;
         info!("Successfully created Synthesizer");
         Ok(Synthesizer {
-            audio_format: self.audio_format,
             write: RefCell::new(write),
             read: RefCell::new(read),
         })
@@ -83,7 +71,6 @@ impl<T> SynthesisCallback for T where T: FnMut(Option<&[u8]>) -> Result<()> {}
 
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 pub struct Synthesizer {
-    audio_format: AudioFormat,
     write: RefCell<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>>,
     read: RefCell<SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>>,
 }

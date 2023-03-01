@@ -7,10 +7,11 @@ use pyo3::{prelude::*, types::PyDict};
 use reqwest::header::{HeaderName, HeaderValue};
 use tokio::runtime::Runtime;
 
+use crate::audio::play_owned_audio_blocking;
 use crate::parse::{parse_pitch, parse_rate, parse_style_degree};
 use crate::{
-    get_default_voice_by_locale, get_endpoint_by_region, AudioFormat, AuthOptions, Synthesizer,
-    SynthesizerConfig, TextOptions, DEFAULT_ENDPOINT,
+    get_default_voice_by_locale, get_endpoint_by_region, AspeakError, AudioFormat, AuthOptions,
+    Synthesizer, SynthesizerConfig, TextOptions, DEFAULT_ENDPOINT,
 };
 
 #[pymodule]
@@ -32,7 +33,54 @@ struct SpeechService {
     runtime: Runtime,
 }
 
-impl SpeechService {}
+impl SpeechService {
+    fn parse_text_options(options: Option<&PyDict>) -> PyResult<Option<TextOptions>> {
+        options
+            .map(|opts| {
+                Ok::<TextOptions, PyErr>(TextOptions {
+                    pitch: opts
+                        .get_item("pitch")
+                        .map(|p| p.extract())
+                        .transpose()?
+                        .map(parse_pitch)
+                        .transpose()?,
+                    rate: opts
+                        .get_item("rate")
+                        .map(|r| r.extract())
+                        .transpose()?
+                        .map(parse_rate)
+                        .transpose()?,
+                    voice: {
+                        if let Some(voice) =
+                            opts.get_item("voice").map(|p| p.extract()).transpose()?
+                        {
+                            Cow::Borrowed(voice)
+                        } else {
+                            let locale = opts
+                                .get_item("locale")
+                                .map(|l| l.extract())
+                                .transpose()?
+                                .unwrap_or("en-US");
+                            Cow::Borrowed(get_default_voice_by_locale(locale)?)
+                        }
+                    },
+                    style: opts
+                        .get_item("style")
+                        .map(|s| s.extract())
+                        .transpose()?
+                        .map(Cow::Borrowed),
+                    style_degree: opts
+                        .get_item("style_degree")
+                        .map(|l| l.extract())
+                        .transpose()?
+                        .map(parse_style_degree)
+                        .transpose()?,
+                    role: opts.get_item("role").map(|r| r.extract()).transpose()?,
+                })
+            })
+            .transpose()
+    }
+}
 
 #[pymethods]
 impl SpeechService {
@@ -120,6 +168,18 @@ impl SpeechService {
         Ok(())
     }
 
+    fn speak_ssml(&self, ssml: &str) -> PyResult<()> {
+        let buffer = self.runtime.block_on(
+            self.synthesizer
+                .borrow()
+                .as_ref()
+                .ok_or(PyOSError::new_err("Synthesizer not connected"))?
+                .synthesize_ssml(ssml),
+        )?;
+        play_owned_audio_blocking(buffer)?;
+        Ok(())
+    }
+
     fn synthesize_ssml<'a>(&self, ssml: &str, py: Python<'a>) -> PyResult<&'a PyBytes> {
         let data = self.runtime.block_on(
             self.synthesizer
@@ -129,6 +189,22 @@ impl SpeechService {
                 .synthesize_ssml(ssml),
         )?;
         Ok(PyBytes::new(py, &data))
+    }
+
+    #[pyo3(signature = (text, **options))]
+    fn speak_text(&self, text: &str, options: Option<&PyDict>) -> PyResult<()> {
+        let buffer = self.runtime.block_on(
+            self.synthesizer
+                .borrow()
+                .as_ref()
+                .ok_or(PyOSError::new_err("Synthesizer not connected"))?
+                .synthesize_text(
+                    text,
+                    &Self::parse_text_options(options)?.unwrap_or_default(),
+                ),
+        )?;
+        play_owned_audio_blocking(buffer)?;
+        Ok(())
     }
 
     #[pyo3(signature = (text, **options))]
@@ -145,51 +221,7 @@ impl SpeechService {
                 .ok_or(PyOSError::new_err("Synthesizer not connected"))?
                 .synthesize_text(
                     text,
-                    &options
-                        .map(|opts| {
-                            Ok::<TextOptions, PyErr>(TextOptions {
-                                pitch: opts
-                                    .get_item("pitch")
-                                    .map(|p| p.extract())
-                                    .transpose()?
-                                    .map(parse_pitch)
-                                    .transpose()?,
-                                rate: opts
-                                    .get_item("rate")
-                                    .map(|r| r.extract())
-                                    .transpose()?
-                                    .map(parse_rate)
-                                    .transpose()?,
-                                voice: {
-                                    if let Some(voice) =
-                                        opts.get_item("voice").map(|p| p.extract()).transpose()?
-                                    {
-                                        Cow::Borrowed(voice)
-                                    } else {
-                                        let locale = opts
-                                            .get_item("locale")
-                                            .map(|l| l.extract())
-                                            .transpose()?
-                                            .unwrap_or("en-US");
-                                        Cow::Borrowed(get_default_voice_by_locale(locale)?)
-                                    }
-                                },
-                                style: opts
-                                    .get_item("style")
-                                    .map(|s| s.extract())
-                                    .transpose()?
-                                    .map(Cow::Borrowed),
-                                style_degree: opts
-                                    .get_item("style_degree")
-                                    .map(|l| l.extract())
-                                    .transpose()?
-                                    .map(parse_style_degree)
-                                    .transpose()?,
-                                role: opts.get_item("role").map(|r| r.extract()).transpose()?,
-                            })
-                        })
-                        .transpose()?
-                        .unwrap_or_default(),
+                    &Self::parse_text_options(options)?.unwrap_or_default(),
                 ),
         )?;
         Ok(PyBytes::new(py, &data))
