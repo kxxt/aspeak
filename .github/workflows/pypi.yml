@@ -1,0 +1,139 @@
+name: Test and Deploy
+on: [pull_request, push]
+
+jobs:
+  windows-build:
+    strategy:
+      matrix:
+        pyversion: ["3.8", "3.9", "3.10", "3.11"]
+    runs-on: "windows-latest"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install latests stable Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.pyversion }}
+          architecture: x64
+      # - name: Install deps
+      #   run: pip install numpy pandas seaborn xgboost=='1.6.1' scikit-learn
+      # - run: |
+      #     cp README.md aspeak/README.md
+      #     cp LICENSE aspeak/LICENSE
+      - name: Build Wheel (PyO3 Binding)
+        uses: messense/maturin-action@v1
+        with:
+          target: x86_64
+          command: build
+          args: --release --strip -F python --bindings pyo3 --interpreter python --manifest-path aspeak/Cargo.toml --out dist-pyo3
+      - name: Build Wheel (Bin Binding)
+        uses: messense/maturin-action@v1
+        with:
+          target: x86_64
+          command: build
+          args: --release --strip -F python --bindings  bin --interpreter python --manifest-path aspeak/Cargo.toml --out dist-bin
+      - name: Merge Wheels
+        run: bash aspeak/merge-wheel.bash
+      - name: Install wheel
+        run: pip install aspeak --no-index --find-links dist --no-deps --force-reinstall
+      - name: Save Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: wheels
+          path: dist
+      - if: "startsWith(github.ref, 'refs/tags/')"
+        name: Publish Wheels
+        uses: messense/maturin-action@v1
+        with:
+          command: publish
+          args: --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_PASSWORD }} --interpreter python --skip-existing --manifest-path aspeak/Cargo.toml
+
+  # macos-build:
+  #   strategy:
+  #     matrix:
+  #       pyversion: ["3.8", "3.9", "3.10", "3.11"]
+  #   runs-on: "macos-latest"
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Install latests stable Rust
+  #       uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: stable
+  #         override: true
+  #     - uses: actions/setup-python@v2
+  #       with:
+  #         python-version: ${{ matrix.pyversion }}
+  #         architecture: x64
+  #     # - name: Install deps
+  #     #   run: pip install numpy pandas seaborn xgboost=='1.6.1' scikit-learn
+  #     # - run: |
+  #     #     cp README.md aspeak/README.md
+  #     #     cp LICENSE aspeak/LICENSE
+  #     - name: Build Wheels with maturin
+  #       uses: messense/maturin-action@v1
+  #       with:
+  #         target: x86_64
+  #         command: build
+  #         args: --release --strip --interpreter python --manifest-path aspeak/Cargo.toml --out dist
+  #     - name: Install wheel
+  #       run: pip install aspeak --no-index --find-links dist --no-deps --force-reinstall
+  #     - name: Save Artifacts
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: wheels
+  #         path: dist
+  #     - if: "startsWith(github.ref, 'refs/tags/')"
+  #       name: Publish Wheels
+  #       uses: messense/maturin-action@v1
+  #       with:
+  #         command: publish
+  #         target: x86_64
+  #         args: --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_PASSWORD }} --interpreter python --skip-existing --manifest-path aspeak/Cargo.toml
+
+  # linux-build:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       pyversion: ["3.8", "3.9", "3.10", "3.11"]
+  #       # target: [x86_64, i686]
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Install latests stable Rust
+  #       uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: stable
+  #         override: true
+  #     - uses: actions/setup-python@v2
+  #       with:
+  #         python-version: ${{ matrix.pyversion }}
+  #         architecture: x64
+  #     # - name: Install deps
+  #     #   run: pip install numpy pandas seaborn xgboost=='1.6.1' scikit-learn
+  #     # - run: |
+  #     #     cp README.md aspeak/README.md
+  #     #     cp LICENSE aspeak/LICENSE
+  #     - name: Build Wheels with maturin
+  #       uses: messense/maturin-action@v1
+  #       with:
+  #         target: x86_64
+  #         manylinux: auto
+  #         command: build
+  #         args: --release --strip --interpreter python${{ matrix.pyversion }} --manifest-path aspeak/Cargo.toml --out dist
+  #     - name: Install wheel
+  #       run: pip install aspeak --no-index --find-links dist --no-deps --force-reinstall
+  #     - name: Save Artifacts
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: wheels
+  #         path: dist
+  #     - if: "startsWith(github.ref, 'refs/tags/')"
+  #       name: Publish Wheels
+  #       uses: messense/maturin-action@v1
+  #       with:
+  #         command: publish
+  #         target: x86_64
+  #         manylinux: auto
+  #         args: --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_PASSWORD }} --interpreter python${{ matrix.pyversion }} --skip-existing --manifest-path aspeak/Cargo.toml
