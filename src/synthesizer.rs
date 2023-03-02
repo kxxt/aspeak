@@ -7,7 +7,7 @@ use futures_util::{
     stream::{SplitSink, SplitStream},
     SinkExt, StreamExt,
 };
-use log::{debug, info};
+use log::{debug, info, warn};
 use std::cell::RefCell;
 
 use tokio::net::TcpStream;
@@ -60,6 +60,7 @@ impl<'a> SynthesizerConfig<'a> {
         ,request_id = &request_id))).await?;
         info!("Successfully created Synthesizer");
         Ok(Synthesizer {
+            audio_format: self.audio_format,
             write: RefCell::new(write),
             read: RefCell::new(read),
         })
@@ -71,6 +72,7 @@ impl<T> SynthesisCallback for T where T: FnMut(Option<&[u8]>) -> Result<()> {}
 
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 pub struct Synthesizer {
+    audio_format: AudioFormat,
     write: RefCell<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>>,
     read: RefCell<SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>>,
 }
@@ -83,7 +85,7 @@ impl Synthesizer {
         let now = Utc::now();
         let synthesis_context = format!(
             r#"{{"synthesis":{{"audio":{{"metadataOptions":{{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false,"sessionEndEnabled":false}},"outputFormat":"{}"}}}}}}"#,
-            Into::<&str>::into(AudioFormat::Riff24Khz16BitMonoPcm)
+            Into::<&str>::into(self.audio_format)
         );
         self.write.borrow_mut().send(Message::Text(format!(
             "Path: synthesis.context\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{synthesis_context}", 
@@ -118,6 +120,7 @@ impl Synthesizer {
                         },
                     ));
                 }
+                msg => warn!("Received a message that is not handled: {:?}", msg),
             }
         }
         Ok(buffer)
@@ -133,4 +136,3 @@ impl Synthesizer {
         self.synthesize_ssml(&ssml).await
     }
 }
-

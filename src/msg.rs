@@ -18,6 +18,8 @@ pub(crate) enum WebSocketMessage<'a> {
         data: &'a [u8],
     },
     Close(Option<&'a CloseFrame<'a>>),
+    Ping,
+    Pong,
 }
 
 impl<'a> TryFrom<&'a Message> for WebSocketMessage<'a> {
@@ -67,10 +69,12 @@ impl<'a> TryFrom<&'a Message> for WebSocketMessage<'a> {
                 result.ok_or_else(err_construct)?
             }
             Message::Close(ref frame) => WebSocketMessage::Close(frame.as_ref()),
-            _ => {
-                return Err(AspeakError::InvalidWebSocketMessage(
-                    "Niether Binary nor Text!".to_string(),
-                ))
+            Message::Ping(_) => WebSocketMessage::Ping,
+            Message::Pong(_) => WebSocketMessage::Pong,
+            ref msg => {
+                return Err(AspeakError::InvalidWebSocketMessage(format!(
+                    "Niether Binary nor Text! Frame is {msg}"
+                )))
             }
         })
     }

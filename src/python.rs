@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 use std::cell::RefCell;
 
+use log::LevelFilter;
 use pyo3::exceptions::{PyOSError, PyValueError};
 use pyo3::types::{PyBytes, PyIterator, PySequence};
 use pyo3::{prelude::*, types::PyDict};
@@ -10,12 +11,16 @@ use tokio::runtime::Runtime;
 use crate::audio::play_owned_audio_blocking;
 use crate::parse::{parse_pitch, parse_rate, parse_style_degree};
 use crate::{
-    get_default_voice_by_locale, get_endpoint_by_region, AspeakError, AudioFormat, AuthOptions,
-    Synthesizer, SynthesizerConfig, TextOptions, DEFAULT_ENDPOINT,
+    get_default_voice_by_locale, get_endpoint_by_region, AudioFormat, AuthOptions, Synthesizer,
+    SynthesizerConfig, TextOptions, DEFAULT_ENDPOINT,
 };
 
 #[pymodule]
 fn aspeak(py: Python, m: &PyModule) -> PyResult<()> {
+    #[cfg(debug_assertions)]
+    env_logger::builder()
+        .filter_level(LevelFilter::Trace)
+        .init();
     crate::types::register_python_items(py, m)?;
     crate::audio::register_python_items(py, m)?;
     m.add_class::<SpeechService>()?;
