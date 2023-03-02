@@ -30,7 +30,7 @@ fi
 dist_info=$(7z l -ba dist-pyo3/*.whl | grep "\.dist-info[\\/|/]METADATA" | awk '{print $6}' | cut -d"$DELIM" -f1)
 echo "The dist-info is $dist_info"
 
-name_version=$(basename $dist_info -s '.dist-info')
+name_version=$(basename -s '.dist-info' $dist_info)
 
 # Merge wheel
 mkdir -p "$DIST_DIR/merged"
