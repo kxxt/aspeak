@@ -31,6 +31,7 @@ jobs:
           command: build
           args: --release --strip --bindings  bin --interpreter python --manifest-path Cargo.toml --out dist-bin
       - name: Merge Wheels
+        shell: bash
         run: bash merge-wheel.bash
       - name: Install wheel
         run: pip install aspeak --no-index --find-links dist --no-deps --force-reinstall
