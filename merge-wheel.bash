@@ -19,7 +19,7 @@ rm -rf "$DIST_DIR"
 # Grab Info
 file_name=$(basename $(/bin/ls dist-pyo3/*.whl))
 dist_info=$(7z l -ba dist-pyo3/*.whl | grep "\.dist-info/METADATA" | awk '{print $6}' | cut -d/ -f1)
-name_version=$(basename -s '.dist-info' $dist_info)
+name_version=$(basename $dist_info -s '.dist-info')
 
 # Merge wheel
 mkdir -p "$DIST_DIR/merged"

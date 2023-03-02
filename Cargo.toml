@@ -21,6 +21,13 @@ lto = true
 strip = true
 codegen-units = 1
 
+[target.x86_64-apple-darwin]
+rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup"]
+
+[target.aarch64-apple-darwin]
+rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup"]
+
+
 [dependencies]
 chrono = { version = "0.4.23", default-features = false, features = [
     "std",
