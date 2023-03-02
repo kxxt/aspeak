@@ -116,7 +116,7 @@ jobs:
       #     cp README.md aspeak/README.md
       #     cp LICENSE aspeak/LICENSE
       - name: Debug
-      - run: ls aspeak
+        run: ls -lah aspeak
       - name: Build Wheel (PyO3 Binding)
         uses: messense/maturin-action@v1
         with:
