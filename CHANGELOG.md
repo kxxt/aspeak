@@ -1,5 +1,14 @@
 # aspeak Changelog
 
+# v4.0.0-beta.2
+
+- Restrict max log level to info in release build
+- Update config template
+- Do not overwrite existing file unless --overwrite is specified
+- Revert to native-tls to reduce binary size
+- Fix: Correctly handle quality setting from profile
+- Fix: RequestID now gets reset on each request
+- Internal refactor
 
 # v4.0.0-beta.1
 
