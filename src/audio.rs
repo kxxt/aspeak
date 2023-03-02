@@ -210,6 +210,20 @@ impl AudioFormat {
     }
 }
 
+#[cfg(feature = "python")]
+#[pyo3::pymethods]
+impl AudioFormat {
+    #[new]
+    #[pyo3(signature = (container = "mp3", quality = 0, use_closest = false))]
+    fn py_from_container_and_quality(
+        container: &str,
+        quality: i8,
+        use_closest: bool,
+    ) -> crate::Result<AudioFormat> {
+        AudioFormat::from_container_and_quality(container, quality, use_closest)
+    }
+}
+
 /// We can't derive `ValueEnum` for `AudioFormat`
 /// because we need to use the strum's string representation,
 /// which is not supported by clap for now.
