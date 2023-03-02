@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        pyversion: ["3.8", "3.9", "3.10", "3.11"]
+        pyversion: ["3.8"] # "3.9", "3.10", "3.11"]
         # target: [x86_64, i686]
     steps:
       - uses: actions/checkout@v2
@@ -115,6 +115,8 @@ jobs:
       # - run: |
       #     cp README.md aspeak/README.md
       #     cp LICENSE aspeak/LICENSE
+      - name: Debug
+      - run: ls aspeak
       - name: Build Wheel (PyO3 Binding)
         uses: messense/maturin-action@v1
         with:
