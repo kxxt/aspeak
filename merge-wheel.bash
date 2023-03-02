@@ -6,34 +6,34 @@ set -e
 # Implementation:
 
 # Get the name-version from the first wheel.
-TMPDIR=.merge-tmp
+DIST_DIR=dist
 
-rm -rf "$TMPDIR"
-mkdir -p "$TMPDIR/tmp1"
-mkdir -p "$TMPDIR/tmp2"
+rm -rf "$DIST_DIR"
+# mkdir -p "$DIST_DIR/dist-pyo3"
+# mkdir -p "$DIST_DIR/dist-bin"
 
 # Build the wheel
-maturin build -F python --release --bindings pyo3 -o "$TMPDIR/tmp1" $@
-maturin build -F python --release --bindings bin  -o "$TMPDIR/tmp2" $@
+# maturin build -F python --release --bindings pyo3 -o "$DIST_DIR/dist-pyo3" $@
+# maturin build -F python --release --bindings bin  -o "$DIST_DIR/dist-bin" $@
 
 # Grab Info
-file_name=$(basename $(/bin/ls "$TMPDIR/tmp1"/*.whl))
-dist_info=$(unzip -qql "$TMPDIR/tmp1/*.whl" | grep "\.dist-info/METADATA" | awk '{print $4}' | cut -d/ -f1)
+file_name=$(basename $(/bin/ls dist-pyo3/*.whl))
+dist_info=$(unzip -qql dist-pyo3/*.whl | grep "\.dist-info/METADATA" | awk '{print $4}' | cut -d/ -f1)
 name_version=$(basename -s '.dist-info' $dist_info)
 
 # Merge wheel
-mkdir -p "$TMPDIR/merged"
-unzip -qo "$TMPDIR/tmp1/$file_name" -d "$TMPDIR/merged"
-unzip -qo "$TMPDIR/tmp2/$file_name" -d "$TMPDIR/merged"
+mkdir -p "$DIST_DIR/merged"
+unzip -qo "dist-pyo3/$file_name" -d "$DIST_DIR/merged"
+unzip -qo "dist-bin/$file_name" -d "$DIST_DIR/merged"
 
 # Merge record
-unzip -qjo "$TMPDIR/tmp1/$file_name" "*.dist-info/RECORD" -d "$TMPDIR/tmp1"
-unzip -qjo "$TMPDIR/tmp1/$file_name" "*.dist-info/RECORD" -d "$TMPDIR/tmp2"
-cat "$TMPDIR/tmp1/RECORD" "$TMPDIR/tmp2/RECORD" | sort | uniq > "$TMPDIR/merged/$name_version.dist-info/RECORD"
+unzip -qjo "dist-pyo3/$file_name" "*.dist-info/RECORD" -d "dist-pyo3"
+unzip -qjo "dist-bin/$file_name" "*.dist-info/RECORD" -d "dist-bin"
+cat dist-pyo3/RECORD dist-bin/RECORD | sort | uniq > "$DIST_DIR/merged/$name_version.dist-info/RECORD"
 
 # Create the wheel
 
-cd "$TMPDIR/merged"
-zip -qr "../../$file_name" *
-cd ../..
-rm -rf "$TMPDIR"
+cd "$DIST_DIR/merged"
+zip -qr "../$file_name" *
+cd ..
+rm -rf "merged"
