@@ -20,7 +20,14 @@ ls -lah dist-pyo3
 
 # Grab Info
 file_name=$(basename $(/bin/ls dist-pyo3/*.whl))
-dist_info=$(7z l -ba dist-pyo3/*.whl | grep "\.dist-info/METADATA" | awk '{print $6}' | cut -d/ -f1)
+
+if [[ "$OSTYPE" == "msys" ]]; then
+    DELIM='\'
+else
+    DELIM='/'
+fi
+
+dist_info=$(7z l -ba dist-pyo3/*.whl | grep "\.dist-info[\\/|/]METADATA" | awk '{print $6}' | cut -d"$DELIM" -f1)
 echo "The dist-info is $dist_info"
 
 name_version=$(basename $dist_info -s '.dist-info')
