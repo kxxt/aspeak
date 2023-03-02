@@ -123,7 +123,7 @@ jobs:
         with:
           target: x86_64
           command: build
-          manylinux: auto
+          manylinux: off
           args: --release --strip -F python --bindings pyo3 --interpreter python${{ matrix.pyversion }} --manifest-path Cargo.toml --out dist-pyo3
       - name: Build Wheel (Bin Binding)
         uses: messense/maturin-action@v1
