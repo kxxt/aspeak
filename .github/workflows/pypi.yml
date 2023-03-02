@@ -21,22 +21,22 @@ jobs:
   #     # - name: Install deps
   #     #   run: pip install numpy pandas seaborn xgboost=='1.6.1' scikit-learn
   #     # - run: |
-  #     #     cp README.md aspeak/README.md
-  #     #     cp LICENSE aspeak/LICENSE
+  #     #     cp README.md README.md
+  #     #     cp LICENSE LICENSE
   #     - name: Build Wheel (PyO3 Binding)
   #       uses: messense/maturin-action@v1
   #       with:
   #         target: x86_64
   #         command: build
-  #         args: --release --strip -F python --bindings pyo3 --interpreter python --manifest-path aspeak/Cargo.toml --out dist-pyo3
+  #         args: --release --strip -F python --bindings pyo3 --interpreter python --manifest-path Cargo.toml --out dist-pyo3
   #     - name: Build Wheel (Bin Binding)
   #       uses: messense/maturin-action@v1
   #       with:
   #         target: x86_64
   #         command: build
-  #         args: --release --strip -F python --bindings  bin --interpreter python --manifest-path aspeak/Cargo.toml --out dist-bin
+  #         args: --release --strip -F python --bindings  bin --interpreter python --manifest-path Cargo.toml --out dist-bin
   #     - name: Merge Wheels
-  #       run: bash aspeak/merge-wheel.bash
+  #       run: bash merge-wheel.bash
   #     - name: Install wheel
   #       run: pip install aspeak --no-index --find-links dist --no-deps --force-reinstall
   #     - name: Save Artifacts
@@ -49,7 +49,7 @@ jobs:
   #       uses: messense/maturin-action@v1
   #       with:
   #         command: publish
-  #         args: --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_PASSWORD }} --interpreter python --skip-existing --manifest-path aspeak/Cargo.toml
+  #         args: --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_PASSWORD }} --interpreter python --skip-existing --manifest-path Cargo.toml
 
   # macos-build:
   #   strategy:
@@ -70,14 +70,14 @@ jobs:
   #     # - name: Install deps
   #     #   run: pip install numpy pandas seaborn xgboost=='1.6.1' scikit-learn
   #     # - run: |
-  #     #     cp README.md aspeak/README.md
-  #     #     cp LICENSE aspeak/LICENSE
+  #     #     cp README.md README.md
+  #     #     cp LICENSE LICENSE
   #     - name: Build Wheels with maturin
   #       uses: messense/maturin-action@v1
   #       with:
   #         target: x86_64
   #         command: build
-  #         args: --release --strip --interpreter python --manifest-path aspeak/Cargo.toml --out dist
+  #         args: --release --strip --interpreter python --manifest-path Cargo.toml --out dist
   #     - name: Install wheel
   #       run: pip install aspeak --no-index --find-links dist --no-deps --force-reinstall
   #     - name: Save Artifacts
@@ -91,7 +91,7 @@ jobs:
   #       with:
   #         command: publish
   #         target: x86_64
-  #         args: --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_PASSWORD }} --interpreter python --skip-existing --manifest-path aspeak/Cargo.toml
+  #         args: --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_PASSWORD }} --interpreter python --skip-existing --manifest-path Cargo.toml
 
   linux-build:
     runs-on: ubuntu-latest
@@ -113,26 +113,24 @@ jobs:
       # - name: Install deps
       #   run: pip install numpy pandas seaborn xgboost=='1.6.1' scikit-learn
       # - run: |
-      #     cp README.md aspeak/README.md
-      #     cp LICENSE aspeak/LICENSE
-      - name: Debug
-        run: ls -lah .
+      #     cp README.md README.md
+      #     cp LICENSE LICENSE
       - name: Build Wheel (PyO3 Binding)
         uses: messense/maturin-action@v1
         with:
           target: x86_64
           command: build
           manylinux: auto
-          args: --release --strip -F python --bindings pyo3 --interpreter python${{ matrix.pyversion }} --manifest-path aspeak/Cargo.toml --out dist-pyo3
+          args: --release --strip -F python --bindings pyo3 --interpreter python${{ matrix.pyversion }} --manifest-path Cargo.toml --out dist-pyo3
       - name: Build Wheel (Bin Binding)
         uses: messense/maturin-action@v1
         with:
           target: x86_64
           command: build
           manylinux: auto
-          args: --release --strip -F python --bindings  bin --interpreter python${{ matrix.pyversion }} --manifest-path aspeak/Cargo.toml --out dist-bin
+          args: --release --strip -F python --bindings  bin --interpreter python${{ matrix.pyversion }} --manifest-path Cargo.toml --out dist-bin
       - name: Merge Wheels
-        run: bash aspeak/merge-wheel.bash
+        run: bash merge-wheel.bash
       - name: Install wheel
         run: pip install aspeak --no-index --find-links dist --no-deps --force-reinstall
       - name: Save Artifacts
@@ -147,4 +145,4 @@ jobs:
           command: publish
           target: x86_64
           manylinux: auto
-          args: --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_PASSWORD }} --interpreter python${{ matrix.pyversion }} --skip-existing --manifest-path aspeak/Cargo.toml
+          args: --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_PASSWORD }} --interpreter python${{ matrix.pyversion }} --skip-existing --manifest-path Cargo.toml
