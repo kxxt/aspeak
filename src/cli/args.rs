@@ -219,13 +219,13 @@ pub(crate) struct TextArgs {
               See the documentation for more details.")]
     pub pitch: Option<String>,
     #[arg(short, long, value_parser = parse_rate ,
-        help=r#"Set speech rate, default to 0. \
-                Valid values include floats(will be converted to percentages), \
-                percentages like -20%%, floats with postfix "f" \
-                (e.g. 2f means doubling the default speech rate), \
-                and string values like x-slow. See the documentation for more details."# )]
+        help="Set speech rate, default to 0. \
+              Valid values include floats(will be converted to percentages), \
+              percentages like -20%, floats with postfix \"f\" \
+              (e.g. 2f means doubling the default speech rate), \
+              and string values like x-slow. See the documentation for more details." )]
     pub rate: Option<String>,
-    #[arg(short = 'S', long, help = r#"Set speech style, default to "general""#)]
+    #[arg(short = 'S', long, help = r#"Set speech style, default to "general"."#)]
     pub style: Option<String>,
     #[arg(short = 'R', long)]
     pub role: Option<Role>,

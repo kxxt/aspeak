@@ -1,6 +1,7 @@
 mod audio;
 mod error;
 mod msg;
+#[cfg(feature = "python")]
 mod parse;
 mod ssml;
 mod synthesizer;
