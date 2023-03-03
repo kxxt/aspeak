@@ -3,6 +3,7 @@ use std::fmt::Display;
 use colored::Colorize;
 use serde::Deserialize;
 
+/// Voice information
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct Voice {
