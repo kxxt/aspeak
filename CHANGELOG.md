@@ -1,5 +1,13 @@
 # aspeak Changelog
 
+# v4.0.0-rc.1
+
+- Update docs.
+- Fix a typo in config template.
+- Internal refactor.
+- Fix: Now you can use `-` to read from stdin.
+- Fix: Correct some CLI help messages.
+
 # v4.0.0-beta.4
 
 - We no longer publish linux wheels to PyPI because of manylinux compatibility issues. Please compile from source if you want to use python bindings on linux.
