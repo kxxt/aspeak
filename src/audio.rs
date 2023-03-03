@@ -1,6 +1,7 @@
 use std::io::Cursor;
 
 use clap::ValueEnum;
+use log::{debug, info};
 use phf::phf_map;
 use rodio::{Decoder, OutputStream, Sink};
 use serde::Deserialize;
@@ -40,17 +41,20 @@ static WEBM_QUALITY_MAP: QualityMap = phf_map! {
     1i8  => AudioFormat::Webm24Khz16Bit24KbpsMonoOpus,
 };
 
+#[allow(unused)]
 pub fn play_borrowed_audio_blocking(buffer: &[u8]) -> Result<(), AspeakError> {
     play_owned_audio_blocking(buffer.to_vec())
 }
 
 pub fn play_owned_audio_blocking(buffer: Vec<u8>) -> Result<(), AspeakError> {
+    info!("Playing audio... ({} bytes)", buffer.len());
     let (_stream, stream_handle) = OutputStream::try_default()?;
     let sink = Sink::try_new(&stream_handle).unwrap();
     let cursor = Cursor::new(buffer);
     let source = Decoder::new(cursor).map_err(AspeakError::from)?;
     sink.append(source);
     sink.sleep_until_end();
+    debug!("Done playing audio");
     Ok(())
 }
 

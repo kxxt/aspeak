@@ -92,7 +92,7 @@ impl SpeechService {
 #[pymethods]
 impl SpeechService {
     #[new]
-    #[pyo3(signature = (audio_format, **options))]
+    #[pyo3(signature = (audio_format = AudioFormat::Riff24Khz16BitMonoPcm, **options))]
     fn new(audio_format: AudioFormat, options: Option<&PyDict>) -> PyResult<Self> {
         let runtime = tokio::runtime::Builder::new_current_thread()
             .enable_io()
