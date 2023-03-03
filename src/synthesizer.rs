@@ -74,7 +74,6 @@ impl<'a> SynthesizerConfig<'a> {
 }
 
 /// The main struct for interacting with the Azure Speech Service.
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 pub struct Synthesizer {
     audio_format: AudioFormat,
     write: RefCell<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>>,
