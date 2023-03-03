@@ -1,5 +1,5 @@
 /target
-/dist
+/dist*
 /.vscode
 /.idea
 *.wav
