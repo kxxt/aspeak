@@ -1,5 +1,7 @@
 use std::borrow::Cow;
 use std::cell::RefCell;
+use std::fs::File;
+use std::io::Write;
 
 use log::LevelFilter;
 use pyo3::exceptions::{PyOSError, PyValueError};
@@ -185,7 +187,13 @@ impl SpeechService {
         Ok(())
     }
 
-    fn synthesize_ssml<'a>(&self, ssml: &str, py: Python<'a>) -> PyResult<&'a PyBytes> {
+    #[pyo3(signature = (ssml, **options))]
+    fn synthesize_ssml<'a>(
+        &self,
+        ssml: &str,
+        options: Option<&PyDict>,
+        py: Python<'a>,
+    ) -> PyResult<Option<&'a PyBytes>> {
         let data = self.runtime.block_on(
             self.synthesizer
                 .borrow()
@@ -193,7 +201,16 @@ impl SpeechService {
                 .ok_or(PyOSError::new_err("Synthesizer not connected"))?
                 .synthesize_ssml(ssml),
         )?;
-        Ok(PyBytes::new(py, &data))
+        if let Some(output) = options
+            .and_then(|d| d.get_item("output").map(|f| f.extract::<&str>()))
+            .transpose()?
+        {
+            let mut file = File::create(output)?;
+            file.write_all(&data)?;
+            Ok(None)
+        } else {
+            Ok(Some(PyBytes::new(py, &data)))
+        }
     }
 
     #[pyo3(signature = (text, **options))]
@@ -218,7 +235,7 @@ impl SpeechService {
         text: &str,
         options: Option<&PyDict>,
         py: Python<'a>,
-    ) -> PyResult<&'a PyBytes> {
+    ) -> PyResult<Option<&'a PyBytes>> {
         let data = self.runtime.block_on(
             self.synthesizer
                 .borrow()
@@ -229,6 +246,15 @@ impl SpeechService {
                     &Self::parse_text_options(options)?.unwrap_or_default(),
                 ),
         )?;
-        Ok(PyBytes::new(py, &data))
+        if let Some(output) = options
+            .and_then(|d| d.get_item("output").map(|f| f.extract::<&str>()))
+            .transpose()?
+        {
+            let mut file = File::create(output)?;
+            file.write_all(&data)?;
+            Ok(None)
+        } else {
+            Ok(Some(PyBytes::new(py, &data)))
+        }
     }
 }
