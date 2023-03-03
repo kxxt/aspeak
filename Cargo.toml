@@ -1,6 +1,6 @@
 [package]
 name = "aspeak"
-version = "4.0.0-beta.2"
+version = "4.0.0-beta.3"
 edition = "2021"
 authors = ["kxxt <rsworktech@outlook.com>"]
 description = "A simple text-to-speech client based on Azure's speech synthesis API"

@@ -1,5 +1,11 @@
 # aspeak Changelog
 
+# v4.0.0-beta.3
+
+- Fix: include aspeak binary in wheel package
+- CI: set up GitHub Actions to build and publish to PyPI
+
+
 # v4.0.0-beta.2
 
 - Restrict max log level to info in release build
