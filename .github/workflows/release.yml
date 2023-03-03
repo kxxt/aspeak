@@ -56,6 +56,7 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt install libasound2-dev binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu
       - name: Publish to crates.io
+        if: ${{ matrix.os }} == 'ubuntu-22.04' && ${{ matrix.target }} == 'x86_64-unknown-linux-gnu'
         uses: katyo/publish-crates@v2
         with:
           registry-token: ${{ secrets.CARGO_REGISTRY_TOKEN }}
