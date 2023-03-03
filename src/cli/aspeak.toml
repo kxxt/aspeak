@@ -27,7 +27,7 @@ verbosity = 0
 # token = "Your Authentication Token"
 
 # Extra http headers (for experts)
-# headers = [["X-My-Header", "My-Value"], ["X-My-Header2: My-Value2"]]
+# headers = [["X-My-Header", "My-Value"], ["X-My-Header2", "My-Value2"]]
 
 #
 # Configuration for text subcommand

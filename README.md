@@ -24,7 +24,7 @@ Starting from version 4.0.0, `aspeak` is rewritten in rust. The old python versi
 
 ## Installation
 
-### Download from GitHub Releases
+### Download from GitHub Releases (Recommended for most users)
 
 Download the latest release from [here](https://github.com/kxxt/aspeak/releases/latest).
 
@@ -139,7 +139,7 @@ verbosity = 0
 # token = "Your Authentication Token"
 
 # Extra http headers (for experts)
-# headers = [["X-My-Header", "My-Value"], ["X-My-Header2: My-Value2"]]
+# headers = [["X-My-Header", "My-Value"], ["X-My-Header2", "My-Value2"]]
 
 #
 # Configuration for text subcommand
