@@ -79,12 +79,117 @@ Run `aspeak help` to see the help message.
 
 Run `aspeak help <subcommand>` to see the help message of a subcommand.
 
+### Configuration
+
+You can configure `aspeak` by creating a profile. Run the following command to create a profile:
+
+```sh
+$ aspeak config init
+```
+
+To edit the profile, run:
+
+```sh
+$ aspeak config edit
+```
+
+If you have trouble running the above command, you can edit the profile manually:
+
+Fist get the path of the profile by running:
+
+```sh
+$ aspeak config where
+```
+
+Then edit the file with your favorite text editor.
+
+The profile is a TOML file. The default profile looks like this:
+
+Check the comments in the config file for more information about available options.
+
+```toml
+# Profile for aspeak
+# GitHub: https://github.com/kxxt/aspeak
+
+# Output verbosity
+# 0   - Default
+# 1   - Verbose
+# The following output verbosity levels are only supported on debug build
+# 2   - Debug
+# >=3 - Trace
+verbosity = 0
+
+#
+# Authentication configuration
+#
+
+[auth]
+# Endpoint for TTS
+# endpoint = "wss://eastus.api.speech.microsoft.com/cognitiveservices/websocket/v1"
+
+# Alternatively, you can specify the region if you are using official endpoints
+# region = "eastus"
+
+# Azure Subscription Key
+# key = "YOUR_KEY"
+
+# Authentication Token
+# token = "Your Authentication Token"
+
+# Extra http headers (for experts)
+# headers = [["X-My-Header", "My-Value"], ["X-My-Header2: My-Value2"]]
+
+#
+# Configuration for text subcommand
+#
+
+[text]
+# Voice to use. Note that it takes precedence over the locale
+# voice = "en-US-JennyNeural"
+# Locale to use
+locale = "en-US"
+# Rate
+rate = 0
+# Pitch
+pitch = 0
+# Role
+role = "Boy"
+# Style, "general" by default
+style = "general"
+# Style degree, a floating-point number between 0.1 and 2.0
+# style_degree = 1.0
+
+#
+# Output Configuration
+#
+
+[output]
+# Container Format, Only wav/mp3/ogg/webm is supported.
+container = "wav"
+# Audio Quality. Run `aspeak list-qualities` to see available qualities.
+#
+# If you choose a container format that does not support the quality level you specified here, 
+# we will automatically select the closest level for you.
+quality = 0
+# Audio Format(for experts). Run `aspeak list-formats` to see available formats.
+# Note that it takes precedence over container and quality!
+# format = "audio-16khz-128kbitrate-mono-mp4"
+```
+
 ### Examples
 
 #### Speak "Hello, world!" to default speaker.
 
 ```sh
 $ aspeak text "Hello, world"
+```
+
+#### SSML to Speech
+
+```sh
+$ aspeak ssml << EOF 
+<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'><voice name='en-US-JennyNeural'>Hello, world!</voice></speak>
+EOF
 ```
 
 #### List all available voices.
