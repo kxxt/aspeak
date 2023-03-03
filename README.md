@@ -44,6 +44,8 @@ Now the prebuilt wheels are only available for x86_64 architecture.
 Due to some technical issues, I haven't uploaded the source distribution to PyPI yet.
 So to build wheel from source, you need to follow the instructions in [Install from Source](#Install-from-Source).
 
+Because of manylinux compatibility issues, the wheels for linux are not available on PyPI. (But you can still build them from source.)
+
 ### Install from Source
 
 #### CLI Only
@@ -416,13 +418,14 @@ $ aspeak text "Hello World" -F riff-48khz-16bit-mono-pcm -o high-quality.wav
 
 The new version of `aspeak` is written in Rust, and the Python binding is provided by PyO3.
 
-TODO
+Here is a simple example:
 
 ```python
 from aspeak import SpeechService, AudioFormat
 
 service = SpeechService()
 service.connect()
+service.speak_text("Hello, world")
 ```
 
 ### Rust
@@ -433,6 +436,4 @@ Add `aspeak` to your `Cargo.toml`:
 $ cargo add aspeak
 ```
 
-Then you can use it in your code:
-
-TODO
+Then follow the [documentation](https://docs.rs/aspeak) of `aspeak` crate.

@@ -1,5 +1,12 @@
 # aspeak Changelog
 
+# v4.0.0-beta.4
+
+- We no longer publish linux wheels to PyPI because of manylinux compatibility issues. Please compile from source if you want to use python bindings on linux.
+- Improve the python bindings.
+- Update docs.
+- Automatically publish to crates.io.
+
 # v4.0.0-beta.3
 
 - Fix: include aspeak binary in wheel package
