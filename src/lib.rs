@@ -6,10 +6,8 @@ mod ssml;
 mod synthesizer;
 mod types;
 mod voice;
+mod constants;
 
-pub const ORIGIN: &str = "https://azure.microsoft.com";
-pub const DEFAULT_ENDPOINT: &str =
-    "wss://eastus.api.speech.microsoft.com/cognitiveservices/websocket/v1";
 
 pub fn get_endpoint_by_region(region: &str) -> String {
     format!("wss://{region}.tts.speech.microsoft.com/cognitiveservices/websocket/v1")
@@ -19,7 +17,7 @@ pub use audio::{AudioFormat, QUALITY_MAP, QUALITY_RANGE_MAP};
 pub use error::{AspeakError, Result};
 use phf::phf_map;
 pub use ssml::interpolate_ssml;
-pub use synthesizer::{SynthesisCallback, Synthesizer, SynthesizerConfig};
+pub use synthesizer::{Synthesizer, SynthesizerConfig};
 pub use types::*;
 pub use voice::Voice;
 

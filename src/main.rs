@@ -1,13 +1,15 @@
 mod cli;
+mod constants;
 
 use std::{borrow::Cow, path::PathBuf};
 
 use cli::{commands::Command, Cli};
 
-use aspeak::{AspeakError, AudioFormat, SynthesizerConfig, Voice, ORIGIN, QUALITY_MAP};
+use aspeak::{AspeakError, AudioFormat, SynthesizerConfig, Voice, QUALITY_MAP};
 use clap::Parser;
 use color_eyre::{eyre::anyhow, Help};
 use colored::Colorize;
+use constants::ORIGIN;
 
 use log::debug;
 

@@ -2,9 +2,8 @@ use std::borrow::Cow;
 
 use super::config::{AuthConfig, Config, OutputConfig};
 use super::parse;
-use aspeak::{
-    get_endpoint_by_region, AspeakError, AudioFormat, AuthOptions, Role, DEFAULT_ENDPOINT,
-};
+use crate::constants::DEFAULT_ENDPOINT;
+use aspeak::{get_endpoint_by_region, AspeakError, AudioFormat, AuthOptions, Role};
 use clap::{ArgAction, Args, ValueEnum};
 use reqwest::header::{HeaderName, HeaderValue};
 use serde::Deserialize;

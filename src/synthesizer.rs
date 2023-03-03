@@ -1,6 +1,7 @@
+use crate::constants::ORIGIN;
 use crate::{
     interpolate_ssml, msg::WebSocketMessage, AspeakError, AudioFormat, AuthOptions, Result,
-    TextOptions, ORIGIN,
+    TextOptions,
 };
 use chrono::Utc;
 use futures_util::{
@@ -66,9 +67,6 @@ impl<'a> SynthesizerConfig<'a> {
         })
     }
 }
-
-pub trait SynthesisCallback: FnMut(Option<&[u8]>) -> Result<()> {}
-impl<T> SynthesisCallback for T where T: FnMut(Option<&[u8]>) -> Result<()> {}
 
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 pub struct Synthesizer {
