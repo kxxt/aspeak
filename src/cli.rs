@@ -66,10 +66,9 @@ impl Cli {
     pub(crate) fn process_input_text(args: &InputArgs) -> color_eyre::Result<String> {
         let mut s = String::new();
 
-        let file: Box<dyn io::Read> = if let Some(file) = &args.file {
-            Box::new(File::open(file)?)
-        } else {
-            Box::new(io::stdin())
+        let file: Box<dyn io::Read> = match args.file.as_deref() {
+            Some(file) if file != "-" => Box::new(File::open(file)?),
+            _ => Box::new(io::stdin()),
         };
         let mut decoder = if let Some(encoding) = args.encoding.as_deref() {
             let encoding = encoding_rs::Encoding::for_label(encoding.as_bytes()).ok_or(
