@@ -45,6 +45,6 @@ cat dist-pyo3/RECORD dist-bin/RECORD | sort | uniq > "$DIST_DIR/merged/$name_ver
 # Create the wheel
 
 cd "$DIST_DIR/merged"
-zip -qr "../$file_name" *
+7z a -tzip "../$file_name" .
 cd ..
 rm -rf "merged"
