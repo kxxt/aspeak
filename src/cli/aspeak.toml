@@ -63,4 +63,4 @@ container = "wav"
 quality = 0
 # Audio Format(for experts). Run `aspeak list-formats` to see available formats.
 # Note that it takes precedence over container and quality!
-# format = "audio-16khz-128kbitrate-mono-mp4"
+# format = "audio-16khz-128kbitrate-mono-mp3"
