@@ -26,9 +26,10 @@ mod parse;
 #[derive(Parser, Debug)]
 #[command(author, version,
     bin_name = "aspeak",
-    about = "Try speech synthesis service(Powered by Azure Cognitive Services) in your terminal!", 
+    about = "A simple text-to-speech client for Azure TTS API.", 
     long_about = None,
-    after_help = "Please refer to the documentation for limitations at https://github.com/kxxt/aspeak/blob/main/README.md#limitations."
+    after_help = "By default, we try to use a trial endpoint that doesn't require authentication\
+                  But its availability is not guaranteed and its capability is restricted by Microsoft."
 )]
 pub(crate) struct Cli {
     #[command(subcommand)]
