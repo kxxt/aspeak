@@ -44,7 +44,7 @@ You can put it in a directory that is in your `PATH` environment variable so tha
 Installing from PyPI will also install the python binding of `aspeak` for you. Check [Library Usage#Python](#Python) for more information on using the python binding.
 
 ```bash
-pip install -U aspeak
+pip install -U aspeak==4.0.0
 ```
 
 Now the prebuilt wheels are only available for x86_64 architecture.
