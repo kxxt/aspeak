@@ -1,5 +1,38 @@
 # aspeak Changelog
 
+# v4.0.0
+
+aspeak has been rewritten in Rust!:tada: This is a major release and there are some breaking changes.
+Please read the documentation carefully if you are upgrading from v3.x.
+
+Fixes:
+
+- In some cases, the old aspeak can't play audio on some linux platforms.
+- aspeak now respects the encoding arg for both stdin and file.
+- Stricter validations for command line options.
+- Do not overwrite existing file unless --overwrite is specified.
+
+New features:
+
+- Now you can use profiles to save your options.
+    - For example, you can specify your native locale in your profile so that you don't need to specify it every time.
+    - You can learn more about profiles in the [documentation](https://github.com/kxxt/aspeak/tree/main#documentation).
+- Theoretically, aspeak is now available on more platforms. But I will only publish binaries for Windows, macOS and Linux.
+    - However, you can still compile aspeak from source on other platforms.
+- Now you can use custom endpoints and authentication tokens.
+- Now you can add custom request headers.
+- More user friendly output and error messages
+- Now I have set up GitHub Actions to build and publish automatically.
+- Now you can use aspeak as a library in your Rust projects.
+    - You can learn more about the Rust API at [docs.rs](https://docs.rs/aspeak/).
+
+Changes:
+
+- RIIR
+- We no longer publish linux wheels to PyPI because of manylinux compatibility issues. Please compile from source if you want to use python bindings on linux.
+- The python bindings has been changed dramatically. Please read the documentation carefully if you are upgrading from v3.x.
+- The `-F/--format` option now takes kebab case values(e.g. `audio-16khz-128kbitrate-mono-mp3`) instead of pascal case values.
+
 # v4.0.0-rc.1
 
 - Update docs.
