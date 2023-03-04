@@ -1,4 +1,4 @@
-use crate::constants::ORIGIN;
+use crate::constants::{DEFAULT_ENDPOINT, ORIGIN};
 use crate::{
     interpolate_ssml, msg::WebSocketMessage, AspeakError, AudioFormat, AuthOptions, Result,
     TextOptions,
@@ -53,7 +53,8 @@ impl<'a> SynthesizerConfig<'a> {
         if !self.auth.headers.is_empty() {
             // TODO: I don't know if this could be further optimized
             headers.extend(self.auth.headers.iter().map(Clone::clone));
-        } else {
+        } else if self.auth.endpoint == DEFAULT_ENDPOINT {
+            // Trial endpoint
             headers.append("Origin", HeaderValue::from_str(ORIGIN).unwrap());
         }
         debug!("The initial request is {request:?}");
@@ -130,7 +131,7 @@ impl Synthesizer {
         Ok(buffer)
     }
 
-    /// Synthesize the given text into audio(bytes). 
+    /// Synthesize the given text into audio(bytes).
     /// This is a convenience method that interpolates the SSML for you.
     pub async fn synthesize_text(
         &self,
