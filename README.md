@@ -20,6 +20,15 @@ You can try the Azure TTS API online: https://azure.microsoft.com/en-us/services
 
 Starting from version 4.0.0, `aspeak` is rewritten in rust. The old python version is available at the `python` branch.
 
+By default, we try to use a trial endpoint that doesn't require authentication.
+But its availability is not guaranteed and its capability is restricted by Microsoft.
+
+You can sign up for an Azure account and then
+[choose a payment plan as needed (or stick to free tier)](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/speech-services/).
+The free tier includes a quota of 0.5 million characters per month, free of charge.
+
+Please refer to the [Authentication section](#authentication) to learn how to set up authentication for aspeak.
+
 ## Installation
 
 ### Download from GitHub Releases (Recommended for most users)
@@ -79,9 +88,33 @@ Run `aspeak help` to see the help message.
 
 Run `aspeak help <subcommand>` to see the help message of a subcommand.
 
+### Authentication
+
+The authentication options should be placed before any subcommand.
+
+For example, to utilize your authentication token and
+an official endpoint designated by a region,
+run the following command:
+
+```sh
+$ aspeak --region <YOUR_REGION> --token <YOUR_AUTH_TOKEN>  text "Hello World"
+```
+
+If you are using a custom endpoint, you can use the `--endpoint` option instead of `--region`.
+
+In the future, authentication by azure subscription key will be supported. 
+For now, I don't have a subscription key to test.
+
+To avoid repetition, you can store your authentication details
+in your aspeak profile. 
+Read the following section for more details.
+
 ### Configuration
 
-You can configure `aspeak` by creating a profile. Run the following command to create a profile:
+aspeak v4 introduces the concept of profiles. 
+A profile is a configuration file where you can specify default values for the command line options.
+
+Run the following command to create your default profile:
 
 ```sh
 $ aspeak config init
@@ -173,7 +206,13 @@ container = "wav"
 quality = 0
 # Audio Format(for experts). Run `aspeak list-formats` to see available formats.
 # Note that it takes precedence over container and quality!
-# format = "audio-16khz-128kbitrate-mono-mp4"
+# format = "audio-16khz-128kbitrate-mono-mp3"
+```
+
+If you want to use a profile other than your default profile, you can use the `--profile` argument:
+
+```sh
+aspeak --profile <PATH_TO_A_PROFILE> text "Hello"
 ```
 
 ### Pitch and Rate
