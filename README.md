@@ -176,7 +176,7 @@ quality = 0
 # format = "audio-16khz-128kbitrate-mono-mp4"
 ```
 
-### Special Note for Pitch and Rate
+### Pitch and Rate
 
 - `rate`: The speaking rate of the voice.
   - If you use a float value (say `0.5`), the value will be multiplied by 100% and become `50.00%`.
@@ -471,8 +471,8 @@ Here are the common options for `speak_text()` and `synthesize_text()`:
 
 - `locale`: The locale of the voice. Default is `en-US`.
 - `voice`: The voice name. Default is `en-US-JennyNeural`.
-- `rate`: The speaking rate of the voice. It must be a string that fits the requirements as documented in this section: [Special Note for Pitch and Rate](#special-note-for-pitch-and-rate)
-- `pitch`: The pitch of the voice. It must be a string that fits the requirements as documented in this section: [Special Note for Pitch and Rate](#special-note-for-pitch-and-rate)
+- `rate`: The speaking rate of the voice. It must be a string that fits the requirements as documented in this section: [Pitch and Rate](#pitch-and-rate)
+- `pitch`: The pitch of the voice. It must be a string that fits the requirements as documented in this section: [Pitch and Rate](#pitch-and-rate)
 - `style`: The style of the voice.
     - You can get a list of available styles for a specific voice by executing `aspeak -L -v <VOICE_ID>`
     - The default value is `general`.
