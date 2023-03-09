@@ -49,9 +49,13 @@ pub struct AuthArgs {
         conflicts_with = "endpoint"
     )]
     pub region: Option<String>,
-    #[arg(short, long, help = "Auth token for speech service")]
+    #[arg(
+        short,
+        long,
+        help = "Auth token for speech service. If you provide an auth token, the subscription key will be ignored."
+    )]
     pub token: Option<String>,
-    #[arg(short, long, help = "Speech resource key")]
+    #[arg(short, long, help = "Azure subscription key for speech service.")]
     pub key: Option<String>,
     #[arg(short = 'H', long, value_parser = parse::parse_header, help = "Additional request headers")]
     pub headers: Vec<(HeaderName, HeaderValue)>,

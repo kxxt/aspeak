@@ -102,16 +102,16 @@ $ aspeak --region <YOUR_REGION> --token <YOUR_AUTH_TOKEN>  text "Hello World"
 
 If you are using a custom endpoint, you can use the `--endpoint` option instead of `--region`.
 
-In the future, authentication by azure subscription key will be supported. 
+In the future, authentication by azure subscription key will be supported.
 For now, I don't have a subscription key to test.
 
 To avoid repetition, you can store your authentication details
-in your aspeak profile. 
+in your aspeak profile.
 Read the following section for more details.
 
 ### Configuration
 
-aspeak v4 introduces the concept of profiles. 
+aspeak v4 introduces the concept of profiles.
 A profile is a configuration file where you can specify default values for the command line options.
 
 Run the following command to create your default profile:
@@ -201,7 +201,7 @@ style = "general"
 container = "wav"
 # Audio Quality. Run `aspeak list-qualities` to see available qualities.
 #
-# If you choose a container format that does not support the quality level you specified here, 
+# If you choose a container format that does not support the quality level you specified here,
 # we will automatically select the closest level for you.
 quality = 0
 # Audio Format(for experts). Run `aspeak list-formats` to see available formats.
@@ -221,21 +221,21 @@ aspeak --profile <PATH_TO_A_PROFILE> text "Hello"
   - If you use a float value (say `0.5`), the value will be multiplied by 100% and become `50.00%`.
   - You can use the following values as well: `x-slow`, `slow`, `medium`, `fast`, `x-fast`, `default`.
   - You can also use percentage values directly: `+10%`.
-  - You can also use a relative float value (with `f` postfix), `1.2f`: 
+  - You can also use a relative float value (with `f` postfix), `1.2f`:
     - According to the [Azure documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=csharp#adjust-prosody),
-    - A relative value, expressed as a number that acts as a multiplier of the default. 
+    - A relative value, expressed as a number that acts as a multiplier of the default.
     - For example, a value of `1f` results in no change in the rate. A value of `0.5f` results in a halving of the rate. A value of `3f` results in a tripling of the rate.
 - `pitch`: The pitch of the voice.
   - If you use a float value (say `-0.5`), the value will be multiplied by 100% and become `-50.00%`.
   - You can also use the following values as well: `x-low`, `low`, `medium`, `high`, `x-high`, `default`.
   - You can also use percentage values directly: `+10%`.
-  - You can also use a relative value, (e.g. `-2st` or `+80Hz`): 
+  - You can also use a relative value, (e.g. `-2st` or `+80Hz`):
     - According to the [Azure documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=csharp#adjust-prosody),
     - A relative value, expressed as a number preceded by "+" or "-" and followed by "Hz" or "st" that specifies an amount to change the pitch.
     - The "st" indicates the change unit is semitone, which is half of a tone (a half step) on the standard diatonic scale.
   - You can also use an absolute value: e.g. `600Hz`
 
-**Note**: Unreasonable high/low values will be clipped to reasonable values by Azure Cognitive Services. 
+**Note**: Unreasonable high/low values will be clipped to reasonable values by Azure Cognitive Services.
 
 ### Examples
 
@@ -248,7 +248,7 @@ $ aspeak text "Hello, world"
 #### SSML to Speech
 
 ```sh
-$ aspeak ssml << EOF 
+$ aspeak ssml << EOF
 <speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'><voice name='en-US-JennyNeural'>Hello, world!</voice></speak>
 EOF
 ```
@@ -495,8 +495,8 @@ When creating a `SpeechService` instance, you can specify the following paramete
   - You can get an audio format by providing a container format and a quality level: `AudioFormat("mp3", 2)`.
 - `endpoint`: The endpoint of the speech service. We will use a trial endpoint by default.
 - `region`: Alternatively, you can specify the region of the speech service instead of typing the boring endpoint url.
-- `subscription_key`: The subscription key of the speech service. **This option doesn't work yet**
-- `token`: The auth token for the speech service. 
+- `subscription_key`: The subscription key of the speech service.
+- `token`: The auth token for the speech service. If you provide a token, the subscription key will be ignored.
 - `headers`: Additional HTTP headers for the speech service.
 
 Then you need to call `connect()` to connect to the speech service.
@@ -513,22 +513,21 @@ Here are the common options for `speak_text()` and `synthesize_text()`:
 - `rate`: The speaking rate of the voice. It must be a string that fits the requirements as documented in this section: [Pitch and Rate](#pitch-and-rate)
 - `pitch`: The pitch of the voice. It must be a string that fits the requirements as documented in this section: [Pitch and Rate](#pitch-and-rate)
 - `style`: The style of the voice.
-    - You can get a list of available styles for a specific voice by executing `aspeak -L -v <VOICE_ID>`
-    - The default value is `general`.
+  - You can get a list of available styles for a specific voice by executing `aspeak -L -v <VOICE_ID>`
+  - The default value is `general`.
 - `style_degree`: The degree of the style.
-    - According to the
-      [Azure documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=csharp#adjust-speaking-styles)
-      , style degree specifies the intensity of the speaking style.
-      It is a floating point number between 0.01 and 2, inclusive.
-    - At the time of writing, style degree adjustments are supported for Chinese (Mandarin, Simplified) neural voices.
+  - According to the
+    [Azure documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=csharp#adjust-speaking-styles)
+    , style degree specifies the intensity of the speaking style.
+    It is a floating point number between 0.01 and 2, inclusive.
+  - At the time of writing, style degree adjustments are supported for Chinese (Mandarin, Simplified) neural voices.
 - `role`: The role of the voice.
-    - According to the
-      [Azure documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=csharp#adjust-speaking-styles)
-      , `role` specifies the speaking role-play. The voice acts as a different age and gender, but the voice name isn't
-      changed.
-    - At the time of writing, role adjustments are supported for these Chinese (Mandarin, Simplified) neural voices:
-      `zh-CN-XiaomoNeural`, `zh-CN-XiaoxuanNeural`, `zh-CN-YunxiNeural`, and `zh-CN-YunyeNeural`.
-
+  - According to the
+    [Azure documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=csharp#adjust-speaking-styles)
+    , `role` specifies the speaking role-play. The voice acts as a different age and gender, but the voice name isn't
+    changed.
+  - At the time of writing, role adjustments are supported for these Chinese (Mandarin, Simplified) neural voices:
+    `zh-CN-XiaomoNeural`, `zh-CN-XiaoxuanNeural`, `zh-CN-YunxiNeural`, and `zh-CN-YunyeNeural`.
 
 ### Rust
 

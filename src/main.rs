@@ -7,7 +7,7 @@ use cli::{commands::Command, Cli};
 
 use aspeak::{AspeakError, AudioFormat, SynthesizerConfig, Voice, QUALITY_MAP};
 use clap::Parser;
-use color_eyre::{eyre::{anyhow, bail}, Help};
+use color_eyre::{eyre::anyhow, Help};
 use colored::Colorize;
 use constants::ORIGIN;
 
@@ -22,9 +22,6 @@ use crate::cli::{commands::ConfigCommand, config::Config};
 fn main() -> color_eyre::eyre::Result<()> {
     color_eyre::install()?;
     let cli = Cli::parse();
-    if cli.auth.key.is_some() {
-        bail!("Authentication by Azure subscription key is not supported yet!");
-    }
     let config = cli.profile.load_profile()?;
     env_logger::builder()
         .filter_level(cli.get_log_level(config.as_ref().and_then(|c| c.verbosity)))

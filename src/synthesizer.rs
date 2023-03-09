@@ -50,6 +50,13 @@ impl<'a> SynthesizerConfig<'a> {
         };
         let mut request = uri.into_client_request()?;
         let headers = request.headers_mut();
+        if let Some(key) = self.auth.key {
+            headers.append(
+                "Ocp-Apim-Subscription-Key",
+                HeaderValue::from_str(&key)
+                    .map_err(|e| AspeakError::ArgumentError(e.to_string()))?,
+            );
+        }
         if !self.auth.headers.is_empty() {
             // TODO: I don't know if this could be further optimized
             headers.extend(self.auth.headers.iter().map(Clone::clone));
