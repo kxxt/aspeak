@@ -57,7 +57,7 @@ Because of manylinux compatibility issues, the wheels for linux are not availabl
 
 #### CLI Only
 
-The easiest way to install `aspeak` is to use cargo:
+The easiest way to install `aspeak` from source is to use cargo:
 
 ```bash
 cargo install aspeak
