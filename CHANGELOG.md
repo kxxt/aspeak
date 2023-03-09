@@ -1,5 +1,10 @@
 # aspeak Changelog
 
+# v4.1.0
+
+- You can now use your azure subscription key to authenticate. Special thanks to [@yhmickey](https://github.com/yhmickey)
+  for trusting me and providing me his subscription key for testing.
+
 # v4.0.0
 
 aspeak has been rewritten in Rust!:tada: This is a major release and there are some breaking changes.
@@ -15,16 +20,16 @@ Fixes:
 New features:
 
 - Now you can use profiles to save your options.
-    - For example, you can specify your native locale in your profile so that you don't need to specify it every time.
-    - You can learn more about profiles in the [documentation](https://github.com/kxxt/aspeak/tree/main#documentation).
+  - For example, you can specify your native locale in your profile so that you don't need to specify it every time.
+  - You can learn more about profiles in the [documentation](https://github.com/kxxt/aspeak/tree/main#documentation).
 - Theoretically, aspeak is now available on more platforms. But I will only publish binaries for Windows, macOS and Linux.
-    - However, you can still compile aspeak from source on other platforms.
+  - However, you can still compile aspeak from source on other platforms.
 - Now you can use custom endpoints and authentication tokens.
 - Now you can add custom request headers.
 - More user friendly output and error messages
 - Now I have set up GitHub Actions to build and publish automatically.
 - Now you can use aspeak as a library in your Rust projects.
-    - You can learn more about the Rust API at [docs.rs](https://docs.rs/aspeak/).
+  - You can learn more about the Rust API at [docs.rs](https://docs.rs/aspeak/).
 
 Changes:
 
@@ -53,7 +58,6 @@ Changes:
 - Fix: include aspeak binary in wheel package
 - CI: set up GitHub Actions to build and publish to PyPI
 
-
 # v4.0.0-beta.2
 
 - Restrict max log level to info in release build
@@ -66,9 +70,9 @@ Changes:
 
 # v4.0.0-beta.1
 
-- Now you can create a profile! 
-    - You no longer need to use the locale arg every time if you do not want to use English locale. Just specify your locale in your profile.
-    - You can also provide default values for other options.
+- Now you can create a profile!
+  - You no longer need to use the locale arg every time if you do not want to use English locale. Just specify your locale in your profile.
+  - You can also provide default values for other options.
 - Many internal refactors.
 
 # v4.0.0-alpha.4
