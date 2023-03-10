@@ -39,6 +39,10 @@ After downloading, extract the archive and you will get a binary executable file
 
 You can put it in a directory that is in your `PATH` environment variable so that you can run it from anywhere.
 
+### Installl from AUR (Recommended for Arch Linux users)
+
+From v4.1.0, You can install `aspeak-bin` from AUR.
+
 ### Install from PyPI
 
 Installing from PyPI will also install the python binding of `aspeak` for you. Check [Library Usage#Python](#Python) for more information on using the python binding.
@@ -62,6 +66,8 @@ The easiest way to install `aspeak` from source is to use cargo:
 ```bash
 cargo install aspeak
 ```
+
+Alternatively, you can also install `aspeak` from AUR.
 
 #### Python Wheel
 
