@@ -41,12 +41,14 @@ impl<'a> SynthesizerConfig<'a> {
         let uuid = Uuid::new_v4();
         let request_id = uuid.as_simple().to_string();
         let uri = {
-            let uri = format!("{}?X-ConnectionId={}", self.auth.endpoint, request_id);
+            let mut url = url::Url::parse(&self.auth.endpoint)?;
+            url.query_pairs_mut()
+                .append_pair("X-ConnectionId", &request_id);
             if let Some(auth_token) = self.auth.token {
-                format!("{uri}&Authorization={auth_token}")
-            } else {
-                uri
+                url.query_pairs_mut()
+                    .append_pair("Authorization", &auth_token);
             }
+            url
         };
         let mut request = uri.into_client_request()?;
         let headers = request.headers_mut();

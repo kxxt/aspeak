@@ -1,6 +1,7 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
+#[non_exhaustive]
 pub enum AspeakError {
     #[error("Websocket error")]
     WebSocketError(#[from] tokio_tungstenite::tungstenite::Error),
@@ -22,6 +23,8 @@ pub enum AspeakError {
     XmlError(#[from] xml::writer::Error),
     #[error("{0}")]
     ArgumentError(String),
+    #[error("Failed to parse url")]
+    UrlParseError(#[from] url::ParseError),
 }
 
 pub type Result<T> = std::result::Result<T, AspeakError>;
@@ -29,9 +32,9 @@ pub type Result<T> = std::result::Result<T, AspeakError>;
 #[cfg(feature = "python")]
 mod python {
     use super::AspeakError::{self, *};
+    use color_eyre::eyre::Report;
     use pyo3::exceptions::{PyOSError, PyValueError};
     use pyo3::prelude::*;
-    use color_eyre::eyre::Report;
 
     impl From<AspeakError> for PyErr {
         fn from(value: AspeakError) -> Self {
