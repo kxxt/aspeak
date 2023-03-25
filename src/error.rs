@@ -31,12 +31,13 @@ mod python {
     use super::AspeakError::{self, *};
     use pyo3::exceptions::{PyOSError, PyValueError};
     use pyo3::prelude::*;
+    use color_eyre::eyre::Report;
 
     impl From<AspeakError> for PyErr {
         fn from(value: AspeakError) -> Self {
             match value {
                 ArgumentError(detail) => PyValueError::new_err(detail),
-                e => PyOSError::new_err(e.to_string()),
+                e => PyOSError::new_err(format!("{:?}", Report::from(e))),
             }
         }
     }
