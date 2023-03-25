@@ -39,13 +39,13 @@ verbosity = 0
 # Locale to use
 locale = "en-US"
 # Rate
-rate = 0
+# rate = 0
 # Pitch
-pitch = 0
+# pitch = 0
 # Role
-role = "Boy"
+# role = "Boy"
 # Style, "general" by default
-style = "general"
+# style = "general"
 # Style degree, a floating-point number between 0.1 and 2.0
 # style_degree = 1.0
 
