@@ -7,7 +7,7 @@ use self::{
     commands::Command,
     config::TextConfig,
 };
-use aspeak::{get_default_voice_by_locale, AspeakError, TextOptions};
+use aspeak::{get_default_voice_by_locale, AspeakError, RichSsmlOptions, TextOptions};
 use std::{
     borrow::Cow,
     fs::{File, OpenOptions},
@@ -163,15 +163,28 @@ impl Cli {
                         .flatten()
                 }
             },
-            style: args
-                .style
-                .as_deref()
-                .or_else(|| config.and_then(|c| c.style.as_deref()))
-                .map(Cow::Borrowed),
-            role: args.role.or_else(|| config.and_then(|c| c.role)),
-            style_degree: args
-                .style_degree
-                .or_else(|| config.and_then(|c| c.style_degree)),
+            rich_ssml_options: {
+                let rich_ssml = !args.no_rich_ssml;
+                let effective_config = if rich_ssml { config } else { None };
+                let style = args
+                    .style
+                    .as_deref()
+                    .or_else(|| effective_config.and_then(|c| c.style.as_deref()))
+                    .map(Cow::Borrowed);
+                let role = args.role.or_else(|| effective_config.and_then(|c| c.role));
+                let style_degree = args
+                    .style_degree
+                    .or_else(|| effective_config.and_then(|c| c.style_degree));
+                if style.is_some() || role.is_some() || style_degree.is_some() {
+                    Some(RichSsmlOptions {
+                        style,
+                        role,
+                        style_degree,
+                    })
+                } else {
+                    None
+                }
+            },
         })
     }
 }

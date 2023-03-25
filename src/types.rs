@@ -38,6 +38,17 @@ pub struct AuthOptions<'a> {
     pub headers: Cow<'a, [(HeaderName, HeaderValue)]>,
 }
 
+/// Options that are only available if rich ssml is enabled
+#[derive(Debug, Clone)]
+pub struct RichSsmlOptions<'a> {
+    /// Speech style
+    pub style: Option<Cow<'a, str>>,
+    /// Speech role
+    pub role: Option<Role>,
+    /// Speech style degree, which should be in range [0.01, 2]
+    pub style_degree: Option<f32>,
+}
+
 /// Options for text-to-speech
 #[derive(Debug, Clone)]
 pub struct TextOptions<'a> {
@@ -47,12 +58,8 @@ pub struct TextOptions<'a> {
     pub pitch: Option<Cow<'a, str>>,
     /// Rate string that will be inserted directly into SSML
     pub rate: Option<Cow<'a, str>>,
-    /// Speech style
-    pub style: Option<Cow<'a, str>>,
-    /// Speech role
-    pub role: Option<Role>,
-    /// Speech style degree, which should be in range [0.01, 2]
-    pub style_degree: Option<f32>,
+    /// Rich SSML options
+    pub rich_ssml_options: Option<RichSsmlOptions<'a>>,
 }
 
 impl Default for TextOptions<'_> {
@@ -61,9 +68,7 @@ impl Default for TextOptions<'_> {
             voice: Cow::Borrowed(get_default_voice_by_locale("en-US").unwrap()),
             pitch: Default::default(),
             rate: Default::default(),
-            style: Default::default(),
-            role: Default::default(),
-            style_degree: Default::default(),
+            rich_ssml_options: Default::default(),
         }
     }
 }

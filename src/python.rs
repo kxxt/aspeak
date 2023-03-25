@@ -72,18 +72,29 @@ impl SpeechService {
                             Cow::Borrowed(get_default_voice_by_locale(locale)?)
                         }
                     },
-                    style: opts
-                        .get_item("style")
-                        .map(|s| s.extract())
-                        .transpose()?
-                        .map(Cow::Borrowed),
-                    style_degree: opts
-                        .get_item("style_degree")
-                        .map(|l| l.extract())
-                        .transpose()?
-                        .map(parse_style_degree)
-                        .transpose()?,
-                    role: opts.get_item("role").map(|r| r.extract()).transpose()?,
+                    rich_ssml_options: {
+                        let style = opts
+                            .get_item("style")
+                            .map(|s| s.extract())
+                            .transpose()?
+                            .map(Cow::Borrowed);
+                        let style_degree = opts
+                            .get_item("style_degree")
+                            .map(|l| l.extract())
+                            .transpose()?
+                            .map(parse_style_degree)
+                            .transpose()?;
+                        let role = opts.get_item("role").map(|r| r.extract()).transpose()?;
+                        if style.is_some() || style_degree.is_some() || role.is_some() {
+                            Some(crate::types::RichSsmlOptions {
+                                style,
+                                style_degree,
+                                role,
+                            })
+                        } else {
+                            None
+                        }
+                    },
                 })
             })
             .transpose()

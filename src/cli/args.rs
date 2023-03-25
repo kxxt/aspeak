@@ -244,4 +244,14 @@ pub(crate) struct TextArgs {
     pub voice: Option<String>,
     #[arg(short, long, help = "Locale to use, default to en-US")]
     pub locale: Option<String>,
+    #[arg(
+        long,
+        help = "Disable rich SSML. This is helpful if the endpoint you are using doesn't support some ssml extensions like mstts.\
+                If this flag is set, role, style and style_degree settings from profile will be ignored.",
+        action = ArgAction::SetTrue,
+        conflicts_with = "style",
+        conflicts_with = "role",
+        conflicts_with = "style_degree"
+    )]
+    pub no_rich_ssml: bool,
 }
