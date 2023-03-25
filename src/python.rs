@@ -5,7 +5,7 @@ use std::io::Write;
 
 use log::LevelFilter;
 use pyo3::exceptions::{PyOSError, PyValueError};
-use pyo3::types::{PyBytes, PyIterator, PySequence};
+use pyo3::types::{PyBytes, PySequence};
 use pyo3::{prelude::*, types::PyDict};
 use reqwest::header::{HeaderName, HeaderValue};
 use tokio::runtime::Runtime;
@@ -135,10 +135,11 @@ impl SpeechService {
             .transpose()?;
         let headers = options
             .and_then(|dict| dict.get_item("headers"))
-            .map(|h| h.downcast::<PyIterator>())
+            .map(|h| h.downcast::<PySequence>())
             .transpose()?;
         let headers = if let Some(headers) = headers {
             headers
+                .iter()?
                 .map(|header| {
                     header.and_then(|header| {
                         let header = header.downcast::<PySequence>()?;
