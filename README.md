@@ -98,18 +98,15 @@ Run `aspeak help <subcommand>` to see the help message of a subcommand.
 
 The authentication options should be placed before any subcommand.
 
-For example, to utilize your authentication token and
+For example, to utilize your subscription key and
 an official endpoint designated by a region,
 run the following command:
 
 ```sh
-$ aspeak --region <YOUR_REGION> --token <YOUR_AUTH_TOKEN>  text "Hello World"
+$ aspeak --region <YOUR_REGION> --key <YOUR_SUBSCRIPTION_KEY>  text "Hello World"
 ```
 
 If you are using a custom endpoint, you can use the `--endpoint` option instead of `--region`.
-
-In the future, authentication by azure subscription key will be supported.
-For now, I don't have a subscription key to test.
 
 To avoid repetition, you can store your authentication details
 in your aspeak profile.

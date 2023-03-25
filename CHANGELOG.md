@@ -1,5 +1,16 @@
 # aspeak Changelog
 
+# v4.2.0
+
+- Show detailed error message in python bindings.
+- Fix: Previously, the `role` field in the default profile template is not commented out and set to `Boy`.
+  You might want to comment it out if you are already using the default profile template and haven't changed it.
+- The `role`, `style` and `style_degree` fields are now commented out in the default profile template.
+- Feature: Now you can use `--no-rich-ssml` flag to disable rich SSML features such as `role`, `style` and `style_degree`.
+  This is useful if you are using an endpoint that does not support rich SSML features.
+- Fix(Python bindings): Now the `SpeechService` constructor correctly takes an iterable instead of an iterator for `headers` keyword argument.
+- Fix: Now aspeak correctly handles endpoint urls that contain query parameters.
+
 # v4.1.0
 
 - You can now use your azure subscription key to authenticate. Special thanks to [@yhmickey](https://github.com/yhmickey)
