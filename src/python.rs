@@ -3,7 +3,6 @@ use std::cell::RefCell;
 use std::fs::File;
 use std::io::Write;
 
-use log::LevelFilter;
 use pyo3::exceptions::{PyOSError, PyValueError};
 use pyo3::types::{PyBytes, PySequence};
 use pyo3::{prelude::*, types::PyDict};
@@ -22,7 +21,7 @@ use crate::{
 fn aspeak(py: Python, m: &PyModule) -> PyResult<()> {
     #[cfg(debug_assertions)]
     env_logger::builder()
-        .filter_level(LevelFilter::Trace)
+        .filter_level(log::LevelFilter::Trace)
         .init();
     crate::types::register_python_items(py, m)?;
     crate::audio::register_python_items(py, m)?;
