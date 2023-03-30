@@ -17,6 +17,7 @@ use tokio_tungstenite::{tungstenite::client::IntoClientRequest, MaybeTlsStream, 
 use crate::error::{AspeakError, Result};
 
 type TungsteniteError = tokio_tungstenite::tungstenite::Error;
+pub(crate) type WsStream = WebSocketStream<MaybeTlsStream<MaybeSocks5Stream<TcpStream>>>;
 
 #[derive(Debug)]
 pub(crate) enum MaybeSocks5Stream<S: AsyncRead + AsyncWrite + Unpin> {
@@ -116,7 +117,7 @@ impl UriExt for Url {
 
 pub(crate) async fn connect_directly<R>(
     request: R,
-) -> Result<WebSocketStream<MaybeTlsStream<MaybeSocks5Stream<TcpStream>>>>
+) -> Result<WsStream>
 where
     R: IntoClientRequest + Unpin,
 {
@@ -132,7 +133,7 @@ where
 pub(crate) async fn connect_via_socks5_proxy(
     ws_req: tokio_tungstenite::tungstenite::handshake::client::Request,
     proxy_addr: &Url,
-) -> Result<WebSocketStream<MaybeTlsStream<MaybeSocks5Stream<TcpStream>>>> {
+) -> Result<WsStream> {
     debug!("Using socks5 proxy: {proxy_addr}");
     let proxy_stream = MaybeSocks5Stream::Socks5Stream(
         Socks5Stream::connect(
@@ -161,7 +162,7 @@ pub(crate) async fn connect_via_socks5_proxy(
 pub(crate) async fn connect_via_http_proxy(
     ws_req: tokio_tungstenite::tungstenite::handshake::client::Request,
     proxy_addr: &Url,
-) -> Result<WebSocketStream<MaybeTlsStream<MaybeSocks5Stream<TcpStream>>>> {
+) -> Result<WsStream> {
     debug!("Using http proxy: {proxy_addr}");
     let authority = ws_req.uri().host_colon_port()?;
     let proxy_server = proxy_addr.host_colon_port()?;

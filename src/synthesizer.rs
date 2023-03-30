@@ -1,5 +1,5 @@
 use crate::constants::{DEFAULT_ENDPOINT, ORIGIN};
-use crate::net::{self, connect_directly, MaybeSocks5Stream};
+use crate::net::{self, connect_directly, WsStream};
 use crate::{
     interpolate_ssml, msg::WebSocketMessage, AspeakError, AudioFormat, AuthOptions, Result,
     TextOptions,
@@ -13,10 +13,9 @@ use hyper::Request;
 use log::{debug, info, warn};
 use std::cell::RefCell;
 
-use tokio::net::TcpStream;
 use tokio_tungstenite::{
     tungstenite::client::IntoClientRequest, tungstenite::http::HeaderValue,
-    tungstenite::protocol::Message, MaybeTlsStream, WebSocketStream,
+    tungstenite::protocol::Message,
 };
 use uuid::Uuid;
 
@@ -119,9 +118,8 @@ impl<'a> SynthesizerConfig<'a> {
 /// The main struct for interacting with the Azure Speech Service.
 pub struct Synthesizer {
     audio_format: AudioFormat,
-    write:
-        RefCell<SplitSink<WebSocketStream<MaybeTlsStream<MaybeSocks5Stream<TcpStream>>>, Message>>,
-    read: RefCell<SplitStream<WebSocketStream<MaybeTlsStream<MaybeSocks5Stream<TcpStream>>>>>,
+    write: RefCell<SplitSink<WsStream, Message>>,
+    read: RefCell<SplitStream<WsStream>>,
 }
 
 impl Synthesizer {
