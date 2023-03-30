@@ -29,6 +29,9 @@ verbosity = 0
 # Extra http headers (for experts)
 # headers = [["X-My-Header", "My-Value"], ["X-My-Header2", "My-Value2"]]
 
+# Proxy
+# proxy = "socks5://127.0.0.1:7890"
+
 #
 # Configuration for text subcommand
 #
