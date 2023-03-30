@@ -1,14 +1,14 @@
 mod audio;
+mod constants;
 mod error;
 mod msg;
+mod net;
 #[cfg(feature = "python")]
 mod parse;
 mod ssml;
 mod synthesizer;
 mod types;
 mod voice;
-mod constants;
-
 
 /// Get the official endpoint by its region (e.g. `eastus`)
 pub fn get_endpoint_by_region(region: &str) -> String {
@@ -26,17 +26,16 @@ pub use voice::Voice;
 #[cfg(feature = "python")]
 pub mod python;
 
-
 /// Returns the default voice for the given locale.
-/// 
+///
 /// # Argument
-/// 
-/// `locale`: A locale code like `en-US`. 
+///
+/// `locale`: A locale code like `en-US`.
 /// Note that the country code is in uppercase and the language code is in lowercase.
-/// 
+///
 /// # Returns
-/// 
-/// A `Result` that contains the default voice as a static string slice if the 
+///
+/// A `Result` that contains the default voice as a static string slice if the
 /// specified locale is valid. Otherwise, an `AspeakError` is returned.
 pub fn get_default_voice_by_locale(locale: &str) -> Result<&'static str> {
     DEFAULT_VOICES.get(locale).copied().ok_or_else(|| {

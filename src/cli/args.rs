@@ -59,6 +59,12 @@ pub struct AuthArgs {
     pub key: Option<String>,
     #[arg(short = 'H', long, value_parser = parse::parse_header, help = "Additional request headers")]
     pub headers: Vec<(HeaderName, HeaderValue)>,
+    #[arg(
+        long,
+        help = "Proxy to use. Only http and socks5 proxy are supported by now.\
+                This option takes precedence over the http_proxy or HTTP_PROXY environment variable."
+    )]
+    pub proxy: Option<String>,
 }
 
 impl AuthArgs {
@@ -108,6 +114,15 @@ impl AuthArgs {
                 Cow::Owned(vec)
             } else {
                 Cow::Borrowed(&self.headers)
+            },
+            proxy: {
+                let p = self.proxy.as_deref().map(Cow::Borrowed).or_else(|| {
+                    std::env::var("HTTP_PROXY")
+                        .or_else(|_| std::env::var("http_proxy"))
+                        .ok() // TODO: Maybe the proxy won't be set if the env var is not valid utf8. In this case, the env var is silently ignored.
+                        .map(Cow::Owned)
+                });
+                p.or_else(|| auth_config.and_then(|c| c.proxy.as_deref().map(Cow::Borrowed)))
             },
         })
     }

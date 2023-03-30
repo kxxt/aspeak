@@ -1,4 +1,5 @@
 use crate::constants::{DEFAULT_ENDPOINT, ORIGIN};
+use crate::net::{self, connect_directly, MaybeSocks5Stream};
 use crate::{
     interpolate_ssml, msg::WebSocketMessage, AspeakError, AudioFormat, AuthOptions, Result,
     TextOptions,
@@ -8,12 +9,13 @@ use futures_util::{
     stream::{SplitSink, SplitStream},
     SinkExt, StreamExt,
 };
+use hyper::Request;
 use log::{debug, info, warn};
 use std::cell::RefCell;
 
 use tokio::net::TcpStream;
 use tokio_tungstenite::{
-    connect_async, tungstenite::client::IntoClientRequest, tungstenite::http::HeaderValue,
+    tungstenite::client::IntoClientRequest, tungstenite::http::HeaderValue,
     tungstenite::protocol::Message, MaybeTlsStream, WebSocketStream,
 };
 use uuid::Uuid;
@@ -36,26 +38,25 @@ impl<'a> SynthesizerConfig<'a> {
         Self { auth, audio_format }
     }
 
-    /// Connect to the Azure Speech Service and return a [`Synthesizer`] on success.
-    pub async fn connect(self) -> Result<Synthesizer> {
+    fn generate_client_request(&self) -> Result<Request<()>> {
         let uuid = Uuid::new_v4();
         let request_id = uuid.as_simple().to_string();
         let uri = {
             let mut url = url::Url::parse(&self.auth.endpoint)?;
             url.query_pairs_mut()
                 .append_pair("X-ConnectionId", &request_id);
-            if let Some(auth_token) = self.auth.token {
+            if let Some(auth_token) = &self.auth.token {
                 url.query_pairs_mut()
-                    .append_pair("Authorization", &auth_token);
+                    .append_pair("Authorization", auth_token);
             }
             url
         };
         let mut request = uri.into_client_request()?;
         let headers = request.headers_mut();
-        if let Some(key) = self.auth.key {
+        if let Some(key) = &self.auth.key {
             headers.append(
                 "Ocp-Apim-Subscription-Key",
-                HeaderValue::from_str(&key)
+                HeaderValue::from_str(key)
                     .map_err(|e| AspeakError::ArgumentError(e.to_string()))?,
             );
         }
@@ -67,10 +68,42 @@ impl<'a> SynthesizerConfig<'a> {
             headers.append("Origin", HeaderValue::from_str(ORIGIN).unwrap());
         }
         debug!("The initial request is {request:?}");
-        let (wss, resp) = connect_async(request).await?;
+        Ok(request)
+    }
+
+    /// Connect to the Azure Speech Service and return a [`Synthesizer`] on success.
+    pub async fn connect(self) -> Result<Synthesizer> {
+        let request = self.generate_client_request()?;
+        let proxy_url = self
+            .auth
+            .proxy
+            .as_deref()
+            .map(reqwest::Url::parse)
+            .transpose()
+            .map_err(|_| {
+                AspeakError::GeneralConnectionError(format!(
+                    "Invalid proxy url: {}",
+                    self.auth.proxy.as_deref().unwrap()
+                ))
+            })?;
+        let wss = match proxy_url.as_ref().map(|x| x.scheme()) {
+            Some("socks5") => {
+                net::connect_via_socks5_proxy(request, proxy_url.as_ref().unwrap()).await?
+            }
+            Some("http") | Some("https") => {
+                net::connect_via_http_proxy(request, proxy_url.as_ref().unwrap()).await?
+            }
+            None => connect_directly(request).await?,
+            Some(other_scheme) => {
+                return Err(AspeakError::GeneralConnectionError(format!(
+                    "Unsupported proxy scheme: {other_scheme}"
+                )))
+            }
+        };
         let (mut write, read) = wss.split();
+        let uuid = Uuid::new_v4();
+        let request_id = uuid.as_simple().to_string();
         let now = Utc::now();
-        debug!("The response to the initial request is {:?}", resp);
         write.send(Message::Text(format!(
             "Path: speech.config\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{CLIENT_INFO_PAYLOAD}"
         ,request_id = &request_id))).await?;
@@ -86,8 +119,9 @@ impl<'a> SynthesizerConfig<'a> {
 /// The main struct for interacting with the Azure Speech Service.
 pub struct Synthesizer {
     audio_format: AudioFormat,
-    write: RefCell<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>>,
-    read: RefCell<SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>>,
+    write:
+        RefCell<SplitSink<WebSocketStream<MaybeTlsStream<MaybeSocks5Stream<TcpStream>>>, Message>>,
+    read: RefCell<SplitStream<WebSocketStream<MaybeTlsStream<MaybeSocks5Stream<TcpStream>>>>>,
 }
 
 impl Synthesizer {

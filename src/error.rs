@@ -25,6 +25,8 @@ pub enum AspeakError {
     ArgumentError(String),
     #[error("Failed to parse url")]
     UrlParseError(#[from] url::ParseError),
+    #[error("Connection error: {0}")]
+    GeneralConnectionError(String),
 }
 
 pub type Result<T> = std::result::Result<T, AspeakError>;

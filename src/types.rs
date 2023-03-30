@@ -36,6 +36,8 @@ pub struct AuthOptions<'a> {
     pub key: Option<Cow<'a, str>>,
     /// Additional headers
     pub headers: Cow<'a, [(HeaderName, HeaderValue)]>,
+    /// Proxy server to use. Only http and socks5 proxy are supported by now.
+    pub proxy: Option<Cow<'a, str>>,
 }
 
 /// Options that are only available if rich ssml is enabled
