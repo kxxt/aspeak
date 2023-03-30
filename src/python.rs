@@ -35,6 +35,7 @@ struct SpeechService {
     endpoint: String,
     key: Option<String>,
     auth_token: Option<String>,
+    proxy: Option<String>,
     headers: Vec<(HeaderName, HeaderValue)>,
     synthesizer: RefCell<Option<Synthesizer>>,
     runtime: Runtime,
@@ -132,6 +133,10 @@ impl SpeechService {
             .and_then(|dict| dict.get_item("token"))
             .map(|k| k.extract())
             .transpose()?;
+        let proxy: Option<String> = options
+            .and_then(|dict| dict.get_item("proxy"))
+            .map(|p| p.extract())
+            .transpose()?;
         let headers = options
             .and_then(|dict| dict.get_item("headers"))
             .map(|h| h.downcast::<PySequence>())
@@ -164,6 +169,7 @@ impl SpeechService {
             key,
             auth_token: token,
             headers,
+            proxy,
             synthesizer: RefCell::new(None),
             runtime,
         })
@@ -178,6 +184,7 @@ impl SpeechService {
                         key: self.key.as_deref().map(Cow::Borrowed),
                         headers: Cow::Borrowed(self.headers.as_slice()),
                         token: self.auth_token.as_deref().map(Cow::Borrowed),
+                        proxy: self.proxy.as_deref().map(Cow::Borrowed),
                     },
                     self.audio_format,
                 )
