@@ -15,6 +15,14 @@ pub(crate) enum Command {
         voice: Option<String>,
         #[arg(short, long, help = "Locale to list, default to all locales")]
         locale: Option<String>,
+        #[arg(
+            short,
+            long,
+            help = "The voice list API url. If this option is not specified and the region option is specified,\
+                    then aspeak will use the API url designated for that region. Otherwise the API url for the \
+                    trial endpoint is used."
+        )]
+        url: Option<String>,
     },
     #[command(about = "List available qualities for all container formats")]
     ListQualities,

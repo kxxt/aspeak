@@ -7,17 +7,26 @@ use cli::{commands::Command, Cli};
 
 use aspeak::{AspeakError, AudioFormat, SynthesizerConfig, Voice, QUALITY_MAP};
 use clap::Parser;
-use color_eyre::{eyre::anyhow, Help};
+use color_eyre::{
+    eyre::{anyhow, bail},
+    Help,
+};
 use colored::Colorize;
 use constants::ORIGIN;
 
 use log::debug;
 
-use reqwest::header::{self, HeaderMap, HeaderValue};
+use reqwest::header::{HeaderMap, HeaderValue};
 use strum::IntoEnumIterator;
 use tokio_tungstenite::tungstenite::{error::ProtocolError, Error as TungsteniteError};
 
-use crate::cli::{commands::ConfigCommand, config::Config};
+use crate::cli::{
+    commands::ConfigCommand,
+    config::{Config, EndpointConfig},
+};
+
+const TRIAL_VOICE_LIST_URL: &str =
+    "https://eastus.api.speech.microsoft.com/cognitiveservices/voices/list";
 
 fn main() -> color_eyre::eyre::Result<()> {
     color_eyre::install()?;
@@ -87,20 +96,52 @@ fn main() -> color_eyre::eyre::Result<()> {
             Command::ListVoices {
                 ref voice,
                 ref locale,
+                ref url
             } => {
-                let url = "https://eastus.api.speech.microsoft.com/cognitiveservices/voices/list";
-                let headers =
-                    HeaderMap::from_iter([(header::ORIGIN, HeaderValue::from_str(ORIGIN).unwrap())]);
-                let mut client = reqwest::ClientBuilder::new()
-                    .no_proxy()
-                    .default_headers(headers);
+                let url = url.as_deref().map(Cow::Borrowed).or_else(|| {
+                    auth.region.as_deref().or_else(||
+                        config.as_ref().and_then(
+                            |c| c.auth.as_ref().and_then(
+                                |a| a.endpoint.as_ref().and_then(
+                                    |e| if let EndpointConfig::Region { ref region } =  e {
+                                        Some(region.as_str())
+                                    } else {
+                                        None
+                                    }
+                                )
+                            )
+                        )
+                    ).map(|r| Cow::Owned(format!("https://{r}.tts.speech.microsoft.com/cognitiveservices/voices/list")))
+                }).unwrap_or(Cow::Borrowed(TRIAL_VOICE_LIST_URL));
                 let auth = auth.to_auth_options(config.as_ref().and_then(|c|c.auth.as_ref()))?;
+                let mut client = reqwest::ClientBuilder::new().no_proxy(); // Disable default system proxy detection.
                 if let Some(proxy) = auth.proxy {
                     client = client.proxy(reqwest::Proxy::all(&*proxy)?);
                 }
                 let client = client.build()?;
-                let request = client.get(url).build()?;
-                let voices = client.execute(request).await?.json::<Vec<Voice>>().await?;
+                let mut request = client.get(&*url);
+                if let Some(key) = &auth.key {
+                    request = request.header(
+                        "Ocp-Apim-Subscription-Key",
+                        HeaderValue::from_str(key)
+                            .map_err(|e| AspeakError::ArgumentError(e.to_string()))?,
+                    );
+                }
+                if !auth.headers.is_empty() {
+                    // TODO: I don't know if this could be further optimized
+                    request = request.headers(HeaderMap::from_iter(auth.headers.iter().map(Clone::clone)));
+                } else if url == TRIAL_VOICE_LIST_URL {
+                    // Trial endpoint
+                    request = request.header("Origin", HeaderValue::from_str(ORIGIN).unwrap());
+                }
+                let request = request.build()?;
+                let response = client.execute(request).await?;
+                if response.status().is_client_error() {
+                    bail!(anyhow!("Failed to retrieve voice list because of client side error.").with_note(|| "Maybe you are not authorized. Did you specify an auth token or a subscription key? Did the key/token expire?"))
+                } else if response.status().is_server_error() {
+                    bail!("Failed to retrieve voice list because of server side error.")
+                }
+                let voices = response.json::<Vec<Voice>>().await?;
                 let voices = voices.iter();
                 let locale_id = locale.as_deref();
                 let voice_id = voice.as_deref();
