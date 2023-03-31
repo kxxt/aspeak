@@ -1,5 +1,12 @@
 # aspeak Changelog
 
+# v4.3.0-beta.2
+
+- Change the implementation of socks5 proxy.
+- Make the `list-voices` command respect the proxy settings.
+- Fix: Now the `list-voices` command correctly handles the auth settings. (region, token, key)
+- Now you can specify the voice list API url when using the `list-voices` command.
+
 # v4.3.0-beta.1
 
 - Add support for http and socks5 proxy. Command line option `--proxy` and environment variable `http_proxy`(or `HTTP_PROXY`) are available.
