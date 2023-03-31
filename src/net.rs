@@ -11,7 +11,7 @@ use tokio::{
     net::TcpStream,
 };
 
-use fast_socks5::client::Socks5Stream;
+use tokio_socks::tcp::Socks5Stream;
 use tokio_tungstenite::{tungstenite::client::IntoClientRequest, MaybeTlsStream, WebSocketStream};
 
 use crate::error::{AspeakError, Result};
@@ -72,11 +72,15 @@ impl<S: AsyncRead + AsyncWrite + Unpin> AsyncWrite for MaybeSocks5Stream<S> {
 }
 
 trait UriExt {
-    fn host_colon_port(&self) -> Result<String>;
+    fn host_and_port(&self) -> Result<(&str, u16)>;
+    fn host_colon_port(&self) -> Result<String> {
+        let (host, port) = self.host_and_port()?;
+        Ok(format!("{}:{}", host, port))
+    }
 }
 
 impl UriExt for Uri {
-    fn host_colon_port(&self) -> Result<String> {
+    fn host_and_port(&self) -> Result<(&str, u16)> {
         let port = match (self.port_u16(), self.scheme_str()) {
             (Some(port), _) => port,
             (None, Some("wss") | Some("https")) => 443,
@@ -91,12 +95,12 @@ impl UriExt for Uri {
         let host = self.host().ok_or_else(|| {
             AspeakError::GeneralConnectionError(format!("No host in uri: {}", self))
         })?;
-        Ok(format!("{}:{}", host, port))
+        Ok((host, port))
     }
 }
 
 impl UriExt for Url {
-    fn host_colon_port(&self) -> Result<String> {
+    fn host_and_port(&self) -> Result<(&str, u16)> {
         let port = match (self.port(), self.scheme()) {
             (Some(port), _) => port,
             (None, "wss" | "https") => 443,
@@ -111,13 +115,11 @@ impl UriExt for Url {
         let host = self.host_str().ok_or_else(|| {
             AspeakError::GeneralConnectionError(format!("No host in uri: {}", self))
         })?;
-        Ok(format!("{}:{}", host, port))
+        Ok((host, port))
     }
 }
 
-pub(crate) async fn connect_directly<R>(
-    request: R,
-) -> Result<WsStream>
+pub(crate) async fn connect_directly<R>(request: R) -> Result<WsStream>
 where
     R: IntoClientRequest + Unpin,
 {
@@ -137,14 +139,15 @@ pub(crate) async fn connect_via_socks5_proxy(
     debug!("Using socks5 proxy: {proxy_addr}");
     let proxy_stream = MaybeSocks5Stream::Socks5Stream(
         Socks5Stream::connect(
-            proxy_addr.host_colon_port()?,
-            ws_req
-                .uri()
-                .host()
-                .expect("expected to have uri host")
-                .to_string(),
-            ws_req.uri().port_u16().unwrap_or(443),
-            fast_socks5::client::Config::default(),
+            proxy_addr.host_and_port()?,
+            (
+                ws_req
+                    .uri()
+                    .host()
+                    .expect("expected to have uri host")
+                    .to_string(),
+                ws_req.uri().port_u16().unwrap_or(443),
+            ),
         )
         .await
         .map_err(|e| {
