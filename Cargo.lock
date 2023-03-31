@@ -1694,6 +1694,7 @@ dependencies = [
  "serde_urlencoded",
  "tokio",
  "tokio-native-tls",
+ "tokio-socks",
  "tower-service",
  "url",
  "wasm-bindgen",

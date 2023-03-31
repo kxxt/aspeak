@@ -91,10 +91,14 @@ fn main() -> color_eyre::eyre::Result<()> {
                 let url = "https://eastus.api.speech.microsoft.com/cognitiveservices/voices/list";
                 let headers =
                     HeaderMap::from_iter([(header::ORIGIN, HeaderValue::from_str(ORIGIN).unwrap())]);
-                let client = reqwest::ClientBuilder::new()
-                    .default_headers(headers)
-                    .build()
-                    .unwrap();
+                let mut client = reqwest::ClientBuilder::new()
+                    .no_proxy()
+                    .default_headers(headers);
+                let auth = auth.to_auth_options(config.as_ref().and_then(|c|c.auth.as_ref()))?;
+                if let Some(proxy) = auth.proxy {
+                    client = client.proxy(reqwest::Proxy::all(&*proxy)?);
+                }
+                let client = client.build()?;
                 let request = client.get(url).build()?;
                 let voices = client.execute(request).await?.json::<Vec<Voice>>().await?;
                 let voices = voices.iter();

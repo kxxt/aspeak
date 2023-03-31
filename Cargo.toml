@@ -41,6 +41,7 @@ phf = { version = "0.11.1", features = ["macros"] }
 reqwest = { version = "0.11.14", default_features = false, features = [
     "json",
     "native-tls",
+    "socks"
 ] }
 rodio = "0.17.1"
 serde = { version = "1.0.152", features = ["derive"] }
