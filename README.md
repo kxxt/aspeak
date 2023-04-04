@@ -48,7 +48,7 @@ From v4.1.0, You can install `aspeak-bin` from AUR.
 Installing from PyPI will also install the python binding of `aspeak` for you. Check [Library Usage#Python](#Python) for more information on using the python binding.
 
 ```bash
-pip install -U aspeak==4.3.0-beta.2
+pip install -U aspeak==4.3.0
 ```
 
 Now the prebuilt wheels are only available for x86_64 architecture.
@@ -107,6 +107,16 @@ $ aspeak --region <YOUR_REGION> --key <YOUR_SUBSCRIPTION_KEY>  text "Hello World
 ```
 
 If you are using a custom endpoint, you can use the `--endpoint` option instead of `--region`.
+
+From v4.3.0, you can let aspeak use a proxy server to connect to the endpoint. 
+For now, only http and socks5 proxies are supported (no https support yet). For example:
+
+```sh
+$ aspeak --proxy http://your_proxy_server:port text "Hello World"
+$ aspeak --proxy socks5://your_proxy_server:port text "Hello World"
+```
+
+aspeak also respects the `HTTP_PROXY`(or `http_proxy`) environment variable.
 
 To avoid repetition, you can store your authentication details
 in your aspeak profile.

@@ -1,5 +1,15 @@
 # aspeak Changelog
 
+# v4.3.0
+
+- Add support for http and socks5 proxy. Command line option `--proxy` and environment variable `http_proxy`(or `HTTP_PROXY`) are available.
+  - Example: `aspeak --proxy "socks5://127.0.0.1:7890" text "Hello World"`
+  - You can also set the proxy in the `auth` section in your profile.
+  - By now, connection to https proxy server is not supported!
+  - For python binding, use the `proxy` keyword argument in the `SpeechService` constructor.
+- Fix: Now the `list-voices` command correctly handles the auth settings. (region, token, key)
+- Now you can specify the voice list API url when using the `list-voices` command.
+
 # v4.3.0-beta.2
 
 - Change the implementation of socks5 proxy.

@@ -108,6 +108,16 @@ $ aspeak --region <YOUR_REGION> --key <YOUR_SUBSCRIPTION_KEY>  text "Hello World
 
 If you are using a custom endpoint, you can use the `--endpoint` option instead of `--region`.
 
+From v4.3.0, you can let aspeak use a proxy server to connect to the endpoint. 
+For now, only http and socks5 proxies are supported (no https support yet). For example:
+
+```sh
+$ aspeak --proxy http://your_proxy_server:port text "Hello World"
+$ aspeak --proxy socks5://your_proxy_server:port text "Hello World"
+```
+
+aspeak also respects the `HTTP_PROXY`(or `http_proxy`) environment variable.
+
 To avoid repetition, you can store your authentication details
 in your aspeak profile.
 Read the following section for more details.
