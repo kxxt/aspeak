@@ -48,7 +48,7 @@ From v4.1.0, You can install `aspeak-bin` from AUR.
 Installing from PyPI will also install the python binding of `aspeak` for you. Check [Library Usage#Python](#Python) for more information on using the python binding.
 
 ```bash
-pip install -U aspeak==4.3.0-beta.2
+pip install -U aspeak==@@ASPEAK_VERSION@@
 ```
 
 Now the prebuilt wheels are only available for x86_64 architecture.
@@ -144,75 +144,7 @@ The profile is a TOML file. The default profile looks like this:
 Check the comments in the config file for more information about available options.
 
 ```toml
-# Profile for aspeak
-# GitHub: https://github.com/kxxt/aspeak
-
-# Output verbosity
-# 0   - Default
-# 1   - Verbose
-# The following output verbosity levels are only supported on debug build
-# 2   - Debug
-# >=3 - Trace
-verbosity = 0
-
-#
-# Authentication configuration
-#
-
-[auth]
-# Endpoint for TTS
-# endpoint = "wss://eastus.api.speech.microsoft.com/cognitiveservices/websocket/v1"
-
-# Alternatively, you can specify the region if you are using official endpoints
-# region = "eastus"
-
-# Azure Subscription Key
-# key = "YOUR_KEY"
-
-# Authentication Token
-# token = "Your Authentication Token"
-
-# Extra http headers (for experts)
-# headers = [["X-My-Header", "My-Value"], ["X-My-Header2", "My-Value2"]]
-
-# Proxy
-# proxy = "socks5://127.0.0.1:7890"
-
-#
-# Configuration for text subcommand
-#
-
-[text]
-# Voice to use. Note that it takes precedence over the locale
-# voice = "en-US-JennyNeural"
-# Locale to use
-locale = "en-US"
-# Rate
-# rate = 0
-# Pitch
-# pitch = 0
-# Role
-# role = "Boy"
-# Style, "general" by default
-# style = "general"
-# Style degree, a floating-point number between 0.1 and 2.0
-# style_degree = 1.0
-
-#
-# Output Configuration
-#
-
-[output]
-# Container Format, Only wav/mp3/ogg/webm is supported.
-container = "wav"
-# Audio Quality. Run `aspeak list-qualities` to see available qualities.
-#
-# If you choose a container format that does not support the quality level you specified here, 
-# we will automatically select the closest level for you.
-quality = 0
-# Audio Format(for experts). Run `aspeak list-formats` to see available formats.
-# Note that it takes precedence over container and quality!
-# format = "audio-16khz-128kbitrate-mono-mp3"
+@@PROFILE_TEMPLATE@@
 ```
 
 If you want to use a profile other than your default profile, you can use the `--profile` argument:
