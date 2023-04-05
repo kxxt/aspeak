@@ -1,5 +1,9 @@
 # aspeak Changelog
 
+# v4.3.1
+
+- Fix a bug that caused the `endpoint` and `region` token in profile to be ineffective.
+
 # v4.3.0
 
 - Add support for http and socks5 proxy. Command line option `--proxy` and environment variable `http_proxy`(or `HTTP_PROXY`) are available.

@@ -48,7 +48,7 @@ From v4.1.0, You can install `aspeak-bin` from AUR.
 Installing from PyPI will also install the python binding of `aspeak` for you. Check [Library Usage#Python](#Python) for more information on using the python binding.
 
 ```bash
-pip install -U aspeak==4.3.0
+pip install -U aspeak==4.3.1
 ```
 
 Now the prebuilt wheels are only available for x86_64 architecture.
