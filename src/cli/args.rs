@@ -83,7 +83,7 @@ impl AuthArgs {
                         .map(get_endpoint_by_region)
                         .map(Cow::Owned)
                 })
-                .or_else(|| auth_config.and_then(|c| c.endpoint.as_ref().map(Cow::from)))
+                .or_else(|| auth_config.and_then(|c| c.endpoint_config.as_ref().map(Cow::from)))
                 .unwrap_or(Cow::Borrowed(DEFAULT_ENDPOINT)),
             token: match (self.token.as_deref(), auth_config) {
                 (Some(token), _) => Some(Cow::Borrowed(token)),

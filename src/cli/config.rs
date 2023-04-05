@@ -65,9 +65,11 @@ impl Config {
     }
 }
 
+
 #[derive(Debug, Deserialize)]
 pub(crate) struct AuthConfig {
-    pub endpoint: Option<EndpointConfig>,
+    #[serde(flatten)]
+    pub endpoint_config: Option<EndpointConfig>,
     pub key: Option<String>,
     pub token: Option<String>,
     pub headers: Option<Vec<(String, String)>>,
@@ -75,6 +77,7 @@ pub(crate) struct AuthConfig {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(untagged)]
 pub(crate) enum EndpointConfig {
     Endpoint { endpoint: String },
     Region { region: String },
