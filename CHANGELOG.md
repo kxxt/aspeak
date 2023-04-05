@@ -2,7 +2,7 @@
 
 # v4.3.1
 
-- Fix a bug that caused the `endpoint` and `region` token in profile to be ineffective.
+- Fix a bug that caused the `endpoint` and `region` settings in profile to be ineffective.
 
 # v4.3.0
 
