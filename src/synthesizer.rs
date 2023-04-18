@@ -58,7 +58,7 @@ impl<'a> SynthesizerConfig<'a> {
         if !self.auth.headers.is_empty() {
             // TODO: I don't know if this could be further optimized
             headers.extend(self.auth.headers.iter().map(Clone::clone));
-        } else if self.auth.endpoint == DEFAULT_ENDPOINT {
+        } else if Some(self.auth.endpoint.as_ref()) == DEFAULT_ENDPOINT {
             // Trial endpoint
             headers.append("Origin", HeaderValue::from_str(ORIGIN).unwrap());
         }
@@ -95,13 +95,12 @@ impl<'a> SynthesizerConfig<'a> {
                 )))
             }
         };
-        // let (mut write, read) = wss.split();
         let uuid = Uuid::new_v4();
-        let request_id = uuid.as_simple().to_string();
+        let request_id = uuid.as_simple();
         let now = Utc::now();
         wss.send(Message::Text(format!(
             "Path: speech.config\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{CLIENT_INFO_PAYLOAD}"
-        ,request_id = &request_id))).await?;
+        ))).await?;
         info!("Successfully created Synthesizer");
         Ok(Synthesizer {
             audio_format: self.audio_format,
@@ -121,7 +120,7 @@ impl Synthesizer {
     #[allow(clippy::await_holding_refcell_ref)]
     pub async fn synthesize_ssml(&mut self, ssml: &str) -> Result<Vec<u8>> {
         let uuid = Uuid::new_v4();
-        let request_id = uuid.as_simple().to_string();
+        let request_id = uuid.as_simple();
         let now = Utc::now();
         let synthesis_context = format!(
             r#"{{"synthesis":{{"audio":{{"metadataOptions":{{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false,"sessionEndEnabled":false}},"outputFormat":"{}"}}}}}}"#,
