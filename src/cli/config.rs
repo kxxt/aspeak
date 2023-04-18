@@ -65,7 +65,6 @@ impl Config {
     }
 }
 
-
 #[derive(Debug, Deserialize)]
 pub(crate) struct AuthConfig {
     #[serde(flatten)]

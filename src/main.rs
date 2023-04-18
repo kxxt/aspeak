@@ -9,7 +9,7 @@ use aspeak::{AspeakError, AudioFormat, SynthesizerConfig, Voice, QUALITY_MAP};
 use clap::Parser;
 use color_eyre::{
     eyre::{anyhow, bail},
-    Help,
+    Help, Report,
 };
 use colored::Colorize;
 use constants::ORIGIN;
@@ -25,8 +25,7 @@ use crate::cli::{
     config::{Config, EndpointConfig},
 };
 
-const TRIAL_VOICE_LIST_URL: &str =
-    "https://eastus.api.speech.microsoft.com/cognitiveservices/voices/list";
+const TRIAL_VOICE_LIST_URL: Option<&str> = None;
 
 fn main() -> color_eyre::eyre::Result<()> {
     color_eyre::install()?;
@@ -112,7 +111,13 @@ fn main() -> color_eyre::eyre::Result<()> {
                             )
                         )
                     ).map(|r| Cow::Owned(format!("https://{r}.tts.speech.microsoft.com/cognitiveservices/voices/list")))
-                }).unwrap_or(Cow::Borrowed(TRIAL_VOICE_LIST_URL));
+                })
+                .or_else(|| TRIAL_VOICE_LIST_URL.map(Cow::Borrowed))
+                .ok_or_else(
+                    || Report::new(AspeakError::ArgumentError("No voice list API url specified!".to_string()))
+                        .with_note(|| "The default voice list API that is used in aspeak v4 has been shutdown and is no longer available.")
+                        .with_suggestion(|| "You can still use the list-voices command by specifying a region(authentication needed) or a custom voice list API url.")
+                )?;
                 let auth = auth.to_auth_options(config.as_ref().and_then(|c|c.auth.as_ref()))?;
                 let mut client = reqwest::ClientBuilder::new().no_proxy(); // Disable default system proxy detection.
                 if let Some(proxy) = auth.proxy {
@@ -130,7 +135,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 if !auth.headers.is_empty() {
                     // TODO: I don't know if this could be further optimized
                     request = request.headers(HeaderMap::from_iter(auth.headers.iter().map(Clone::clone)));
-                } else if url == TRIAL_VOICE_LIST_URL {
+                } else if Some(url.as_ref()) == TRIAL_VOICE_LIST_URL {
                     // Trial endpoint
                     request = request.header("Origin", HeaderValue::from_str(ORIGIN).unwrap());
                 }

@@ -15,7 +15,7 @@ verbosity = 0
 
 [auth]
 # Endpoint for TTS
-# endpoint = "wss://eastus.api.speech.microsoft.com/cognitiveservices/websocket/v1"
+# endpoint = "wss://eastus.tts.speech.microsoft.com/cognitiveservices/websocket/v1"
 
 # Alternatively, you can specify the region if you are using official endpoints
 # region = "eastus"
