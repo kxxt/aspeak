@@ -55,7 +55,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref()))?;
                 let callback = Cli::process_output(output_args.output, output_args.overwrite)?;
                 let auth_options = auth.to_auth_options(config.as_ref().and_then(|c|c.auth.as_ref()))?;
-                let synthesizer = SynthesizerConfig::new(auth_options, audio_format)
+                let mut synthesizer = SynthesizerConfig::new(auth_options, audio_format)
                     .connect()
                     .await?;
                 let audio_data = synthesizer.synthesize_ssml(&ssml).await?;
@@ -76,7 +76,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref()))?;
                 let callback = Cli::process_output(output_args.output, output_args.overwrite)?;
                 let auth_options = auth.to_auth_options(config.as_ref().and_then(|c|c.auth.as_ref()))?;
-                let synthesizer = SynthesizerConfig::new(auth_options,audio_format)
+                let mut synthesizer = SynthesizerConfig::new(auth_options,audio_format)
                     .connect()
                     .await?;
                 let options = &Cli::process_text_options(&text_args, config.as_ref().and_then(|c|c.text.as_ref()))?;

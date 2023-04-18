@@ -197,8 +197,8 @@ impl SpeechService {
     fn speak_ssml(&self, ssml: &str) -> PyResult<()> {
         let buffer = self.runtime.block_on(
             self.synthesizer
-                .borrow()
-                .as_ref()
+                .borrow_mut()
+                .as_mut()
                 .ok_or(PyOSError::new_err("Synthesizer not connected"))?
                 .synthesize_ssml(ssml),
         )?;
@@ -215,8 +215,8 @@ impl SpeechService {
     ) -> PyResult<Option<&'a PyBytes>> {
         let data = self.runtime.block_on(
             self.synthesizer
-                .borrow()
-                .as_ref()
+                .borrow_mut()
+                .as_mut()
                 .ok_or(PyOSError::new_err("Synthesizer not connected"))?
                 .synthesize_ssml(ssml),
         )?;
@@ -236,8 +236,8 @@ impl SpeechService {
     fn speak_text(&self, text: &str, options: Option<&PyDict>) -> PyResult<()> {
         let buffer = self.runtime.block_on(
             self.synthesizer
-                .borrow()
-                .as_ref()
+                .borrow_mut()
+                .as_mut()
                 .ok_or(PyOSError::new_err("Synthesizer not connected"))?
                 .synthesize_text(
                     text,
@@ -257,8 +257,8 @@ impl SpeechService {
     ) -> PyResult<Option<&'a PyBytes>> {
         let data = self.runtime.block_on(
             self.synthesizer
-                .borrow()
-                .as_ref()
+                .borrow_mut()
+                .as_mut()
                 .ok_or(PyOSError::new_err("Synthesizer not connected"))?
                 .synthesize_text(
                     text,

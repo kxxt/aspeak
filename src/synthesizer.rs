@@ -5,13 +5,9 @@ use crate::{
     TextOptions,
 };
 use chrono::Utc;
-use futures_util::{
-    stream::{SplitSink, SplitStream},
-    SinkExt, StreamExt,
-};
+use futures_util::{SinkExt, StreamExt};
 use hyper::Request;
 use log::{debug, info, warn};
-use std::cell::RefCell;
 
 use tokio_tungstenite::{
     tungstenite::client::IntoClientRequest, tungstenite::http::HeaderValue,
@@ -85,7 +81,7 @@ impl<'a> SynthesizerConfig<'a> {
                     self.auth.proxy.as_deref().unwrap()
                 ))
             })?;
-        let wss = match proxy_url.as_ref().map(|x| x.scheme()) {
+        let mut wss = match proxy_url.as_ref().map(|x| x.scheme()) {
             Some("socks5") => {
                 net::connect_via_socks5_proxy(request, proxy_url.as_ref().unwrap()).await?
             }
@@ -99,18 +95,17 @@ impl<'a> SynthesizerConfig<'a> {
                 )))
             }
         };
-        let (mut write, read) = wss.split();
+        // let (mut write, read) = wss.split();
         let uuid = Uuid::new_v4();
         let request_id = uuid.as_simple().to_string();
         let now = Utc::now();
-        write.send(Message::Text(format!(
+        wss.send(Message::Text(format!(
             "Path: speech.config\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{CLIENT_INFO_PAYLOAD}"
         ,request_id = &request_id))).await?;
         info!("Successfully created Synthesizer");
         Ok(Synthesizer {
             audio_format: self.audio_format,
-            write: RefCell::new(write),
-            read: RefCell::new(read),
+            stream: wss,
         })
     }
 }
@@ -118,14 +113,13 @@ impl<'a> SynthesizerConfig<'a> {
 /// The main struct for interacting with the Azure Speech Service.
 pub struct Synthesizer {
     audio_format: AudioFormat,
-    write: RefCell<SplitSink<WsStream, Message>>,
-    read: RefCell<SplitStream<WsStream>>,
+    stream: WsStream,
 }
 
 impl Synthesizer {
     /// Synthesize the given SSML into audio(bytes).
     #[allow(clippy::await_holding_refcell_ref)]
-    pub async fn synthesize_ssml(&self, ssml: &str) -> Result<Vec<u8>> {
+    pub async fn synthesize_ssml(&mut self, ssml: &str) -> Result<Vec<u8>> {
         let uuid = Uuid::new_v4();
         let request_id = uuid.as_simple().to_string();
         let now = Utc::now();
@@ -133,17 +127,17 @@ impl Synthesizer {
             r#"{{"synthesis":{{"audio":{{"metadataOptions":{{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false,"sessionEndEnabled":false}},"outputFormat":"{}"}}}}}}"#,
             Into::<&str>::into(self.audio_format)
         );
-        self.write.borrow_mut().send(Message::Text(format!(
+        self.stream.send(Message::Text(format!(
             "Path: synthesis.context\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{synthesis_context}", 
             request_id = &request_id)),
         ).await?;
         info!("Before sending the SSML to the server");
-        self.write.borrow_mut().send(Message::Text(format!(
+        self.stream.send(Message::Text(format!(
             "Path: ssml\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}\r\nContent-Type: application/ssml+xml\r\n\r\n{ssml}"
         ))).await?;
         const HEADER_SIZE: usize = 44;
         let mut buffer = Vec::with_capacity(HEADER_SIZE);
-        while let Some(raw_msg) = self.read.borrow_mut().next().await {
+        while let Some(raw_msg) = self.stream.next().await {
             let raw_msg = raw_msg?;
             let msg = WebSocketMessage::try_from(&raw_msg)?;
             match msg {
@@ -175,7 +169,7 @@ impl Synthesizer {
     /// Synthesize the given text into audio(bytes).
     /// This is a convenience method that interpolates the SSML for you.
     pub async fn synthesize_text(
-        &self,
+        &mut self,
         text: impl AsRef<str>,
         options: &TextOptions<'_>,
     ) -> Result<Vec<u8>> {
