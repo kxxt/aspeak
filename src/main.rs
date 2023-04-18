@@ -141,21 +141,21 @@ fn main() -> color_eyre::eyre::Result<()> {
                 )?;
                 let auth = auth.to_auth_options(config.as_ref().and_then(|c|c.auth.as_ref()))?;
                 let mut client = reqwest::ClientBuilder::new().no_proxy(); // Disable default system proxy detection.
-                if let Some(proxy) = auth.proxy {
-                    client = client.proxy(reqwest::Proxy::all(&*proxy)?);
+                if let Some(proxy) = auth.proxy() {
+                    client = client.proxy(reqwest::Proxy::all(proxy)?);
                 }
                 let client = client.build()?;
                 let mut request = client.get(&*url);
-                if let Some(key) = &auth.key {
+                if let Some(key) = auth.key() {
                     request = request.header(
                         "Ocp-Apim-Subscription-Key",
                         HeaderValue::from_str(key)
                             .map_err(|e| AspeakError::ArgumentError(e.to_string()))?,
                     );
                 }
-                if !auth.headers.is_empty() {
+                if !auth.headers().is_empty() {
                     // TODO: I don't know if this could be further optimized
-                    request = request.headers(HeaderMap::from_iter(auth.headers.iter().map(Clone::clone)));
+                    request = request.headers(HeaderMap::from_iter(auth.headers().iter().map(Clone::clone)));
                 } else if Some(url.as_ref()) == TRIAL_VOICE_LIST_URL {
                     // Trial endpoint
                     request = request.header("Origin", HeaderValue::from_str(ORIGIN).unwrap());

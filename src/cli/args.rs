@@ -81,8 +81,8 @@ impl AuthArgs {
         &'a self,
         auth_config: Option<&'a AuthConfig>,
     ) -> color_eyre::Result<AuthOptions<'a>> {
-        Ok(AuthOptions {
-            endpoint: self
+        let mut builder = AuthOptions::builder(
+            self
                 .endpoint
                 .as_deref()
                 .map(Cow::Borrowed)
@@ -100,47 +100,58 @@ impl AuthArgs {
                     ))
                     .with_note(|| "The default endpoint has been removed since aspeak v5.0 because Microsoft shutdown their trial service.")
                     .with_suggestion(|| "You can register an Azure account for the speech service and continue to use aspeak with your subscription key.")
-                })?,
-            token: match (self.token.as_deref(), auth_config) {
-                (Some(token), _) => Some(Cow::Borrowed(token)),
-                (None, Some(config)) => config.token.as_ref().map(Cow::from),
-                (None, None) => None,
-            },
-            key: match (self.key.as_deref(), auth_config) {
-                (Some(key), _) => Some(Cow::Borrowed(key)),
-                (None, Some(config)) => config.key.as_ref().map(Cow::from),
-                (None, None) => None,
-            },
-            headers: if let Some(AuthConfig {
-                headers: Some(headers),
-                ..
-            }) = auth_config
-            {
-                let vec: color_eyre::Result<Vec<(HeaderName, HeaderValue)>> = headers
-                    .iter()
-                    .map(|(k, v)| {
-                        Ok((
-                            HeaderName::from_bytes(k.as_bytes())?,
-                            HeaderValue::from_bytes(v.as_bytes())?,
-                        ))
-                    })
-                    .collect();
-                let mut vec = vec?;
-                vec.extend_from_slice(&self.headers);
-                Cow::Owned(vec)
-            } else {
-                Cow::Borrowed(&self.headers)
-            },
-            proxy: {
-                let p = self.proxy.as_deref().map(Cow::Borrowed).or_else(|| {
-                    std::env::var("HTTP_PROXY")
-                        .or_else(|_| std::env::var("http_proxy"))
-                        .ok() // TODO: Maybe the proxy won't be set if the env var is not valid utf8. In this case, the env var is silently ignored.
-                        .map(Cow::Owned)
+                })?)
+                .headers(if let Some(AuthConfig {
+                    headers: Some(headers),
+                    ..
+                }) = auth_config
+                {
+                    let vec: color_eyre::Result<Vec<(HeaderName, HeaderValue)>> = headers
+                        .iter()
+                        .map(|(k, v)| {
+                            Ok((
+                                HeaderName::from_bytes(k.as_bytes())?,
+                                HeaderValue::from_bytes(v.as_bytes())?,
+                            ))
+                        })
+                        .collect();
+                    let mut vec = vec?;
+                    vec.extend_from_slice(&self.headers);
+                    Cow::Owned::<'_, [(HeaderName, HeaderValue)]>(vec)
+                } else {
+                    Cow::Borrowed::<'_, [(HeaderName, HeaderValue)]>(&self.headers)
                 });
-                p.or_else(|| auth_config.and_then(|c| c.proxy.as_deref().map(Cow::Borrowed)))
-            },
-        })
+        if let Some(token) = match (self.token.as_deref(), auth_config) {
+            (Some(token), _) => Some(token),
+            (None, Some(config)) => config.token.as_deref(),
+            (None, None) => None,
+        } {
+            builder = builder.token(token);
+        }
+        if let Some(key) = match (self.key.as_deref(), auth_config) {
+            (Some(key), _) => Some(key),
+            (None, Some(config)) => config.key.as_deref(),
+            (None, None) => None,
+        } {
+            builder = builder.key(key);
+        }
+
+        if let Some(proxy) = self
+            .proxy
+            .as_deref()
+            .map(Cow::Borrowed)
+            .or_else(|| {
+                std::env::var("HTTP_PROXY")
+                    .or_else(|_| std::env::var("http_proxy"))
+                    .ok() // TODO: Maybe the proxy won't be set if the env var is not valid utf8. In this case, the env var is silently ignored.
+                    .map(Cow::Owned)
+            })
+            .or_else(|| auth_config.and_then(|c| c.proxy.as_deref().map(Cow::Borrowed)))
+        {
+            builder = builder.proxy(proxy);
+        }
+
+        Ok(builder.build())
     }
 }
 

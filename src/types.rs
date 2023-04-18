@@ -1,11 +1,9 @@
 use std::borrow::Cow;
 
 use clap::ValueEnum;
-
-use reqwest::header::{HeaderName, HeaderValue};
 use serde::Deserialize;
+use strum;
 use strum::IntoStaticStr;
-use strum::{self};
 
 use crate::get_default_voice_by_locale;
 
@@ -23,21 +21,6 @@ pub enum Role {
     OlderAdultMale,
     SeniorFemale,
     SeniorMale,
-}
-
-/// Options for authentication
-#[derive(Debug, Clone)]
-pub struct AuthOptions<'a> {
-    /// Endpoint of the service
-    pub endpoint: Cow<'a, str>,
-    /// Authentication token
-    pub token: Option<Cow<'a, str>>,
-    /// Azure Subscription Key for authentication. It currently doesn't work.
-    pub key: Option<Cow<'a, str>>,
-    /// Additional headers
-    pub headers: Cow<'a, [(HeaderName, HeaderValue)]>,
-    /// Proxy server to use. Only http and socks5 proxy are supported by now.
-    pub proxy: Option<Cow<'a, str>>,
 }
 
 /// Options that are only available if rich ssml is enabled
@@ -81,6 +64,5 @@ pub(crate) fn register_python_items(
     m: &pyo3::types::PyModule,
 ) -> pyo3::PyResult<()> {
     m.add_class::<Role>()?;
-    // m.add_class::<TextOptions>()?;
     Ok(())
 }
