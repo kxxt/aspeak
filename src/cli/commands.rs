@@ -19,8 +19,7 @@ pub(crate) enum Command {
             short,
             long,
             help = "The voice list API url. If this option is not specified and the region option is specified,\
-                    then aspeak will use the API url designated for that region. Otherwise the API url for the \
-                    trial endpoint is used."
+                    then aspeak will use the API url designated for that region."
         )]
         url: Option<String>,
     },

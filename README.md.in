@@ -14,14 +14,9 @@
 
 A simple text-to-speech client for Azure TTS API. :laughing:
 
-You can try the Azure TTS API online: https://azure.microsoft.com/en-us/services/cognitive-services/text-to-speech
-
 ## Note
 
 Starting from version 4.0.0, `aspeak` is rewritten in rust. The old python version is available at the `python` branch.
-
-By default, we try to use a trial endpoint that doesn't require authentication.
-But its availability is not guaranteed and its capability is restricted by Microsoft.
 
 You can sign up for an Azure account and then
 [choose a payment plan as needed (or stick to free tier)](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/speech-services/).
@@ -108,6 +103,10 @@ $ aspeak --region <YOUR_REGION> --key <YOUR_SUBSCRIPTION_KEY>  text "Hello World
 
 If you are using a custom endpoint, you can use the `--endpoint` option instead of `--region`.
 
+To avoid repetition, you can store your authentication details
+in your aspeak profile.
+Read the following section for more details.
+
 From v4.3.0, you can let aspeak use a proxy server to connect to the endpoint. 
 For now, only http and socks5 proxies are supported (no https support yet). For example:
 
@@ -117,10 +116,6 @@ $ aspeak --proxy socks5://your_proxy_server:port text "Hello World"
 ```
 
 aspeak also respects the `HTTP_PROXY`(or `http_proxy`) environment variable.
-
-To avoid repetition, you can store your authentication details
-in your aspeak profile.
-Read the following section for more details.
 
 ### Configuration
 
@@ -163,6 +158,12 @@ If you want to use a profile other than your default profile, you can use the `-
 aspeak --profile <PATH_TO_A_PROFILE> text "Hello"
 ```
 
+If you want to temporarily disable the profile, you can use the `--no-profile` argument:
+
+```sh
+aspeak --no-profile --region eastus --key <YOUR_KEY> text "Hello"
+```
+
 ### Pitch and Rate
 
 - `rate`: The speaking rate of the voice.
@@ -186,6 +187,8 @@ aspeak --profile <PATH_TO_A_PROFILE> text "Hello"
 **Note**: Unreasonable high/low values will be clipped to reasonable values by Azure Cognitive Services.
 
 ### Examples
+
+The following examples assume that you have already set up authentication in your profile.
 
 #### Speak "Hello, world!" to default speaker.
 
@@ -413,7 +416,7 @@ $ aspeak text "你好，世界！" -v zh-CN-XiaoxiaoNeural -p=+1st -r=-7% -S lyr
 
 #### Use a custom audio format for output
 
-**Note**: Some audio formats are not supported when you are outputting to speaker.
+**Note**: Some audio formats are not supported when outputting to speaker.
 
 ```sh
 $ aspeak text "Hello World" -F riff-48khz-16bit-mono-pcm -o high-quality.wav
@@ -441,7 +444,7 @@ When creating a `SpeechService` instance, you can specify the following paramete
 
 - `audio_format`: The audio format of the output audio. Default is `AudioFormat.Riff24KHz16BitMonoPcm`.
   - You can get an audio format by providing a container format and a quality level: `AudioFormat("mp3", 2)`.
-- `endpoint`: The endpoint of the speech service. We will use a trial endpoint by default.
+- `endpoint`: The endpoint of the speech service.
 - `region`: Alternatively, you can specify the region of the speech service instead of typing the boring endpoint url.
 - `subscription_key`: The subscription key of the speech service.
 - `token`: The auth token for the speech service. If you provide a token, the subscription key will be ignored.
