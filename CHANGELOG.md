@@ -1,5 +1,30 @@
 # aspeak Changelog
 
+# v5.0.0
+
+## Enhancements
+
+- Add support for `--color={auto,always,never}` options. And `aspeak` will also respect the `NO_COLOR` environment variable.
+  - There is an edge case that `aspeak` will use colored output even if `--color=never` is specified.
+    This is because `aspeak` uses `clap` to parse command line options. `--color=never` works only if the command line parsing is successful.
+    So if you specify an invalid option, `aspeak` will print the error message and exit. In this case, `aspeak` will use colored output.
+- More documentation for the rust crate.
+- Minor performance improvements.
+- Now you can specify the custom voice list API url in your profile(field `voice_list_api` in section `auth`).
+
+## Breaking changes
+
+- The default trial endpoint has been removed because it was shutdown by Microsoft. Now you must set up authentication to use `aspeak`.
+- The default voice list API url has been removed for the same reason.
+- The rust API has been changed.
+  - `Synthesizer` is now `Send`. Its various `synthesize_*` methods now takes `&mut self` instead of `&self`.
+  - Now you need to use the builder pattern to create various options like `TextOptions`.
+  - Fields of the `Voice` struct are now private. You can use the methods to access them.
+
+## Other changes
+
+- The PKGBUILDs for Arch Linux is no longer stored in this repository. You can find them in the [AUR](https://aur.archlinux.org/packages/aspeak).
+
 # v4.3.1
 
 - Fix a bug that caused the `endpoint` and `region` settings in profile to be ineffective.
