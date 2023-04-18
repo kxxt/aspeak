@@ -178,11 +178,13 @@ impl Cli {
                     .style_degree
                     .or_else(|| effective_config.and_then(|c| c.style_degree));
                 if style.is_some() || role.is_some() || style_degree.is_some() {
-                    Some(RichSsmlOptions {
-                        style,
-                        role,
-                        style_degree,
-                    })
+                    Some(
+                        RichSsmlOptions::builder()
+                            .optional_role(role)
+                            .optional_style(style)
+                            .optional_style_degree(style_degree)
+                            .build(),
+                    )
                 } else {
                     None
                 }

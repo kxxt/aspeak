@@ -24,14 +24,95 @@ pub enum Role {
 }
 
 /// Options that are only available if rich ssml is enabled
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct RichSsmlOptions<'a> {
     /// Speech style
-    pub style: Option<Cow<'a, str>>,
+    pub(crate) style: Option<Cow<'a, str>>,
     /// Speech role
-    pub role: Option<Role>,
+    pub(crate) role: Option<Role>,
     /// Speech style degree, which should be in range [0.01, 2]
-    pub style_degree: Option<f32>,
+    pub(crate) style_degree: Option<f32>,
+}
+
+impl<'a> RichSsmlOptions<'a> {
+    pub fn style(&self) -> Option<&str> {
+        self.style.as_deref()
+    }
+
+    pub fn style_mut(&mut self) -> Option<&mut Cow<'a, str>> {
+        self.style.as_mut()
+    }
+
+    pub fn role(&self) -> Option<Role> {
+        self.role
+    }
+
+    pub fn role_mut(&mut self) -> Option<&mut Role> {
+        self.role.as_mut()
+    }
+
+    pub fn style_degree(&self) -> Option<f32> {
+        self.style_degree
+    }
+
+    pub fn style_degree_mut(&mut self) -> Option<&mut f32> {
+        self.style_degree.as_mut()
+    }
+
+    pub fn builder() -> RichSsmlOptionsBuilder<'a> {
+        RichSsmlOptionsBuilder::new()
+    }
+}
+
+#[derive(Default)]
+pub struct RichSsmlOptionsBuilder<'a> {
+    style: Option<Cow<'a, str>>,
+    role: Option<Role>,
+    style_degree: Option<f32>,
+}
+
+impl<'a> RichSsmlOptionsBuilder<'a> {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    pub fn style(mut self, style: impl Into<Cow<'a, str>>) -> Self {
+        self.style = Some(style.into());
+        self
+    }
+
+    pub fn optional_style(mut self, style: Option<impl Into<Cow<'a, str>>>) -> Self {
+        self.style = style.map(|s| s.into());
+        self
+    }
+
+    pub fn role(mut self, role: Role) -> Self {
+        self.role = Some(role);
+        self
+    }
+
+    pub fn optional_role(mut self, role: Option<Role>) -> Self {
+        self.role = role;
+        self
+    }
+
+    pub fn style_degree(mut self, style_degree: f32) -> Self {
+        self.style_degree = Some(style_degree);
+        self
+    }
+
+    pub fn optional_style_degree(mut self, style_degree: Option<f32>) -> Self {
+        self.style_degree = style_degree;
+        self
+    }
+
+    pub fn build(self) -> RichSsmlOptions<'a> {
+        RichSsmlOptions {
+            style: self.style,
+            role: self.role,
+            style_degree: self.style_degree,
+        }
+    }
 }
 
 /// Options for text-to-speech
