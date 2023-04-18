@@ -173,9 +173,9 @@ fn main() -> color_eyre::eyre::Result<()> {
                 let voice_id = voice.as_deref();
                 let voices: Box<dyn Iterator<Item = &Voice>> = {
                     if locale_id.is_some() {
-                        Box::new(voices.filter(|voice| Some(voice.locale.as_str()) == locale_id))
+                        Box::new(voices.filter(|voice| Some(voice.locale()) == locale_id))
                     } else if voice_id.is_some() {
-                        Box::new(voices.filter(|voice| Some(voice.short_name.as_str()) == voice_id))
+                        Box::new(voices.filter(|voice| Some(voice.short_name()) == voice_id))
                     } else {
                         Box::new(voices)
                     }

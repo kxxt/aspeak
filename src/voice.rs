@@ -4,22 +4,76 @@ use colored::Colorize;
 use serde::Deserialize;
 
 /// Voice information
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct Voice {
-    pub display_name: String,
-    pub gender: String,
-    pub local_name: String,
-    pub locale: String,
-    pub locale_name: String,
-    pub name: String,
-    pub sample_rate_hertz: String,
-    pub short_name: String,
-    pub status: String,
-    pub voice_type: String,
-    pub words_per_minute: Option<String>,
-    pub style_list: Option<Vec<String>>,
-    pub role_play_list: Option<Vec<String>>,
+    display_name: String,
+    gender: String,
+    local_name: String,
+    locale: String,
+    locale_name: String,
+    name: String,
+    sample_rate_hertz: String,
+    short_name: String,
+    status: String,
+    voice_type: String,
+    words_per_minute: Option<String>,
+    style_list: Option<Vec<String>>,
+    role_play_list: Option<Vec<String>>,
+}
+
+impl Voice {
+    pub fn display_name(&self) -> &str {
+        &self.display_name
+    }
+
+    pub fn gender(&self) -> &str {
+        &self.gender
+    }
+
+    pub fn local_name(&self) -> &str {
+        &self.local_name
+    }
+
+    pub fn locale(&self) -> &str {
+        &self.locale
+    }
+
+    pub fn locale_name(&self) -> &str {
+        &self.locale_name
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn sample_rate_hertz(&self) -> &str {
+        &self.sample_rate_hertz
+    }
+
+    pub fn short_name(&self) -> &str {
+        &self.short_name
+    }
+
+    pub fn status(&self) -> &str {
+        &self.status
+    }
+
+    pub fn voice_type(&self) -> &str {
+        &self.voice_type
+    }
+
+    pub fn words_per_minute(&self) -> Option<&str> {
+        self.words_per_minute.as_deref()
+    }
+
+    pub fn style_list(&self) -> Option<&[String]> {
+        self.style_list.as_deref()
+    }
+
+    pub fn role_play_list(&self) -> Option<&[String]> {
+        self.role_play_list.as_deref()
+    }
 }
 
 impl Display for Voice {
