@@ -117,7 +117,6 @@ pub struct Synthesizer {
 
 impl Synthesizer {
     /// Synthesize the given SSML into audio(bytes).
-    #[allow(clippy::await_holding_refcell_ref)]
     pub async fn synthesize_ssml(&mut self, ssml: &str) -> Result<Vec<u8>> {
         let uuid = Uuid::new_v4();
         let request_id = uuid.as_simple();
