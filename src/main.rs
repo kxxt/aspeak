@@ -97,7 +97,13 @@ fn main() -> color_eyre::eyre::Result<()> {
                 ref locale,
                 ref url
             } => {
+                // Look for --url first,
+                // then look for auth.voice_list_api in profile,
+                // then try to determine the url by region
+                // otherwise, try to use the trial voice list url
                 let url = url.as_deref().map(Cow::Borrowed).or_else(|| {
+                    config.as_ref().and_then(|c| c.auth.as_ref().and_then(|a| a.voice_list_api.as_deref().map(Cow::Borrowed)))
+                }).or_else(|| {
                     auth.region.as_deref().or_else(||
                         config.as_ref().and_then(
                             |c| c.auth.as_ref().and_then(

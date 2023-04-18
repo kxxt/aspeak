@@ -73,6 +73,7 @@ pub(crate) struct AuthConfig {
     pub token: Option<String>,
     pub headers: Option<Vec<(String, String)>>,
     pub proxy: Option<String>,
+    pub voice_list_api: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]

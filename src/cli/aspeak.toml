@@ -32,6 +32,9 @@ verbosity = 0
 # Proxy
 # proxy = "socks5://127.0.0.1:7890"
 
+# Voice list API url
+# voice_list_api = "Custom voice list API url"
+
 #
 # Configuration for text subcommand
 #
