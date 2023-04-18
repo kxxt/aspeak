@@ -13,8 +13,8 @@ use crate::audio::play_owned_audio_blocking;
 use crate::constants::DEFAULT_ENDPOINT;
 use crate::parse::{parse_pitch, parse_rate, parse_style_degree};
 use crate::{
-    get_default_voice_by_locale, get_endpoint_by_region, AudioFormat, AuthOptions, Synthesizer,
-    SynthesizerConfig, TextOptions,
+    get_default_voice_by_locale, get_endpoint_by_region, AspeakError, AudioFormat, AuthOptions,
+    Synthesizer, SynthesizerConfig, TextOptions,
 };
 
 #[pymodule]
@@ -123,7 +123,10 @@ impl SpeechService {
                 .transpose()?
                 .map(get_endpoint_by_region)
                 .map(Cow::Owned)
-                .unwrap_or(Cow::Borrowed(DEFAULT_ENDPOINT))
+                .or_else(|| DEFAULT_ENDPOINT.map(Cow::Borrowed))
+                .ok_or_else(|| {
+                    AspeakError::ArgumentError("No endpoint is specified!".to_string())
+                })?
         };
         let key: Option<String> = options
             .and_then(|dict| dict.get_item("key"))

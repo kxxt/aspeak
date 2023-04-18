@@ -5,6 +5,7 @@ use super::parse;
 use crate::constants::DEFAULT_ENDPOINT;
 use aspeak::{get_endpoint_by_region, AspeakError, AudioFormat, AuthOptions, Role};
 use clap::{ArgAction, Args, ValueEnum};
+use color_eyre::{Help, Report};
 use reqwest::header::{HeaderName, HeaderValue};
 use serde::Deserialize;
 use strum::AsRefStr;
@@ -84,7 +85,14 @@ impl AuthArgs {
                         .map(Cow::Owned)
                 })
                 .or_else(|| auth_config.and_then(|c| c.endpoint_config.as_ref().map(Cow::from)))
-                .unwrap_or(Cow::Borrowed(DEFAULT_ENDPOINT)),
+                .or_else(|| DEFAULT_ENDPOINT.map(Cow::Borrowed))
+                .ok_or_else(|| {
+                    Report::new(AspeakError::ArgumentError(
+                        "No endpoint is specified!".to_string(),
+                    ))
+                    .with_note(|| "The default endpoint has been removed since aspeak v5.0 because Microsoft shutdown their trial service.")
+                    .with_suggestion(|| "You can register an Azure account for the speech service and continue to use aspeak with your subscription key.")
+                })?,
             token: match (self.token.as_deref(), auth_config) {
                 (Some(token), _) => Some(Cow::Borrowed(token)),
                 (None, Some(config)) => config.token.as_ref().map(Cow::from),
