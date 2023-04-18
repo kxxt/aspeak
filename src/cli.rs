@@ -131,8 +131,8 @@ impl Cli {
         args: &'a TextArgs,
         config: Option<&'a TextConfig>,
     ) -> color_eyre::Result<TextOptions<'a>> {
-        Ok(TextOptions {
-            voice: Cow::Borrowed(
+        Ok(TextOptions::builder()
+            .voice(
                 match (args.voice.as_deref(), args.locale.as_deref(), &config) {
                     (Some(voice), _, _) => voice,
                     (None, Some(locale), _) => get_default_voice_by_locale(locale)?,
@@ -142,8 +142,8 @@ impl Cli {
                         .flatten()
                         .unwrap_or_else(|| get_default_voice_by_locale("en-US").unwrap()),
                 },
-            ),
-            pitch: {
+            )
+            .optional_pitch({
                 if let Some(pitch) = args.pitch.as_deref().map(Cow::Borrowed) {
                     Some(pitch)
                 } else {
@@ -153,8 +153,8 @@ impl Cli {
                         .map_err(|e| anyhow!(e))?
                         .flatten()
                 }
-            },
-            rate: {
+            })
+            .optional_rate({
                 if let Some(rate) = args.rate.as_deref().map(Cow::Borrowed) {
                     Some(rate)
                 } else {
@@ -164,8 +164,8 @@ impl Cli {
                         .map_err(|e| anyhow!(e))?
                         .flatten()
                 }
-            },
-            rich_ssml_options: {
+            })
+            .optional_rich_ssml_options({
                 let rich_ssml = !args.no_rich_ssml;
                 let effective_config = if rich_ssml { config } else { None };
                 let style = args
@@ -188,7 +188,7 @@ impl Cli {
                 } else {
                     None
                 }
-            },
-        })
+            })
+            .build())
     }
 }

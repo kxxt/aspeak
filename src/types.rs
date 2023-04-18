@@ -2,7 +2,6 @@ use std::borrow::Cow;
 
 use clap::ValueEnum;
 use serde::Deserialize;
-use strum;
 use strum::IntoStaticStr;
 
 use crate::get_default_voice_by_locale;
@@ -119,13 +118,13 @@ impl<'a> RichSsmlOptionsBuilder<'a> {
 #[derive(Debug, Clone)]
 pub struct TextOptions<'a> {
     /// Voice identifier. It should be in the format of `locale-voice_name` like `en-US-JennyNeural`.
-    pub voice: Cow<'a, str>,
+    pub(crate) voice: Cow<'a, str>,
     /// Pitch string that will be inserted directly into SSML
-    pub pitch: Option<Cow<'a, str>>,
+    pub(crate) pitch: Option<Cow<'a, str>>,
     /// Rate string that will be inserted directly into SSML
-    pub rate: Option<Cow<'a, str>>,
+    pub(crate) rate: Option<Cow<'a, str>>,
     /// Rich SSML options
-    pub rich_ssml_options: Option<RichSsmlOptions<'a>>,
+    pub(crate) rich_ssml_options: Option<RichSsmlOptions<'a>>,
 }
 
 impl Default for TextOptions<'_> {
@@ -135,6 +134,122 @@ impl Default for TextOptions<'_> {
             pitch: Default::default(),
             rate: Default::default(),
             rich_ssml_options: Default::default(),
+        }
+    }
+}
+
+impl<'a> TextOptions<'a> {
+    pub fn voice(&self) -> &str {
+        &self.voice
+    }
+
+    pub fn voice_mut(&mut self) -> &mut Cow<'a, str> {
+        &mut self.voice
+    }
+
+    pub fn pitch(&self) -> Option<&str> {
+        self.pitch.as_deref()
+    }
+
+    pub fn pitch_mut(&mut self) -> Option<&mut Cow<'a, str>> {
+        self.pitch.as_mut()
+    }
+
+    pub fn rate(&self) -> Option<&str> {
+        self.rate.as_deref()
+    }
+
+    pub fn rate_mut(&mut self) -> Option<&mut Cow<'a, str>> {
+        self.rate.as_mut()
+    }
+
+    pub fn rich_ssml_options(&self) -> Option<&RichSsmlOptions> {
+        self.rich_ssml_options.as_ref()
+    }
+
+    pub fn rich_ssml_options_mut(&mut self) -> Option<&mut RichSsmlOptions<'a>> {
+        self.rich_ssml_options.as_mut()
+    }
+
+    pub fn builder() -> TextOptionsBuilder<'a> {
+        TextOptionsBuilder::new()
+    }
+}
+
+#[derive(Default)]
+pub struct TextOptionsBuilder<'a> {
+    voice: Option<Cow<'a, str>>,
+    pitch: Option<Cow<'a, str>>,
+    rate: Option<Cow<'a, str>>,
+    rich_ssml_options: Option<RichSsmlOptions<'a>>,
+}
+
+impl<'a> TextOptionsBuilder<'a> {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    pub fn voice(mut self, voice: impl Into<Cow<'a, str>>) -> Self {
+        self.voice = Some(voice.into());
+        self
+    }
+
+    pub fn optional_voice(mut self, voice: Option<impl Into<Cow<'a, str>>>) -> Self {
+        self.voice = voice.map(|v| v.into());
+        self
+    }
+
+    pub fn pitch(mut self, pitch: impl Into<Cow<'a, str>>) -> Self {
+        self.pitch = Some(pitch.into());
+        self
+    }
+
+    pub fn optional_pitch(mut self, pitch: Option<impl Into<Cow<'a, str>>>) -> Self {
+        self.pitch = pitch.map(|p| p.into());
+        self
+    }
+
+    pub fn rate(mut self, rate: impl Into<Cow<'a, str>>) -> Self {
+        self.rate = Some(rate.into());
+        self
+    }
+
+    pub fn optional_rate(mut self, rate: Option<impl Into<Cow<'a, str>>>) -> Self {
+        self.rate = rate.map(|r| r.into());
+        self
+    }
+
+    pub fn rich_ssml_options(mut self, rich_ssml_options: RichSsmlOptions<'a>) -> Self {
+        self.rich_ssml_options = Some(rich_ssml_options);
+        self
+    }
+
+    pub fn optional_rich_ssml_options(
+        mut self,
+        rich_ssml_options: Option<RichSsmlOptions<'a>>,
+    ) -> Self {
+        self.rich_ssml_options = rich_ssml_options;
+        self
+    }
+
+    pub fn chain_rich_ssml_options_builder(
+        mut self,
+        rich_ssml_options_builder: RichSsmlOptionsBuilder<'a>,
+    ) -> Self {
+        self.rich_ssml_options = Some(rich_ssml_options_builder.build());
+        self
+    }
+
+    pub fn build(self) -> TextOptions<'a> {
+        TextOptions {
+            voice: self.voice.unwrap_or_else(|| {
+                Cow::Borrowed(
+                    get_default_voice_by_locale("en-US").expect("No default voice for en-US!"),
+                )
+            }),
+            pitch: self.pitch,
+            rate: self.rate,
+            rich_ssml_options: self.rich_ssml_options,
         }
     }
 }
