@@ -1,5 +1,6 @@
 use thiserror::Error;
 
+/// Error type for aspeak crate
 #[derive(Error, Debug)]
 #[non_exhaustive]
 pub enum AspeakError {
@@ -25,6 +26,7 @@ pub enum AspeakError {
     ArgumentError(String),
     #[error("Failed to parse url")]
     UrlParseError(#[from] url::ParseError),
+    /// Other connection errors that are not covered by the above. (e.g. proxy error)
     #[error("Connection error: {0}")]
     GeneralConnectionError(String),
 }

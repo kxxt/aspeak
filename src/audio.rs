@@ -72,6 +72,9 @@ pub static QUALITY_RANGE_MAP: phf::Map<&'static str, (i8, i8)> = phf_map! {
     "webm" => (-1, 1),
 };
 
+/// All possible audio formats
+/// 
+/// Some endpoints only support a subset of these formats.
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 #[derive(Debug, Clone, Copy, Default, IntoStaticStr, EnumString, EnumIter, Deserialize)]
 #[non_exhaustive]
