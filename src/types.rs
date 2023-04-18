@@ -38,24 +38,24 @@ impl<'a> RichSsmlOptions<'a> {
         self.style.as_deref()
     }
 
-    pub fn style_mut(&mut self) -> Option<&mut Cow<'a, str>> {
-        self.style.as_mut()
+    pub fn style_mut(&mut self) -> &mut Option<Cow<'a, str>> {
+        &mut self.style
     }
 
     pub fn role(&self) -> Option<Role> {
         self.role
     }
 
-    pub fn role_mut(&mut self) -> Option<&mut Role> {
-        self.role.as_mut()
+    pub fn role_mut(&mut self) -> &mut Option<Role> {
+        &mut self.role
     }
 
     pub fn style_degree(&self) -> Option<f32> {
         self.style_degree
     }
 
-    pub fn style_degree_mut(&mut self) -> Option<&mut f32> {
-        self.style_degree.as_mut()
+    pub fn style_degree_mut(&mut self) -> &mut Option<f32> {
+        &mut self.style_degree
     }
 
     pub fn builder() -> RichSsmlOptionsBuilder<'a> {
@@ -151,24 +151,24 @@ impl<'a> TextOptions<'a> {
         self.pitch.as_deref()
     }
 
-    pub fn pitch_mut(&mut self) -> Option<&mut Cow<'a, str>> {
-        self.pitch.as_mut()
+    pub fn pitch_mut(&mut self) -> &mut Option<Cow<'a, str>> {
+        &mut self.pitch
     }
 
     pub fn rate(&self) -> Option<&str> {
         self.rate.as_deref()
     }
 
-    pub fn rate_mut(&mut self) -> Option<&mut Cow<'a, str>> {
-        self.rate.as_mut()
+    pub fn rate_mut(&mut self) -> &mut Option<Cow<'a, str>> {
+        &mut self.rate
     }
 
-    pub fn rich_ssml_options(&self) -> Option<&RichSsmlOptions> {
-        self.rich_ssml_options.as_ref()
+    pub fn rich_ssml_options(&self) -> &Option<RichSsmlOptions> {
+        &self.rich_ssml_options
     }
 
-    pub fn rich_ssml_options_mut(&mut self) -> Option<&mut RichSsmlOptions<'a>> {
-        self.rich_ssml_options.as_mut()
+    pub fn rich_ssml_options_mut(&mut self) -> &mut Option<RichSsmlOptions<'a>> {
+        &mut self.rich_ssml_options
     }
 
     pub fn builder() -> TextOptionsBuilder<'a> {

@@ -22,20 +22,40 @@ impl<'a> AuthOptions<'a> {
         &self.endpoint
     }
 
+    pub fn endpoint_mut(&mut self) -> &mut Cow<'a, str> {
+        &mut self.endpoint
+    }
+
     pub fn token(&self) -> Option<&str> {
         self.token.as_deref()
+    }
+
+    pub fn token_mut(&mut self) -> &mut Option<Cow<'a, str>> {
+        &mut self.token
     }
 
     pub fn key(&self) -> Option<&str> {
         self.key.as_deref()
     }
 
+    pub fn key_mut(&mut self) -> &mut Option<Cow<'a, str>> {
+        &mut self.key
+    }
+
     pub fn headers(&self) -> &[(HeaderName, HeaderValue)] {
         &self.headers
     }
 
+    pub fn headers_mut(&mut self) -> &mut Cow<'a, [(HeaderName, HeaderValue)]> {
+        &mut self.headers
+    }
+
     pub fn proxy(&self) -> Option<&str> {
         self.proxy.as_deref()
+    }
+
+    pub fn proxy_mut(&mut self) -> &mut Option<Cow<'a, str>> {
+        &mut self.proxy
     }
 
     pub fn builder(endpoint: impl Into<Cow<'a, str>>) -> AuthOptionsBuilder<'a> {
@@ -67,8 +87,18 @@ impl<'a> AuthOptionsBuilder<'a> {
         self
     }
 
+    pub fn optional_token(mut self, token: Option<impl Into<Cow<'a, str>>>) -> Self {
+        self.token = token.map(Into::into);
+        self
+    }
+
     pub fn key(mut self, key: impl Into<Cow<'a, str>>) -> Self {
         self.key = Some(key.into());
+        self
+    }
+
+    pub fn optional_key(mut self, key: Option<impl Into<Cow<'a, str>>>) -> Self {
+        self.key = key.map(Into::into);
         self
     }
 
@@ -79,6 +109,11 @@ impl<'a> AuthOptionsBuilder<'a> {
 
     pub fn proxy(mut self, proxy: impl Into<Cow<'a, str>>) -> Self {
         self.proxy = Some(proxy.into());
+        self
+    }
+
+    pub fn optional_proxy(mut self, proxy: Option<impl Into<Cow<'a, str>>>) -> Self {
+        self.proxy = proxy.map(Into::into);
         self
     }
 
