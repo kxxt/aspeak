@@ -14,6 +14,7 @@ use color_eyre::{
 use colored::Colorize;
 use constants::ORIGIN;
 
+use env_logger::WriteStyle;
 use log::debug;
 
 use reqwest::header::{HeaderMap, HeaderValue};
@@ -21,6 +22,7 @@ use strum::IntoEnumIterator;
 use tokio_tungstenite::tungstenite::{error::ProtocolError, Error as TungsteniteError};
 
 use crate::cli::{
+    args::Color,
     commands::ConfigCommand,
     config::{Config, EndpointConfig},
 };
@@ -28,11 +30,24 @@ use crate::cli::{
 const TRIAL_VOICE_LIST_URL: Option<&str> = None;
 
 fn main() -> color_eyre::eyre::Result<()> {
-    color_eyre::install()?;
-    let cli = Cli::parse();
+    let mut cli = Cli::parse();
+    if cli.color == Color::Auto && std::env::var_os("NO_COLOR").is_some() {
+        // Respect NO_COLOR if --color=auto
+        cli.color = Color::Never;
+    }
+    if cli.color == Color::Never {
+        colored::control::set_override(false);
+    } else {
+        color_eyre::install()?;
+    }
     let config = cli.profile.load_profile()?;
     env_logger::builder()
         .filter_level(cli.get_log_level(config.as_ref().and_then(|c| c.verbosity)))
+        .write_style(match cli.color {
+            Color::Auto => WriteStyle::Auto,
+            Color::Never => WriteStyle::Never,
+            Color::Always => WriteStyle::Always,
+        })
         .init();
     debug!("Commandline args: {cli:?}");
     debug!("Profile: {config:?}");

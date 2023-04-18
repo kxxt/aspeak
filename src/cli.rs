@@ -3,7 +3,7 @@ use log::{debug, info};
 use rodio::{Decoder, OutputStream, Sink};
 
 use self::{
-    args::{AuthArgs, InputArgs, ProfileArgs, TextArgs},
+    args::{AuthArgs, Color, InputArgs, ProfileArgs, TextArgs},
     commands::Command,
     config::TextConfig,
 };
@@ -37,6 +37,8 @@ pub(crate) struct Cli {
     #[arg(short, long, action = ArgAction::Count,
         help = "Log verbosity, -v for INFO, -vv for DEBUG, -vvv for TRACE")]
     verbose: u8,
+    #[arg(long, default_value_t = Color::Auto, help = "Control whether colored output is enabled")]
+    pub color: Color,
     #[command(flatten)]
     pub profile: ProfileArgs,
     #[command(flatten)]

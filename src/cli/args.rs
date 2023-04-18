@@ -8,7 +8,15 @@ use clap::{ArgAction, Args, ValueEnum};
 use color_eyre::{Help, Report};
 use reqwest::header::{HeaderName, HeaderValue};
 use serde::Deserialize;
-use strum::AsRefStr;
+use strum::{AsRefStr, Display};
+
+#[derive(Debug, Clone, Copy, ValueEnum, PartialEq, Display)]
+#[strum(serialize_all = "kebab-case")]
+pub(crate) enum Color {
+    Auto,
+    Always,
+    Never,
+}
 
 #[derive(Debug, Clone, Copy, Default, ValueEnum, AsRefStr, Deserialize)]
 #[strum(serialize_all = "kebab-case")]
