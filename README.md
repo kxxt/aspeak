@@ -43,7 +43,7 @@ From v4.1.0, You can install `aspeak-bin` from AUR.
 Installing from PyPI will also install the python binding of `aspeak` for you. Check [Library Usage#Python](#Python) for more information on using the python binding.
 
 ```bash
-pip install -U aspeak==5.0.0
+pip install -U aspeak==5.1.0
 ```
 
 Now the prebuilt wheels are only available for x86_64 architecture.
@@ -59,7 +59,7 @@ Because of manylinux compatibility issues, the wheels for linux are not availabl
 The easiest way to install `aspeak` from source is to use cargo:
 
 ```bash
-cargo install aspeak
+cargo install aspeak -F binary
 ```
 
 Alternatively, you can also install `aspeak` from AUR.
@@ -77,7 +77,7 @@ After cloning the repository and `cd` into the directory
 
 ```bash
 maturin build --release --strip -F python --bindings pyo3 --interpreter python --manifest-path Cargo.toml --out dist-pyo3
-maturin build --release --strip --bindings  bin --interpreter python --manifest-path Cargo.toml --out dist-bin
+maturin build --release --strip --bindings bin -F binary --interpreter python --manifest-path Cargo.toml --out dist-bin
 bash merge-wheel.bash
 ```
 

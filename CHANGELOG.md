@@ -1,5 +1,10 @@
 # aspeak Changelog
 
+# v5.1.0
+
+- Add binary feature to aspeak crate to make rust lib less bloated
+  - From now on, building the CLI requires `-F binary` flag.
+
 # v5.0.1-alpha.2
 
 - Add binary feature to make rust lib less bloated
