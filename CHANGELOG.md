@@ -1,5 +1,9 @@
 # aspeak Changelog
 
+# v5.0.1-alpha.2
+
+- Add binary feature to make rust lib less bloated
+
 # v5.0.0
 
 ## Enhancements
