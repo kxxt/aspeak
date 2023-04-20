@@ -1,11 +1,10 @@
-use std::io::Cursor;
-
+#[cfg(feature = "binary")]
 use clap::ValueEnum;
-use log::{debug, info};
 use phf::phf_map;
+#[cfg(feature = "audio")]
 use rodio::{Decoder, OutputStream, Sink};
 use serde::Deserialize;
-use strum::{EnumIter, EnumString, IntoEnumIterator, IntoStaticStr};
+use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::AspeakError;
 
@@ -42,19 +41,21 @@ static WEBM_QUALITY_MAP: QualityMap = phf_map! {
 };
 
 #[allow(unused)]
+#[cfg(feature = "audio")]
 pub fn play_borrowed_audio_blocking(buffer: &[u8]) -> Result<(), AspeakError> {
     play_owned_audio_blocking(buffer.to_vec())
 }
 
+#[cfg(feature = "audio")]
 pub fn play_owned_audio_blocking(buffer: Vec<u8>) -> Result<(), AspeakError> {
-    info!("Playing audio... ({} bytes)", buffer.len());
+    log::info!("Playing audio... ({} bytes)", buffer.len());
     let (_stream, stream_handle) = OutputStream::try_default()?;
     let sink = Sink::try_new(&stream_handle).unwrap();
-    let cursor = Cursor::new(buffer);
-    let source = Decoder::new(cursor).map_err(AspeakError::from)?;
+    let cursor = std::io::Cursor::new(buffer);
+    let source = Decoder::new(cursor)?;
     sink.append(source);
     sink.sleep_until_end();
-    debug!("Done playing audio");
+    log::debug!("Done playing audio");
     Ok(())
 }
 
@@ -73,7 +74,7 @@ pub static QUALITY_RANGE_MAP: phf::Map<&'static str, (i8, i8)> = phf_map! {
 };
 
 /// All possible audio formats
-/// 
+///
 /// Some endpoints only support a subset of these formats.
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 #[derive(Debug, Clone, Copy, Default, IntoStaticStr, EnumString, EnumIter, Deserialize)]
@@ -234,8 +235,10 @@ impl AudioFormat {
 /// We can't derive `ValueEnum` for `AudioFormat`
 /// because we need to use the strum's string representation,
 /// which is not supported by clap for now.
+#[cfg(feature = "binary")]
 impl ValueEnum for AudioFormat {
     fn value_variants<'a>() -> &'a [Self] {
+        use strum::IntoEnumIterator;
         // It's fine to leak it,
         // because otherwise we need to store it as a static/const variable
         AudioFormat::iter().collect::<Vec<_>>().leak()

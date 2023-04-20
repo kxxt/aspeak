@@ -33,7 +33,7 @@ jobs:
         with:
           target: x86_64
           command: build
-          args: --release --strip --bindings  bin --interpreter python --manifest-path Cargo.toml --out dist-bin
+          args: --release --strip -F binary --bindings bin --interpreter python --manifest-path Cargo.toml --out dist-bin
       - name: Merge Wheels
         shell: bash
         run: bash merge-wheel.bash
@@ -72,7 +72,7 @@ jobs:
         with:
           target: x86_64
           command: build
-          args: --release --strip --bindings  bin --interpreter python --manifest-path Cargo.toml --out dist-bin
+          args: --release --strip -F binary --bindings bin --interpreter python --manifest-path Cargo.toml --out dist-bin
       - name: Merge Wheels
         run: bash merge-wheel.bash
       - name: Install wheel
@@ -118,7 +118,7 @@ jobs:
   #         command: build
   #         manylinux: auto
   #         container: off
-  #         args: --release --strip --bindings  bin --interpreter python${{ matrix.pyversion }} --manifest-path Cargo.toml --out dist-bin
+  #         args: --release --strip -F binary --bindings bin --interpreter python${{ matrix.pyversion }} --manifest-path Cargo.toml --out dist-bin
   #     - name: Merge Wheels
   #       run: bash merge-wheel.bash
   #     - name: Install wheel

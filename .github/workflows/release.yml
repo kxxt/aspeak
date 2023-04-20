@@ -64,5 +64,6 @@ jobs:
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           bin: aspeak
+          features: binary
           token: ${{ secrets.GITHUB_TOKEN }}
           target: ${{ matrix.target }}
