@@ -1,4 +1,5 @@
 use std::borrow::Cow;
+use std::env;
 
 use super::config::{AuthConfig, Config, OutputConfig};
 use super::parse;
@@ -124,16 +125,18 @@ impl AuthArgs {
                     Cow::Borrowed::<'_, [(HeaderName, HeaderValue)]>(&self.headers)
                 }
             ).optional_token(
-                match (self.token.as_deref(), auth_config) {
-                    (Some(token), _) => Some(token),
-                    (None, Some(config)) => config.token.as_deref(),
-                    (None, None) => None,
+                match (self.token.as_deref(), auth_config, env::var("ASPEAK_AUTH_TOKEN").ok()) {
+                    (Some(token), _, _) => Some(Cow::Borrowed(token)),
+                    (None, _, Some(token)) => Some(Cow::Owned(token)),
+                    (None, Some(config), _) => config.token.as_deref().map(Cow::Borrowed),
+                    (None, None, _) => None,
                 }
             ).optional_key(
-                match (self.key.as_deref(), auth_config) {
-                    (Some(key), _) => Some(key),
-                    (None, Some(config)) => config.key.as_deref(),
-                    (None, None) => None,
+                match (self.key.as_deref(), auth_config, env::var("ASPEAK_AUTH_KEY").ok()) {
+                    (Some(key), _, _) => Some(Cow::Borrowed(key)),
+                    (None, _, Some(key)) => Some(Cow::Owned(key)),
+                    (None, Some(config), _) => config.key.as_deref().map(Cow::Borrowed),
+                    (None, None, _) => None,
                 }
             ).optional_proxy(
                 self
