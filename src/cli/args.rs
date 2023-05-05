@@ -3,7 +3,7 @@ use std::env;
 
 use super::config::{AuthConfig, Config, OutputConfig};
 use super::parse;
-use crate::constants::DEFAULT_ENDPOINT;
+use aspeak::DEFAULT_ENDPOINT;
 use aspeak::{get_endpoint_by_region, AspeakError, AudioFormat, AuthOptions, Role};
 use clap::{ArgAction, Args, ValueEnum};
 use color_eyre::{Help, Report};

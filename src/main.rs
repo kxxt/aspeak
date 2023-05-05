@@ -1,5 +1,4 @@
 mod cli;
-mod constants;
 
 use std::{borrow::Cow, path::PathBuf};
 

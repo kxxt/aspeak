@@ -18,6 +18,7 @@ pub fn get_endpoint_by_region(region: &str) -> String {
 
 pub use audio::{AudioFormat, QUALITY_MAP, QUALITY_RANGE_MAP};
 pub use auth::*;
+pub use constants::DEFAULT_ENDPOINT;
 pub use error::{AspeakError, Result};
 use phf::phf_map;
 pub use ssml::interpolate_ssml;
