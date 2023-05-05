@@ -107,7 +107,12 @@ To avoid repetition, you can store your authentication details
 in your aspeak profile.
 Read the following section for more details.
 
-From v4.3.0, you can let aspeak use a proxy server to connect to the endpoint. 
+From v5.2.0, you can also set the authentication secrets via the following environment variables:
+
+- `ASPEAK_AUTH_KEY` for authentication using subscription key
+- `ASPEAK_AUTH_TOKEN` for authentication using authorization token
+
+From v4.3.0, you can let aspeak use a proxy server to connect to the endpoint.
 For now, only http and socks5 proxies are supported (no https support yet). For example:
 
 ```sh
