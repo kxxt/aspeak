@@ -1,5 +1,18 @@
 # aspeak Changelog
 
+# v5.2.0
+
+## CLI
+
+You can now set the authentication secrets via the following environment variables:
+
+- `ASPEAK_AUTH_KEY` for authentication using subscription key
+- `ASPEAK_AUTH_TOKEN` for authentication using authorization token
+
+## Rust API
+
+- Now you can use `Voice::request_available_voices`(or `Voice::request_available_voices_with_additional_headers`) to get the list of available voices.
+
 # v5.1.0
 
 - Add binary feature to aspeak crate to make rust lib less bloated

@@ -43,7 +43,7 @@ From v4.1.0, You can install `aspeak-bin` from AUR.
 Installing from PyPI will also install the python binding of `aspeak` for you. Check [Library Usage#Python](#Python) for more information on using the python binding.
 
 ```bash
-pip install -U aspeak==5.1.0
+pip install -U aspeak==5.2.0
 ```
 
 Now the prebuilt wheels are only available for x86_64 architecture.
@@ -107,7 +107,12 @@ To avoid repetition, you can store your authentication details
 in your aspeak profile.
 Read the following section for more details.
 
-From v4.3.0, you can let aspeak use a proxy server to connect to the endpoint. 
+From v5.2.0, you can also set the authentication secrets via the following environment variables:
+
+- `ASPEAK_AUTH_KEY` for authentication using subscription key
+- `ASPEAK_AUTH_TOKEN` for authentication using authorization token
+
+From v4.3.0, you can let aspeak use a proxy server to connect to the endpoint.
 For now, only http and socks5 proxies are supported (no https support yet). For example:
 
 ```sh
