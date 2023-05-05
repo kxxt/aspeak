@@ -1,7 +1,14 @@
-use std::fmt::Display;
+use std::{
+    borrow::Cow,
+    error::Error,
+    fmt::{self, Display, Formatter},
+};
 
 use colored::Colorize;
+use hyper::{header::InvalidHeaderValue, http::HeaderValue};
 use serde::Deserialize;
+
+use crate::constants::{ORIGIN, TRIAL_VOICE_LIST_URL};
 
 /// Voice information
 #[derive(Debug, Clone, Deserialize)]
@@ -22,7 +29,107 @@ pub struct Voice {
     role_play_list: Option<Vec<String>>,
 }
 
+#[non_exhaustive]
+pub enum VoiceListAPIEndpoint<'a> {
+    Region(&'a str),
+    Url(&'a str),
+}
+
+impl<'a> VoiceListAPIEndpoint<'a> {
+    pub fn get_endpoint_url(&'a self) -> Cow<'a, str> {
+        match self {
+            Self::Url(url) => (*url).into(),
+            Self::Region(r) => Cow::Owned(format!(
+                "https://{r}.tts.speech.microsoft.com/cognitiveservices/voices/list"
+            )),
+        }
+    }
+}
+
+#[non_exhaustive]
+pub enum VoiceListAPIAuth<'a> {
+    SubscriptionKey(&'a str),
+    AuthToken(&'a str),
+}
+
 impl Voice {
+    pub async fn request_available_voices(
+        endpoint: VoiceListAPIEndpoint<'_>,
+        auth: Option<VoiceListAPIAuth<'_>>,
+        proxy: Option<&str>,
+    ) -> Result<Vec<Self>, VoiceListAPIError> {
+        Self::request_available_voices_with_additional_headers(endpoint, auth, proxy, None).await
+    }
+
+    pub async fn request_available_voices_with_additional_headers(
+        endpoint: VoiceListAPIEndpoint<'_>,
+        auth: Option<VoiceListAPIAuth<'_>>,
+        proxy: Option<&str>,
+        additional_headers: Option<reqwest::header::HeaderMap>,
+    ) -> Result<Vec<Self>, VoiceListAPIError> {
+        let url = endpoint.get_endpoint_url();
+        let mut client = reqwest::ClientBuilder::new().no_proxy(); // Disable default system proxy detection.
+        if let Some(proxy) = proxy {
+            client = client.proxy(reqwest::Proxy::all(proxy).map_err(|e| VoiceListAPIError {
+                kind: VoiceListAPIErrorKind::ProxyError,
+                source: Some(e.into()),
+            })?);
+        }
+        let client = client.build().map_err(|e| VoiceListAPIError {
+            kind: VoiceListAPIErrorKind::RequestError,
+            source: Some(e.into()),
+        })?;
+        let mut request = client.get(&*url);
+        let request_error = |e: InvalidHeaderValue| VoiceListAPIError {
+            kind: VoiceListAPIErrorKind::RequestError,
+            source: Some(e.into()),
+        };
+        match auth {
+            Some(VoiceListAPIAuth::SubscriptionKey(key)) => {
+                request = request.header(
+                    "Ocp-Apim-Subscription-Key",
+                    HeaderValue::from_str(key).map_err(request_error)?,
+                );
+            }
+            Some(VoiceListAPIAuth::AuthToken(token)) => {
+                request = request.header(
+                    "Authorization",
+                    HeaderValue::from_str(token).map_err(request_error)?,
+                );
+            }
+            None => {}
+        }
+        if additional_headers.is_some() {
+            request = request.headers(additional_headers.unwrap());
+        } else if Some(url.as_ref()) == TRIAL_VOICE_LIST_URL {
+            // Trial endpoint
+            request = request.header("Origin", HeaderValue::from_str(ORIGIN).unwrap());
+        }
+        let request_error = |e: reqwest::Error| VoiceListAPIError {
+            kind: VoiceListAPIErrorKind::RequestError,
+            source: Some(e.into()),
+        };
+        let request = request.build().map_err(request_error)?;
+        let response = client.execute(request).await.map_err(request_error)?;
+        let response = response.error_for_status().map_err(|e| VoiceListAPIError {
+            kind: VoiceListAPIErrorKind::ResponseError,
+            source: Some(
+                VoiceListAPIResponseStatusError {
+                    status: e.status().unwrap(),
+                    source: Some(e.into()),
+                }
+                .into(),
+            ),
+        })?;
+        response
+            .json::<Vec<Voice>>()
+            .await
+            .map_err(|e| VoiceListAPIError {
+                kind: VoiceListAPIErrorKind::ParseError,
+                source: Some(e.into()),
+            })
+    }
+
     pub fn display_name(&self) -> &str {
         &self.display_name
     }
@@ -100,4 +207,59 @@ impl Display for Voice {
         }
         Ok(())
     }
+}
+
+#[derive(Debug)]
+#[non_exhaustive]
+pub struct VoiceListAPIResponseStatusError {
+    pub status: reqwest::StatusCode,
+    source: Option<anyhow::Error>,
+}
+
+impl Display for VoiceListAPIResponseStatusError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "failed to retrieve voice list because of {} side error: status {:?}",
+            if self.status.as_u16() >= 500u16 {
+                "server"
+            } else {
+                "client"
+            },
+            self.status
+        )
+    }
+}
+
+impl Error for VoiceListAPIResponseStatusError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        self.source.as_ref().map(|e| e.as_ref() as _)
+    }
+}
+
+#[derive(Debug)]
+#[non_exhaustive]
+pub struct VoiceListAPIError {
+    pub kind: VoiceListAPIErrorKind,
+    source: Option<anyhow::Error>,
+}
+
+impl Display for VoiceListAPIError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "error while retrieving voice list: {:?}", self.kind)
+    }
+}
+
+impl Error for VoiceListAPIError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        self.source.as_ref().map(|e| e.as_ref() as _)
+    }
+}
+
+#[derive(Debug)]
+pub enum VoiceListAPIErrorKind {
+    ProxyError,
+    RequestError,
+    ParseError,
+    ResponseError,
 }

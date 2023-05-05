@@ -16,18 +16,7 @@ crate-type = ["cdylib", "rlib"]
 [features]
 audio = ["dep:rodio"]
 python = ["audio", "dep:pyo3", "dep:env_logger", "dep:color-eyre"]
-binary = [
-    "audio",
-    "dep:clap",
-    "dep:env_logger",
-    "dep:toml",
-    "dep:dirs",
-    "dep:color-eyre",
-    "dep:serde_json",
-    "dep:open",
-    "dep:encoding_rs",
-    "dep:encoding_rs_io",
-]
+binary = ["audio", "dep:clap", "dep:env_logger", "dep:toml", "dep:dirs", "dep:color-eyre", "dep:serde_json", "dep:open", "dep:encoding_rs", "dep:encoding_rs_io"]
 
 [[bin]]
 name = "aspeak"
@@ -82,3 +71,4 @@ open = { version = "4.0.1", optional = true }
 url = "2.3.1"
 hyper = "0.14.25"
 tokio-socks = "0.5.1"
+anyhow = "1.0.70"
