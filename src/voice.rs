@@ -4,26 +4,30 @@ use std::{
     fmt::{self, Display, Formatter},
 };
 
+use crate::{
+    constants::{ORIGIN, TRIAL_VOICE_LIST_URL},
+    AudioFormat,
+};
 use colored::Colorize;
 use hyper::{header::InvalidHeaderValue, http::HeaderValue};
 use serde::Deserialize;
-
-use crate::constants::{ORIGIN, TRIAL_VOICE_LIST_URL};
 
 /// Voice information
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct Voice {
-    display_name: String,
+    display_name: Option<String>,
+    friendly_name: Option<String>,
     gender: String,
-    local_name: String,
+    local_name: Option<String>,
     locale: String,
-    locale_name: String,
+    locale_name: Option<String>,
     name: String,
-    sample_rate_hertz: String,
+    sample_rate_hertz: Option<String>,
+    suggested_codec: Option<AudioFormat>,
     short_name: String,
     status: String,
-    voice_type: String,
+    voice_type: Option<String>,
     words_per_minute: Option<String>,
     style_list: Option<Vec<String>>,
     role_play_list: Option<Vec<String>>,
@@ -130,32 +134,32 @@ impl Voice {
             })
     }
 
-    pub fn display_name(&self) -> &str {
-        &self.display_name
+    pub fn display_name(&self) -> Option<&str> {
+        self.display_name.as_deref()
     }
 
     pub fn gender(&self) -> &str {
         &self.gender
     }
 
-    pub fn local_name(&self) -> &str {
-        &self.local_name
+    pub fn local_name(&self) -> Option<&str> {
+        self.local_name.as_deref()
     }
 
     pub fn locale(&self) -> &str {
         &self.locale
     }
 
-    pub fn locale_name(&self) -> &str {
-        &self.locale_name
+    pub fn locale_name(&self) -> Option<&str> {
+        self.locale_name.as_deref()
     }
 
     pub fn name(&self) -> &str {
         &self.name
     }
 
-    pub fn sample_rate_hertz(&self) -> &str {
-        &self.sample_rate_hertz
+    pub fn sample_rate_hertz(&self) -> Option<&str> {
+        self.sample_rate_hertz.as_deref()
     }
 
     pub fn short_name(&self) -> &str {
@@ -166,8 +170,8 @@ impl Voice {
         &self.status
     }
 
-    pub fn voice_type(&self) -> &str {
-        &self.voice_type
+    pub fn voice_type(&self) -> Option<&str> {
+        self.voice_type.as_deref()
     }
 
     pub fn words_per_minute(&self) -> Option<&str> {
@@ -181,19 +185,47 @@ impl Voice {
     pub fn role_play_list(&self) -> Option<&[String]> {
         self.role_play_list.as_deref()
     }
+
+    pub fn friendly_name(&self) -> Option<&str> {
+        self.friendly_name.as_deref()
+    }
+
+    pub fn suggested_codec(&self) -> Option<AudioFormat> {
+        self.suggested_codec
+    }
+
+    fn optional_display(
+        f: &mut std::fmt::Formatter<'_>,
+        name: &str,
+        value: Option<&str>,
+    ) -> std::fmt::Result {
+        if let Some(value) = value {
+            writeln!(f, "{}: {}", name, value)?;
+        }
+        Ok(())
+    }
 }
 
 impl Display for Voice {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "{}", self.name.bright_green())?;
-        writeln!(f, "Display name: {}", self.display_name)?;
-        writeln!(f, "Local name: {} @ {}", self.local_name, self.locale)?;
-        writeln!(f, "Locale: {}", self.locale_name)?;
+        Self::optional_display(f, "Friendly name", self.friendly_name())?;
+        Self::optional_display(f, "Display name", self.display_name())?;
+        Self::optional_display(f, "Local name", self.local_name())?;
+        Self::optional_display(f, "Locale name", self.locale_name())?;
+        writeln!(f, "Locale: {}", self.locale)?;
         writeln!(f, "Gender: {}", self.gender)?;
-        writeln!(f, "ID: {}", self.short_name)?;
-        writeln!(f, "Voice type: {}", self.voice_type)?;
+        writeln!(f, "Short name: {}", self.short_name)?;
+        Self::optional_display(f, "Voice type", self.voice_type())?;
         writeln!(f, "Status: {}", self.status)?;
-        writeln!(f, "Sample rate: {}Hz", self.sample_rate_hertz)?;
+        Self::optional_display(
+            f,
+            "Suggested codec",
+            self.suggested_codec().map(|x| x.into()),
+        )?;
+        if let Some(hz) = self.sample_rate_hertz.as_deref() {
+            writeln!(f, "Sample rate: {}Hz", hz)?;
+        }
         writeln!(
             f,
             "Words per minute: {}",
