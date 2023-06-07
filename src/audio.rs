@@ -1,8 +1,6 @@
 #[cfg(feature = "binary")]
 use clap::ValueEnum;
 use phf::phf_map;
-#[cfg(feature = "audio")]
-use rodio::{Decoder, OutputStream, Sink};
 use serde::Deserialize;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
@@ -40,24 +38,85 @@ static WEBM_QUALITY_MAP: QualityMap = phf_map! {
     1i8  => AudioFormat::Webm24Khz16Bit24KbpsMonoOpus,
 };
 
-#[allow(unused)]
 #[cfg(feature = "audio")]
-pub fn play_borrowed_audio_blocking(buffer: &[u8]) -> Result<(), AspeakError> {
-    play_owned_audio_blocking(buffer.to_vec())
+mod internal {
+    use std::error::Error;
+    use std::fmt::{self, Display, Formatter};
+
+    use rodio::{decoder::DecoderError, PlayError, StreamError};
+    use rodio::{Decoder, OutputStream, Sink};
+    #[allow(unused)]
+    pub fn play_borrowed_audio_blocking(buffer: &[u8]) -> Result<(), AudioError> {
+        play_owned_audio_blocking(buffer.to_vec())
+    }
+
+    pub fn play_owned_audio_blocking(buffer: Vec<u8>) -> Result<(), AudioError> {
+        log::info!("Playing audio... ({} bytes)", buffer.len());
+        let (_stream, stream_handle) = OutputStream::try_default()?;
+        let sink = Sink::try_new(&stream_handle).unwrap();
+        let cursor = std::io::Cursor::new(buffer);
+        let source = Decoder::new(cursor)?;
+        sink.append(source);
+        sink.sleep_until_end();
+        log::debug!("Done playing audio");
+        Ok(())
+    }
+
+    #[derive(Debug)]
+    #[non_exhaustive]
+    pub struct AudioError {
+        pub kind: AudioErrorKind,
+        source: Option<anyhow::Error>,
+    }
+
+    impl Display for AudioError {
+        fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+            write!(f, "audio {:?} error", self.kind)
+        }
+    }
+
+    impl Error for AudioError {
+        fn source(&self) -> Option<&(dyn Error + 'static)> {
+            self.source.as_ref().map(|e| e.as_ref() as _)
+        }
+    }
+
+    #[derive(Debug)]
+    #[non_exhaustive]
+    pub enum AudioErrorKind {
+        Decoder,
+        Stream,
+        #[allow(unused)]
+        Play,
+    }
+
+    macro_rules! impl_from_for_audio_error {
+        ($error_type:ident, $error_kind:ident) => {
+            impl From<$error_type> for AudioError {
+                fn from(e: $error_type) -> Self {
+                    Self {
+                        kind: AudioErrorKind::$error_kind,
+                        source: Some(e.into()),
+                    }
+                }
+            }
+        };
+    }
+
+    impl_from_for_audio_error!(StreamError, Stream);
+    impl_from_for_audio_error!(DecoderError, Decoder);
+    impl_from_for_audio_error!(PlayError, Decoder);
+
+    #[cfg(feature = "python")]
+    impl From<AudioError> for pyo3::PyErr {
+        fn from(value: AudioError) -> Self {
+            pyo3::exceptions::PyOSError::new_err(format!("{:?}", color_eyre::Report::from(value)))
+        }
+    }
 }
 
 #[cfg(feature = "audio")]
-pub fn play_owned_audio_blocking(buffer: Vec<u8>) -> Result<(), AspeakError> {
-    log::info!("Playing audio... ({} bytes)", buffer.len());
-    let (_stream, stream_handle) = OutputStream::try_default()?;
-    let sink = Sink::try_new(&stream_handle).unwrap();
-    let cursor = std::io::Cursor::new(buffer);
-    let source = Decoder::new(cursor)?;
-    sink.append(source);
-    sink.sleep_until_end();
-    log::debug!("Done playing audio");
-    Ok(())
-}
+pub use internal::*;
 
 pub static QUALITY_MAP: phf::Map<&'static str, &'static QualityMap> = phf_map! {
     "wav" => &WAV_QUALITY_MAP,

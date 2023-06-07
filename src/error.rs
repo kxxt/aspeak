@@ -10,15 +10,6 @@ pub enum AspeakError {
     ConnectionCloseError { code: String, reason: String },
     #[error("Encountered invalid websocket message, invalid segment is: {0:?}")]
     InvalidWebSocketMessage(String),
-    #[cfg(feature = "audio")]
-    #[error("Audio decoder error")]
-    DecoderError(#[from] rodio::decoder::DecoderError),
-    #[cfg(feature = "audio")]
-    #[error("Audio stream error")]
-    StreamError(#[from] rodio::StreamError),
-    #[cfg(feature = "audio")]
-    #[error("Audio play error")]
-    PlayError(#[from] rodio::PlayError),
     #[error("IO error")]
     IOError(#[from] std::io::Error),
     #[error("No input text/SSML.")]
