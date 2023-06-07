@@ -7,7 +7,7 @@ mod net;
 #[cfg(feature = "python")]
 mod parse;
 mod ssml;
-mod synthesizer;
+mod websocket_synthesizer;
 mod types;
 pub mod voice;
 
@@ -22,7 +22,7 @@ pub use constants::DEFAULT_ENDPOINT;
 pub use error::{AspeakError, Result};
 use phf::phf_map;
 pub use ssml::interpolate_ssml;
-pub use synthesizer::{Synthesizer, SynthesizerConfig};
+pub use websocket_synthesizer::{WebsocketSynthesizer, SynthesizerConfig};
 pub use types::*;
 pub use voice::Voice;
 

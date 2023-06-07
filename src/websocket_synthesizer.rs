@@ -67,7 +67,7 @@ impl<'a> SynthesizerConfig<'a> {
     }
 
     /// Connect to the Azure Speech Service and return a [`Synthesizer`] on success.
-    pub async fn connect(self) -> Result<Synthesizer> {
+    pub async fn connect(self) -> Result<WebsocketSynthesizer> {
         let request = self.generate_client_request()?;
         let proxy_url = self
             .auth
@@ -102,7 +102,7 @@ impl<'a> SynthesizerConfig<'a> {
             "Path: speech.config\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{CLIENT_INFO_PAYLOAD}"
         ))).await?;
         info!("Successfully created Synthesizer");
-        Ok(Synthesizer {
+        Ok(WebsocketSynthesizer {
             audio_format: self.audio_format,
             stream: wss,
         })
@@ -110,12 +110,12 @@ impl<'a> SynthesizerConfig<'a> {
 }
 
 /// The main struct for interacting with the Azure Speech Service.
-pub struct Synthesizer {
+pub struct WebsocketSynthesizer {
     audio_format: AudioFormat,
     stream: WsStream,
 }
 
-impl Synthesizer {
+impl WebsocketSynthesizer {
     /// Synthesize the given SSML into audio(bytes).
     pub async fn synthesize_ssml(&mut self, ssml: &str) -> Result<Vec<u8>> {
         let uuid = Uuid::new_v4();

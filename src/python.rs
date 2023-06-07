@@ -14,7 +14,7 @@ use crate::constants::DEFAULT_ENDPOINT;
 use crate::parse::{parse_pitch, parse_rate, parse_style_degree};
 use crate::{
     get_default_voice_by_locale, get_endpoint_by_region, AspeakError, AudioFormat, AuthOptions,
-    Synthesizer, SynthesizerConfig, TextOptions,
+    WebsocketSynthesizer, SynthesizerConfig, TextOptions,
 };
 
 #[pymodule]
@@ -37,7 +37,7 @@ struct SpeechService {
     auth_token: Option<String>,
     proxy: Option<String>,
     headers: Vec<(HeaderName, HeaderValue)>,
-    synthesizer: RefCell<Option<Synthesizer>>,
+    synthesizer: RefCell<Option<WebsocketSynthesizer>>,
     runtime: Runtime,
 }
 
