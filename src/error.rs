@@ -1,5 +1,7 @@
 use thiserror::Error;
 
+use crate::net;
+
 /// Error type for aspeak crate
 #[derive(Error, Debug)]
 #[non_exhaustive]
@@ -20,9 +22,8 @@ pub enum AspeakError {
     ArgumentError(String),
     #[error("Failed to parse url")]
     UrlParseError(#[from] url::ParseError),
-    /// Other connection errors that are not covered by the above. (e.g. proxy error)
-    #[error("Connection error: {0}")]
-    GeneralConnectionError(String),
+    #[error("Failed to connect to proxy")]
+    ProxyConnectError(#[from] net::ProxyConnectError),
 }
 
 pub type Result<T> = std::result::Result<T, AspeakError>;

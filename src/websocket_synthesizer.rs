@@ -1,5 +1,5 @@
 use crate::constants::{DEFAULT_ENDPOINT, ORIGIN};
-use crate::net::{self, connect_directly, WsStream};
+use crate::net::{self, connect_directly, ProxyConnectError, WsStream};
 use crate::{
     interpolate_ssml, msg::WebSocketMessage, AspeakError, AudioFormat, AuthOptions, Result,
     TextOptions,
@@ -75,11 +75,9 @@ impl<'a> SynthesizerConfig<'a> {
             .as_deref()
             .map(reqwest::Url::parse)
             .transpose()
-            .map_err(|_| {
-                AspeakError::GeneralConnectionError(format!(
-                    "Invalid proxy url: {}",
-                    self.auth.proxy.as_deref().unwrap()
-                ))
+            .map_err(|e| ProxyConnectError {
+                kind: net::ProxyConnectErrorKind::BadUrl(self.auth.proxy.unwrap().to_string()),
+                source: Some(e.into()),
             })?;
         let mut wss = match proxy_url.as_ref().map(|x| x.scheme()) {
             Some("socks5") => {
@@ -90,9 +88,13 @@ impl<'a> SynthesizerConfig<'a> {
             }
             None => connect_directly(request).await?,
             Some(other_scheme) => {
-                return Err(AspeakError::GeneralConnectionError(format!(
-                    "Unsupported proxy scheme: {other_scheme}"
-                )))
+                return Err(ProxyConnectError {
+                    kind: net::ProxyConnectErrorKind::UnsupportedScheme(Some(
+                        other_scheme.to_string(),
+                    )),
+                    source: None,
+                }
+                .into())
             }
         };
         let uuid = Uuid::new_v4();
