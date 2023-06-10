@@ -11,6 +11,7 @@ use crate::{
 use colored::Colorize;
 use hyper::{header::InvalidHeaderValue, http::HeaderValue};
 use serde::Deserialize;
+use strum::AsRefStr;
 
 /// Voice information
 #[derive(Debug, Clone, Deserialize)]
@@ -75,17 +76,17 @@ impl Voice {
         let mut client = reqwest::ClientBuilder::new().no_proxy(); // Disable default system proxy detection.
         if let Some(proxy) = proxy {
             client = client.proxy(reqwest::Proxy::all(proxy).map_err(|e| VoiceListAPIError {
-                kind: VoiceListAPIErrorKind::ProxyError,
+                kind: VoiceListAPIErrorKind::Proxy,
                 source: Some(e.into()),
             })?);
         }
         let client = client.build().map_err(|e| VoiceListAPIError {
-            kind: VoiceListAPIErrorKind::RequestError,
+            kind: VoiceListAPIErrorKind::Request,
             source: Some(e.into()),
         })?;
         let mut request = client.get(&*url);
         let request_error = |e: InvalidHeaderValue| VoiceListAPIError {
-            kind: VoiceListAPIErrorKind::RequestError,
+            kind: VoiceListAPIErrorKind::Request,
             source: Some(e.into()),
         };
         match auth {
@@ -110,13 +111,13 @@ impl Voice {
             request = request.header("Origin", HeaderValue::from_str(ORIGIN).unwrap());
         }
         let request_error = |e: reqwest::Error| VoiceListAPIError {
-            kind: VoiceListAPIErrorKind::RequestError,
+            kind: VoiceListAPIErrorKind::Request,
             source: Some(e.into()),
         };
         let request = request.build().map_err(request_error)?;
         let response = client.execute(request).await.map_err(request_error)?;
         let response = response.error_for_status().map_err(|e| VoiceListAPIError {
-            kind: VoiceListAPIErrorKind::ResponseError,
+            kind: VoiceListAPIErrorKind::Response,
             source: Some(
                 VoiceListAPIResponseStatusError {
                     status: e.status().unwrap(),
@@ -129,7 +130,7 @@ impl Voice {
             .json::<Vec<Voice>>()
             .await
             .map_err(|e| VoiceListAPIError {
-                kind: VoiceListAPIErrorKind::ParseError,
+                kind: VoiceListAPIErrorKind::Parse,
                 source: Some(e.into()),
             })
     }
@@ -278,7 +279,11 @@ pub struct VoiceListAPIError {
 
 impl Display for VoiceListAPIError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "error while retrieving voice list: {:?}", self.kind)
+        write!(
+            f,
+            "voice list api: {} error while retrieving voice list",
+            self.kind.as_ref()
+        )
     }
 }
 
@@ -288,10 +293,12 @@ impl Error for VoiceListAPIError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, AsRefStr, PartialEq, Clone)]
+#[strum(serialize_all = "title_case")]
+#[non_exhaustive]
 pub enum VoiceListAPIErrorKind {
-    ProxyError,
-    RequestError,
-    ParseError,
-    ResponseError,
+    Proxy,
+    Request,
+    Parse,
+    Response,
 }

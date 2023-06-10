@@ -162,7 +162,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                     auth, auth_options.proxy(), Some(HeaderMap::from_iter(auth_options.headers().iter().map(Clone::clone)))
                 ).await;
                 let voices = if let Err(VoiceListAPIError {
-                    kind: VoiceListAPIErrorKind::ResponseError,
+                    kind: VoiceListAPIErrorKind::Response,
                     ..
                 }) =  voices_result {
                     voices_result.with_note(|| "Maybe you are not authorized. Did you specify an auth token or a subscription key? Did the key/token expire?")?
