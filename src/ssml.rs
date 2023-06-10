@@ -117,7 +117,7 @@ impl Error for SsmlError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 #[non_exhaustive]
 pub enum SsmlErrorKind {
     Xml,

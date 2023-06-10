@@ -84,7 +84,7 @@ mod internal {
         }
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq, Clone)]
     #[non_exhaustive]
     pub enum AudioErrorKind {
         Decoder,
@@ -347,7 +347,7 @@ impl From<AudioFormatParseError> for pyo3::PyErr {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 #[non_exhaustive]
 pub enum AudioFormatParseErrorKind {
     InvalidContainer(String),
