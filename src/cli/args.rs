@@ -4,9 +4,9 @@ use std::env;
 use super::config::{AuthConfig, Config, OutputConfig};
 use super::parse;
 use aspeak::DEFAULT_ENDPOINT;
-use aspeak::{get_endpoint_by_region, AspeakError, AudioFormat, AuthOptions, Role};
+use aspeak::{get_endpoint_by_region, AudioFormat, AuthOptions, Role};
 use clap::{ArgAction, Args, ValueEnum};
-use color_eyre::{Help, Report};
+use color_eyre::Help;
 use reqwest::header::{HeaderName, HeaderValue};
 use serde::Deserialize;
 use strum::{AsRefStr, Display};
@@ -96,9 +96,7 @@ impl AuthArgs {
                 .or_else(|| auth_config.and_then(|c| c.endpoint_config.as_ref().map(Cow::from)))
                 .or_else(|| DEFAULT_ENDPOINT.map(Cow::Borrowed))
                 .ok_or_else(|| {
-                    Report::new(AspeakError::ArgumentError(
-                        "No endpoint is specified!".to_string(),
-                    ))
+                    color_eyre::eyre::eyre!("No endpoint is specified!")
                     .with_note(|| "The default endpoint has been removed since aspeak v5.0 because Microsoft shutdown their trial service.")
                     .with_suggestion(|| "You can register an Azure account for the speech service and continue to use aspeak with your subscription key.")
                 })?
@@ -243,11 +241,11 @@ impl OutputArgs {
     }
 }
 
-fn parse_pitch(pitch: &str) -> Result<String, AspeakError> {
+fn parse_pitch(pitch: &str) -> Result<String, parse::ParseError> {
     parse::parse_pitch(pitch).map(String::from)
 }
 
-fn parse_rate(rate: &str) -> Result<String, AspeakError> {
+fn parse_rate(rate: &str) -> Result<String, parse::ParseError> {
     parse::parse_rate(rate).map(String::from)
 }
 

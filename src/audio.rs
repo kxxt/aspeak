@@ -1,10 +1,13 @@
+use std::{
+    error::Error,
+    fmt::{self, Display, Formatter},
+};
+
 #[cfg(feature = "binary")]
 use clap::ValueEnum;
 use phf::phf_map;
 use serde::Deserialize;
 use strum::{EnumIter, EnumString, IntoStaticStr};
-
-use crate::AspeakError;
 
 pub type QualityMap = phf::Map<i8, AudioFormat>;
 
@@ -257,12 +260,12 @@ impl AudioFormat {
         container: &str,
         quality: i8,
         use_closest: bool,
-    ) -> crate::Result<AudioFormat> {
-        let map = QUALITY_MAP.get(container).ok_or_else(|| {
-            AspeakError::ArgumentError(format!(
-                "No quality map found for container: {container}. Please check if the container is correct."
-            ))
-        })?;
+    ) -> Result<AudioFormat, AudioFormatParseError> {
+        let map = QUALITY_MAP
+            .get(container)
+            .ok_or_else(|| AudioFormatParseError {
+                kind: AudioFormatParseErrorKind::InvalidContainer(container.to_string()),
+            })?;
         if let Some(format) = map.get(&quality).copied() {
             Ok(format)
         } else if use_closest {
@@ -270,9 +273,12 @@ impl AudioFormat {
             let closest = if quality < *min { *min } else { *max };
             Ok(*map.get(&closest).unwrap())
         } else {
-            Err(AspeakError::ArgumentError(format!(
-                        "Invalid quality found for container: {container} and quality: {quality}. Please check if the quality is correct."
-            )))
+            Err(AudioFormatParseError {
+                kind: AudioFormatParseErrorKind::InvalidQuality {
+                    container: container.to_string(),
+                    quality,
+                },
+            })
         }
     }
 }
@@ -286,7 +292,7 @@ impl AudioFormat {
         container: &str,
         quality: i8,
         use_closest: bool,
-    ) -> crate::Result<AudioFormat> {
+    ) -> Result<AudioFormat, AudioFormatParseError> {
         AudioFormat::from_container_and_quality(container, quality, use_closest)
     }
 }
@@ -306,6 +312,46 @@ impl ValueEnum for AudioFormat {
     fn to_possible_value(&self) -> Option<clap::builder::PossibleValue> {
         Some(clap::builder::PossibleValue::new(Into::<&str>::into(self)))
     }
+}
+
+#[derive(Debug)]
+#[non_exhaustive]
+pub struct AudioFormatParseError {
+    pub kind: AudioFormatParseErrorKind,
+}
+
+impl Display for AudioFormatParseError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "audio format parse error: ")?;
+        match &self.kind {
+            AudioFormatParseErrorKind::InvalidContainer(container) => {
+                write!(f, "invalid container format: {}", container)
+            }
+            AudioFormatParseErrorKind::InvalidQuality { container, quality } => {
+                write!(f, "invalid quality {} for container {}", quality, container)
+            }
+        }
+    }
+}
+
+impl Error for AudioFormatParseError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
+    }
+}
+
+#[cfg(feature = "python")]
+impl From<AudioFormatParseError> for pyo3::PyErr {
+    fn from(value: AudioFormatParseError) -> Self {
+        pyo3::exceptions::PyOSError::new_err(format!("{:?}", color_eyre::Report::from(value)))
+    }
+}
+
+#[derive(Debug)]
+#[non_exhaustive]
+pub enum AudioFormatParseErrorKind {
+    InvalidContainer(String),
+    InvalidQuality { container: String, quality: i8 },
 }
 
 #[cfg(feature = "python")]

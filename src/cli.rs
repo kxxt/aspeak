@@ -7,7 +7,7 @@ use self::{
     commands::Command,
     config::TextConfig,
 };
-use aspeak::{get_default_voice_by_locale, AspeakError, RichSsmlOptions, TextOptions};
+use aspeak::{get_default_voice_by_locale, RichSsmlOptions, TextOptions};
 use std::{
     borrow::Cow,
     fs::{File, OpenOptions},
@@ -15,7 +15,10 @@ use std::{
     path::Path,
 };
 
-use color_eyre::{eyre::anyhow, Help};
+use color_eyre::{
+    eyre::{anyhow, eyre},
+    Help,
+};
 use encoding_rs_io::{DecodeReaderBytes, DecodeReaderBytesBuilder};
 
 pub(crate) mod args;
@@ -72,9 +75,8 @@ impl Cli {
             _ => Box::new(io::stdin()),
         };
         let mut decoder = if let Some(encoding) = args.encoding.as_deref() {
-            let encoding = encoding_rs::Encoding::for_label(encoding.as_bytes()).ok_or(
-                AspeakError::ArgumentError(format!("Unsupported encoding: {encoding}")),
-            )?;
+            let encoding = encoding_rs::Encoding::for_label(encoding.as_bytes())
+                .ok_or(eyre!("Unsupported encoding: {encoding}"))?;
             DecodeReaderBytesBuilder::new()
                 .encoding(Some(encoding))
                 .build(file)
@@ -133,7 +135,8 @@ impl Cli {
             .voice(
                 match (args.voice.as_deref(), args.locale.as_deref(), &config) {
                     (Some(voice), _, _) => voice,
-                    (None, Some(locale), _) => get_default_voice_by_locale(locale)?,
+                    (None, Some(locale), _) => get_default_voice_by_locale(locale)
+                        .ok_or_else(|| eyre!("No default voice found for locale {}", locale))?,
                     (None, None, config) => config
                         .map(|c| c.voice.as_ref().map(|v| v.try_as_str()).transpose())
                         .transpose()?

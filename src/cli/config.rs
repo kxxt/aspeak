@@ -146,7 +146,8 @@ impl VoiceConfig {
     pub fn try_as_str(&self) -> color_eyre::Result<&str> {
         Ok(match self {
             VoiceConfig::Voice { voice } => voice.as_str(),
-            VoiceConfig::Locale { locale } => get_default_voice_by_locale(locale)?,
+            VoiceConfig::Locale { locale } => get_default_voice_by_locale(locale)
+                .ok_or_else(|| anyhow!("Could not find default voice for locale: {}", locale))?,
         })
     }
 }

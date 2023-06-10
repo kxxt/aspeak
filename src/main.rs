@@ -1,15 +1,19 @@
 mod cli;
 
-use std::{borrow::Cow, path::PathBuf};
+use std::{borrow::Cow, error::Error, path::PathBuf};
 
 use cli::{commands::Command, Cli};
 
 use aspeak::{
     voice::{VoiceListAPIAuth, VoiceListAPIEndpoint, VoiceListAPIError, VoiceListAPIErrorKind},
-    AspeakError, AudioFormat, SynthesizerConfig, Voice, QUALITY_MAP,
+    AudioFormat, SynthesizerConfig, Voice, WebsocketSynthesizerError,
+    WebsocketSynthesizerErrorKind, QUALITY_MAP,
 };
 use clap::Parser;
-use color_eyre::{eyre::anyhow, Help, Report};
+use color_eyre::{
+    eyre::{anyhow, eyre},
+    Help,
+};
 use colored::Colorize;
 
 use env_logger::WriteStyle;
@@ -24,6 +28,12 @@ use crate::cli::{
     commands::ConfigCommand,
     config::{Config, EndpointConfig},
 };
+
+#[derive(Debug, thiserror::Error)]
+enum CliError {
+    #[error("No input text/SSML.")]
+    InputError,
+}
 
 fn main() -> color_eyre::eyre::Result<()> {
     let mut cli = Cli::parse();
@@ -62,7 +72,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 output_args,
             } => {
                 let ssml = ssml
-                    .ok_or(AspeakError::InputError)
+                    .ok_or(CliError::InputError)
                     .or_else(|_| Cli::process_input_text(&input_args))?;
                 let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref()))?;
                 let callback = Cli::process_output(output_args.output, output_args.overwrite)?;
@@ -81,7 +91,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                     text_args
                         .text.as_deref()
                         .map(Cow::Borrowed)
-                        .ok_or(AspeakError::InputError)
+                        .ok_or(CliError::InputError)
                         .or_else(|_| Cli::process_input_text(&input_args).map(Cow::Owned))
                         ?;
                 let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref()))?;
@@ -91,11 +101,19 @@ fn main() -> color_eyre::eyre::Result<()> {
                     .await?;
                 let options = &Cli::process_text_options(&text_args, config.as_ref().and_then(|c|c.text.as_ref()))?;
                 let result = synthesizer.synthesize_text(&text, options).await;
-                if let Err(e @ AspeakError::WebSocketError(TungsteniteError::Protocol(
-                    ProtocolError::ResetWithoutClosingHandshake,
-                ))) = result
+                if result.as_ref().err().and_then(
+                    |e| match e {
+                        WebsocketSynthesizerError {
+                            kind: WebsocketSynthesizerErrorKind::WebsocketError,
+                            ..
+                        } => e.source().and_then(|err| err.downcast_ref::<tokio_tungstenite::tungstenite::Error>()).map(
+                            |e| matches!(e, TungsteniteError::Protocol(ProtocolError::ResetWithoutClosingHandshake))
+                        ),
+                        _ => None,
+                    }
+                ).unwrap_or(false)
                 {
-                    return Err(e).with_note(|| "This error usually indicates a poor internet connection or that the remote API terminates your service.")
+                    return Err(result.err().unwrap()).with_note(|| "This error usually indicates a poor internet connection or that the remote API terminates your service.")
                         .with_suggestion(|| "Retry if you are on a poor internet connection. \
                                              If this error persists and you are using the trial service, please shorten your input.");
                 } else {
@@ -131,7 +149,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 })
                 // .or_else(|| TRIAL_VOICE_LIST_URL.map(Cow::Borrowed))
                 .ok_or_else(
-                    || Report::new(AspeakError::ArgumentError("No voice list API url specified!".to_string()))
+                    || eyre!("No voice list API url specified!".to_string())
                         .with_note(|| "The default voice list API that is used in aspeak v4 has been shutdown and is no longer available.")
                         .with_suggestion(|| "You can still use the list-voices command by specifying a region(authentication needed) or a custom voice list API url.")
                 )?;

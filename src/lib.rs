@@ -1,30 +1,28 @@
 mod audio;
 mod auth;
 mod constants;
-mod error;
 mod msg;
 mod net;
 #[cfg(feature = "python")]
 mod parse;
 mod ssml;
-mod websocket_synthesizer;
 mod types;
 pub mod voice;
+mod websocket_synthesizer;
 
 /// Get the official endpoint by its region (e.g. `eastus`)
 pub fn get_endpoint_by_region(region: &str) -> String {
     format!("wss://{region}.tts.speech.microsoft.com/cognitiveservices/websocket/v1")
 }
 
-pub use audio::{AudioFormat, QUALITY_MAP, QUALITY_RANGE_MAP};
+pub use audio::{AudioFormat, AudioFormatParseError, QUALITY_MAP, QUALITY_RANGE_MAP};
 pub use auth::*;
 pub use constants::DEFAULT_ENDPOINT;
-pub use error::{AspeakError, Result};
 use phf::phf_map;
-pub use ssml::interpolate_ssml;
-pub use websocket_synthesizer::{WebsocketSynthesizer, SynthesizerConfig};
+pub use ssml::*;
 pub use types::*;
 pub use voice::Voice;
+pub use websocket_synthesizer::*;
 
 #[cfg(feature = "python")]
 pub mod python;
@@ -40,12 +38,8 @@ pub mod python;
 ///
 /// A `Result` that contains the default voice as a static string slice if the
 /// specified locale is valid. Otherwise, an `AspeakError` is returned.
-pub fn get_default_voice_by_locale(locale: &str) -> Result<&'static str> {
-    DEFAULT_VOICES.get(locale).copied().ok_or_else(|| {
-        AspeakError::ArgumentError(format!(
-            "No default voice found for locale: {locale}. Please check if the locale is correct."
-        ))
-    })
+pub fn get_default_voice_by_locale(locale: &str) -> Option<&'static str> {
+    DEFAULT_VOICES.get(locale).copied()
 }
 
 pub(crate) static DEFAULT_VOICES: phf::Map<&'static str, &'static str> = phf_map! {

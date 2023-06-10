@@ -1,4 +1,9 @@
-use crate::error::Result;
+use core::fmt;
+use std::{
+    error::Error,
+    fmt::{Display, Formatter},
+};
+
 use crate::TextOptions;
 
 use log::info;
@@ -34,7 +39,7 @@ impl<'a> StartElementBuilderExt<'a> for StartElementBuilder<'a> {
 const DEFAULT_PITCH_RATE_STR: &str = "0%";
 
 /// Interpolate SSML from text and options
-pub fn interpolate_ssml(text: impl AsRef<str>, options: &TextOptions) -> Result<String> {
+pub fn interpolate_ssml(text: impl AsRef<str>, options: &TextOptions) -> Result<String, SsmlError> {
     let mut buf = Vec::new();
     let mut writer = EventWriter::new_with_config(
         &mut buf,
@@ -92,3 +97,43 @@ pub fn interpolate_ssml(text: impl AsRef<str>, options: &TextOptions) -> Result<
     info!("Created SSML: {}", &ssml);
     Ok(ssml)
 }
+
+#[derive(Debug)]
+#[non_exhaustive]
+pub struct SsmlError {
+    pub kind: SsmlErrorKind,
+    pub(crate) source: Option<anyhow::Error>,
+}
+
+impl Display for SsmlError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "ssml {:?} error", self.kind)
+    }
+}
+
+impl Error for SsmlError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        self.source.as_ref().map(|e| e.as_ref() as _)
+    }
+}
+
+#[derive(Debug)]
+#[non_exhaustive]
+pub enum SsmlErrorKind {
+    Xml,
+}
+
+macro_rules! impl_from_for_ssml_error {
+    ($error_type:ty, $error_kind:ident) => {
+        impl From<$error_type> for SsmlError {
+            fn from(e: $error_type) -> Self {
+                Self {
+                    kind: SsmlErrorKind::$error_kind,
+                    source: Some(e.into()),
+                }
+            }
+        }
+    };
+}
+
+impl_from_for_ssml_error!(xml::writer::Error, Xml);
