@@ -104,7 +104,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 if result.as_ref().err().and_then(
                     |e| match e {
                         WebsocketSynthesizerError {
-                            kind: WebsocketSynthesizerErrorKind::WebsocketError,
+                            kind: WebsocketSynthesizerErrorKind::Websocket,
                             ..
                         } => e.source().and_then(|err| err.downcast_ref::<tokio_tungstenite::tungstenite::Error>()).map(
                             |e| matches!(e, TungsteniteError::Protocol(ProtocolError::ResetWithoutClosingHandshake))

@@ -3,7 +3,7 @@ use std::fmt::{self, Display, Formatter};
 
 use crate::constants::{DEFAULT_ENDPOINT, ORIGIN};
 use crate::msg;
-use crate::net::{self, connect_directly, ProxyConnectError, WsStream};
+use crate::net::{self, connect_directly, ConnectError, WsStream};
 use crate::{interpolate_ssml, msg::WebSocketMessage, AudioFormat, AuthOptions, TextOptions};
 use chrono::Utc;
 use futures_util::{SinkExt, StreamExt};
@@ -78,8 +78,8 @@ impl<'a> SynthesizerConfig<'a> {
             .as_deref()
             .map(reqwest::Url::parse)
             .transpose()
-            .map_err(|e| ProxyConnectError {
-                kind: net::ProxyConnectErrorKind::BadUrl(self.auth.proxy.unwrap().to_string()),
+            .map_err(|e| ConnectError {
+                kind: net::ConnectErrorKind::BadUrl(self.auth.proxy.unwrap().to_string()),
                 source: Some(e.into()),
             })?;
         let mut wss = match proxy_url.as_ref().map(|x| x.scheme()) {
@@ -91,8 +91,8 @@ impl<'a> SynthesizerConfig<'a> {
             }
             None => connect_directly(request).await?,
             Some(other_scheme) => {
-                return Err(ProxyConnectError {
-                    kind: net::ProxyConnectErrorKind::UnsupportedScheme(Some(
+                return Err(ConnectError {
+                    kind: net::ConnectErrorKind::UnsupportedScheme(Some(
                         other_scheme.to_string(),
                     )),
                     source: None,
@@ -208,17 +208,18 @@ impl WebsocketSynthesizerError {
 impl Display for WebsocketSynthesizerError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         use WebsocketSynthesizerErrorKind::*;
+        write!(f, "ws synthesizer error: ")?;
         match &self.kind {
             WebsocketConnectionClosed { code, reason } => {
                 write!(
                     f,
-                    "ws synthesizer error: the websocket connection was closed with code {} and reason {}",
+                    "the websocket connection was closed with code {} and reason {}",
                     code, reason
                 )
             }
-            WebsocketError => write!(f, "ws synthesizer error: websocket error"),
-            ProxyConnect => write!(f, "ws synthesizer error: proxy connect error"),
-            InvalidRequest => write!(f, "ws synthesizer error: invalid request"),
+            Websocket => write!(f, "websocket error"),
+            Connect => write!(f, "connect error"),
+            InvalidRequest => write!(f, "invalid request"),
             _ => write!(f, "{:?} error", self.kind),
         }
     }
@@ -240,9 +241,9 @@ impl From<WebsocketSynthesizerError> for pyo3::PyErr {
 #[derive(Debug, PartialEq, Clone)]
 #[non_exhaustive]
 pub enum WebsocketSynthesizerErrorKind {
-    ProxyConnect,
+    Connect,
     WebsocketConnectionClosed { code: String, reason: String },
-    WebsocketError,
+    Websocket,
     InvalidRequest,
     InvalidMessage,
     SsmlError,
@@ -263,8 +264,8 @@ macro_rules! impl_from_for_ws_synthesizer_error {
 
 impl_from_for_ws_synthesizer_error!(InvalidHeaderValue, InvalidRequest);
 impl_from_for_ws_synthesizer_error!(url::ParseError, InvalidRequest);
-impl_from_for_ws_synthesizer_error!(net::ProxyConnectError, ProxyConnect);
-impl_from_for_ws_synthesizer_error!(tokio_tungstenite::tungstenite::Error, WebsocketError);
+impl_from_for_ws_synthesizer_error!(net::ConnectError, Connect);
+impl_from_for_ws_synthesizer_error!(tokio_tungstenite::tungstenite::Error, Websocket);
 impl_from_for_ws_synthesizer_error!(crate::ssml::SsmlError, SsmlError);
 
 impl From<msg::ParseError> for WebsocketSynthesizerError {
