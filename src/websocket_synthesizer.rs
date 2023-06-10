@@ -11,6 +11,7 @@ use hyper::header::InvalidHeaderValue;
 use hyper::Request;
 use log::{debug, info, warn};
 
+use strum::AsRefStr;
 use tokio_tungstenite::{
     tungstenite::client::IntoClientRequest, tungstenite::http::HeaderValue,
     tungstenite::protocol::Message,
@@ -92,9 +93,7 @@ impl<'a> SynthesizerConfig<'a> {
             None => connect_directly(request).await?,
             Some(other_scheme) => {
                 return Err(ConnectError {
-                    kind: net::ConnectErrorKind::UnsupportedScheme(Some(
-                        other_scheme.to_string(),
-                    )),
+                    kind: net::ConnectErrorKind::UnsupportedScheme(Some(other_scheme.to_string())),
                     source: None,
                 }
                 .into())
@@ -217,10 +216,8 @@ impl Display for WebsocketSynthesizerError {
                     code, reason
                 )
             }
-            Websocket => write!(f, "websocket error"),
-            Connect => write!(f, "connect error"),
-            InvalidRequest => write!(f, "invalid request"),
-            _ => write!(f, "{:?} error", self.kind),
+            InvalidMessage => write!(f, "aspeak cannot handle this message. Please report this bug to https://github.com/kxxt/aspeak/issues."),
+            _ => write!(f, "{} error", self.kind.as_ref()),
         }
     }
 }
@@ -238,15 +235,16 @@ impl From<WebsocketSynthesizerError> for pyo3::PyErr {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, AsRefStr)]
 #[non_exhaustive]
+#[strum(serialize_all = "title_case")]
 pub enum WebsocketSynthesizerErrorKind {
     Connect,
     WebsocketConnectionClosed { code: String, reason: String },
     Websocket,
     InvalidRequest,
     InvalidMessage,
-    SsmlError,
+    Ssml,
 }
 
 macro_rules! impl_from_for_ws_synthesizer_error {
@@ -266,7 +264,7 @@ impl_from_for_ws_synthesizer_error!(InvalidHeaderValue, InvalidRequest);
 impl_from_for_ws_synthesizer_error!(url::ParseError, InvalidRequest);
 impl_from_for_ws_synthesizer_error!(net::ConnectError, Connect);
 impl_from_for_ws_synthesizer_error!(tokio_tungstenite::tungstenite::Error, Websocket);
-impl_from_for_ws_synthesizer_error!(crate::ssml::SsmlError, SsmlError);
+impl_from_for_ws_synthesizer_error!(crate::ssml::SsmlError, Ssml);
 
 impl From<msg::ParseError> for WebsocketSynthesizerError {
     fn from(e: msg::ParseError) -> Self {
