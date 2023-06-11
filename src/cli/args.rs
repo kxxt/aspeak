@@ -4,7 +4,7 @@ use std::env;
 use super::config::{AuthConfig, Config, OutputConfig};
 use super::parse;
 use aspeak::DEFAULT_ENDPOINT;
-use aspeak::{get_endpoint_by_region, AudioFormat, AuthOptions, Role};
+use aspeak::{get_websocket_endpoint_by_region, AudioFormat, AuthOptions, Role};
 use clap::{ArgAction, Args, ValueEnum};
 use color_eyre::Help;
 use reqwest::header::{HeaderName, HeaderValue};
@@ -90,7 +90,7 @@ impl AuthArgs {
                 .or_else(|| {
                     self.region
                         .as_deref()
-                        .map(get_endpoint_by_region)
+                        .map(get_websocket_endpoint_by_region)
                         .map(Cow::Owned)
                 })
                 .or_else(|| auth_config.and_then(|c| c.endpoint_config.as_ref().map(Cow::from)))

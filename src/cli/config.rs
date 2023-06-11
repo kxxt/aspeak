@@ -4,7 +4,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use aspeak::{get_default_voice_by_locale, get_endpoint_by_region, AudioFormat, Role};
+use aspeak::{get_default_voice_by_locale, get_websocket_endpoint_by_region, AudioFormat, Role};
 use color_eyre::eyre::{anyhow, bail};
 
 use serde::Deserialize;
@@ -88,7 +88,7 @@ impl<'a> From<&'a EndpointConfig> for Cow<'a, str> {
         match endpoint {
             EndpointConfig::Endpoint { endpoint } => Cow::Borrowed(endpoint),
             EndpointConfig::Region { region } => {
-                Cow::Owned(get_endpoint_by_region(region.as_str()))
+                Cow::Owned(get_websocket_endpoint_by_region(region.as_str()))
             }
         }
     }

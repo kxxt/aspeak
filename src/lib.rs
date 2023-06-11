@@ -6,13 +6,19 @@ mod net;
 #[cfg(feature = "python")]
 mod parse;
 mod ssml;
-mod types;
-pub mod voice;
 pub mod synthesizer;
+mod types;
+mod utils;
+pub mod voice;
 
-/// Get the official endpoint by its region (e.g. `eastus`)
-pub fn get_endpoint_by_region(region: &str) -> String {
+/// Get the official websocket endpoint by its region (e.g. `eastus`)
+pub fn get_websocket_endpoint_by_region(region: &str) -> String {
     format!("wss://{region}.tts.speech.microsoft.com/cognitiveservices/websocket/v1")
+}
+
+/// Get the official REST endpoint by its region (e.g. `eastus`)
+pub fn get_rest_endpoint_by_region(region: &str) -> String {
+    format!("https://{region}.tts.speech.microsoft.com/cognitiveservices/v1")
 }
 
 pub use audio::{AudioFormat, AudioFormatParseError, QUALITY_MAP, QUALITY_RANGE_MAP};

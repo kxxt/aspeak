@@ -13,7 +13,7 @@ use crate::audio::play_owned_audio_blocking;
 use crate::constants::DEFAULT_ENDPOINT;
 use crate::parse::{parse_pitch, parse_rate, parse_style_degree};
 use crate::{
-    get_default_voice_by_locale, get_endpoint_by_region,
+    get_default_voice_by_locale, get_websocket_endpoint_by_region,
     synthesizer::{SynthesizerConfig, WebsocketSynthesizer},
     AudioFormat, AuthOptions, TextOptions,
 };
@@ -127,7 +127,7 @@ impl SpeechService {
                 .and_then(|dict| dict.get_item("region"))
                 .map(|e| e.extract::<&str>())
                 .transpose()?
-                .map(get_endpoint_by_region)
+                .map(get_websocket_endpoint_by_region)
                 .map(Cow::Owned)
                 .or_else(|| DEFAULT_ENDPOINT.map(Cow::Borrowed))
                 .ok_or_else(|| PyValueError::new_err("No endpoint is specified!".to_string()))?
