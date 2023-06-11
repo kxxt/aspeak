@@ -195,7 +195,7 @@ impl SpeechService {
                     },
                     self.audio_format,
                 )
-                .connect(),
+                .connect_websocket(),
             )?,
         );
         Ok(())

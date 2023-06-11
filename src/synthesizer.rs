@@ -71,7 +71,7 @@ impl<'a> SynthesizerConfig<'a> {
     }
 
     /// Connect to the Azure Speech Service and return a [`Synthesizer`] on success.
-    pub async fn connect(self) -> Result<WebsocketSynthesizer, WebsocketSynthesizerError> {
+    pub async fn connect_websocket(self) -> Result<WebsocketSynthesizer, WebsocketSynthesizerError> {
         let request = self.generate_client_request()?;
         let proxy_url = self
             .auth

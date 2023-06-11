@@ -77,7 +77,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref()))?;
                 let callback = Cli::process_output(output_args.output, output_args.overwrite)?;
                 let mut synthesizer = SynthesizerConfig::new(auth_options, audio_format)
-                    .connect()
+                    .connect_websocket()
                     .await?;
                 let audio_data = synthesizer.synthesize_ssml(&ssml).await?;
                 callback(&audio_data)?;
@@ -97,7 +97,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref()))?;
                 let callback = Cli::process_output(output_args.output, output_args.overwrite)?;
                 let mut synthesizer = SynthesizerConfig::new(auth_options,audio_format)
-                    .connect()
+                    .connect_websocket()
                     .await?;
                 let options = &Cli::process_text_options(&text_args, config.as_ref().and_then(|c|c.text.as_ref()))?;
                 let result = synthesizer.synthesize_text(&text, options).await;
