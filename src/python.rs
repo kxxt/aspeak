@@ -13,8 +13,9 @@ use crate::audio::play_owned_audio_blocking;
 use crate::constants::DEFAULT_ENDPOINT;
 use crate::parse::{parse_pitch, parse_rate, parse_style_degree};
 use crate::{
-    get_default_voice_by_locale, get_endpoint_by_region, AudioFormat, AuthOptions,
-    SynthesizerConfig, TextOptions, WebsocketSynthesizer,
+    get_default_voice_by_locale, get_endpoint_by_region,
+    synthesizer::{SynthesizerConfig, WebsocketSynthesizer},
+    AudioFormat, AuthOptions, TextOptions,
 };
 
 #[pymodule]

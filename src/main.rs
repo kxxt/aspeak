@@ -5,9 +5,9 @@ use std::{borrow::Cow, error::Error, path::PathBuf};
 use cli::{commands::Command, Cli};
 
 use aspeak::{
+    synthesizer::{SynthesizerConfig, WebsocketSynthesizerError, WebsocketSynthesizerErrorKind},
     voice::{VoiceListAPIAuth, VoiceListAPIEndpoint, VoiceListAPIError, VoiceListAPIErrorKind},
-    AudioFormat, SynthesizerConfig, Voice, WebsocketSynthesizerError,
-    WebsocketSynthesizerErrorKind, QUALITY_MAP,
+    AudioFormat, Voice, QUALITY_MAP,
 };
 use clap::Parser;
 use color_eyre::{

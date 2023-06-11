@@ -8,7 +8,7 @@ mod parse;
 mod ssml;
 mod types;
 pub mod voice;
-mod websocket_synthesizer;
+pub mod synthesizer;
 
 /// Get the official endpoint by its region (e.g. `eastus`)
 pub fn get_endpoint_by_region(region: &str) -> String {
@@ -22,7 +22,6 @@ use phf::phf_map;
 pub use ssml::*;
 pub use types::*;
 pub use voice::Voice;
-pub use websocket_synthesizer::*;
 
 #[cfg(feature = "python")]
 pub mod python;
