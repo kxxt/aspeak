@@ -14,6 +14,7 @@ impl ClientBuilderExt for ClientBuilder {
     }
 }
 
+#[cfg(feature = "rest-synthesizer")]
 pub(crate) fn transpose_tuple_option_result<T, K, E>(
     x: Option<(T, Result<K, E>)>,
 ) -> Result<Option<(T, K)>, E> {

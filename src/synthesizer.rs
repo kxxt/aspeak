@@ -1,29 +1,22 @@
-use chrono::Utc;
-use futures_util::SinkExt;
-use hyper::{header, http::HeaderValue};
-use log::{debug, info};
-use reqwest::Proxy;
-use tokio_tungstenite::tungstenite::{
-    client::IntoClientRequest, handshake::client::Request, Message,
-};
-use uuid::Uuid;
+use log::info;
 
-use crate::{
-    constants::ORIGIN,
-    net::{self, connect_directly, ConnectError},
-    utils::{transpose_tuple_option_result, ClientBuilderExt},
-    AudioFormat, AuthOptions, DEFAULT_ENDPOINT,
-};
+use crate::{AudioFormat, AuthOptions};
 
+#[cfg(feature = "rest-synthesizer")]
 mod rest;
+#[cfg(feature = "unified-synthesizer")]
 mod unified;
+#[cfg(feature = "websocket-synthesizer")]
 mod websocket;
 
+#[cfg(feature = "rest-synthesizer")]
 pub use rest::*;
+#[cfg(feature = "websocket-synthesizer")]
 pub use websocket::*;
 
 /// Initialize a new [`Synthesizer`] by creating a new [`SynthesizerConfig`] and call [`SynthesizerConfig::connect`].
 #[derive(Debug, Clone)]
+#[allow(unused)]
 pub struct SynthesizerConfig<'a> {
     /// The authentication options.
     pub(crate) auth: AuthOptions<'a>,
@@ -31,6 +24,7 @@ pub struct SynthesizerConfig<'a> {
     pub(crate) audio_format: AudioFormat,
 }
 
+#[cfg(feature = "websocket-synthesizer")]
 const CLIENT_INFO_PAYLOAD: &str = r#"{"context":{"system":{"version":"1.25.0","name":"SpeechSDK","build":"Windows-x64"},"os":{"platform":"Windows","name":"Client","version":"10"}}}"#; // r#"{"context":{"system":{"name":"SpeechSDK","version":"1.12.1-rc.1","build":"JavaScript","lang":"JavaScript","os":{"platform":"Browser/Linux x86_64","name":"Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0","version":"5.0 (X11)"}}}}"#;
 
 impl<'a> SynthesizerConfig<'a> {
@@ -40,7 +34,18 @@ impl<'a> SynthesizerConfig<'a> {
         Self { auth, audio_format }
     }
 
-    fn generate_client_request(&self) -> Result<Request, WebsocketSynthesizerError> {
+    #[cfg(feature = "websocket-synthesizer")]
+    fn generate_client_request(
+        &self,
+    ) -> Result<tokio_tungstenite::tungstenite::handshake::client::Request, WebsocketSynthesizerError>
+    {
+        use hyper::http::HeaderValue;
+        use log::debug;
+        use tokio_tungstenite::tungstenite::client::IntoClientRequest;
+        use uuid::Uuid;
+
+        use crate::{constants::ORIGIN, DEFAULT_ENDPOINT};
+
         let uuid = Uuid::new_v4();
         let request_id = uuid.as_simple().to_string();
         let uri = {
@@ -75,9 +80,17 @@ impl<'a> SynthesizerConfig<'a> {
     }
 
     /// Connect to the Azure Speech Service and return a [`Synthesizer`] on success.
+    #[cfg(feature = "websocket-synthesizer")]
     pub async fn connect_websocket(
         self,
     ) -> Result<WebsocketSynthesizer, WebsocketSynthesizerError> {
+        use crate::errors::{ConnectError, ConnectErrorKind};
+        use crate::net::{self, connect_directly};
+        use chrono::Utc;
+        use futures_util::SinkExt;
+        use tokio_tungstenite::tungstenite::Message;
+        use uuid::Uuid;
+
         let request = self.generate_client_request()?;
         let proxy_url = self
             .auth
@@ -86,7 +99,7 @@ impl<'a> SynthesizerConfig<'a> {
             .map(reqwest::Url::parse)
             .transpose()
             .map_err(|e| ConnectError {
-                kind: net::ConnectErrorKind::BadUrl(self.auth.proxy.unwrap().to_string()),
+                kind: ConnectErrorKind::BadUrl(self.auth.proxy.unwrap().to_string()),
                 source: Some(e.into()),
             })?;
         let mut wss = match proxy_url.as_ref().map(|x| x.scheme()) {
@@ -99,7 +112,7 @@ impl<'a> SynthesizerConfig<'a> {
             None => connect_directly(request).await?,
             Some(other_scheme) => {
                 return Err(ConnectError {
-                    kind: net::ConnectErrorKind::UnsupportedScheme(Some(other_scheme.to_string())),
+                    kind: ConnectErrorKind::UnsupportedScheme(Some(other_scheme.to_string())),
                     source: None,
                 }
                 .into())
@@ -118,7 +131,12 @@ impl<'a> SynthesizerConfig<'a> {
         })
     }
 
-    pub fn http_synthesizer(&self) -> Result<RestSynthesizer, RestSynthesizerError> {
+    #[cfg(feature = "rest-synthesizer")]
+    pub fn rest_synthesizer(&self) -> Result<RestSynthesizer, RestSynthesizerError> {
+        use crate::utils::{transpose_tuple_option_result, ClientBuilderExt};
+        use hyper::{header, http::HeaderValue};
+        use reqwest::Proxy;
+
         Ok(RestSynthesizer {
             client: reqwest::Client::builder()
                 .user_agent("aspeak")

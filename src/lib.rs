@@ -1,7 +1,10 @@
 mod audio;
 mod auth;
 mod constants;
+mod errors;
+#[cfg(feature = "websocket-synthesizer")]
 mod msg;
+#[cfg(feature = "websocket-synthesizer")]
 mod net;
 #[cfg(feature = "python")]
 mod parse;

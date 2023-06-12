@@ -1,8 +1,9 @@
 use std::error::Error;
 use std::fmt::{self, Display, Formatter};
 
+use crate::errors::ConnectError;
 use crate::msg;
-use crate::net::{self, WsStream};
+use crate::net::WsStream;
 use crate::{interpolate_ssml, msg::WebSocketMessage, AudioFormat, TextOptions};
 use chrono::Utc;
 use futures_util::{SinkExt, StreamExt};
@@ -162,7 +163,7 @@ macro_rules! impl_from_for_ws_synthesizer_error {
 
 impl_from_for_ws_synthesizer_error!(InvalidHeaderValue, InvalidRequest);
 impl_from_for_ws_synthesizer_error!(url::ParseError, InvalidRequest);
-impl_from_for_ws_synthesizer_error!(net::ConnectError, Connect);
+impl_from_for_ws_synthesizer_error!(ConnectError, Connect);
 impl_from_for_ws_synthesizer_error!(tokio_tungstenite::tungstenite::Error, Websocket);
 impl_from_for_ws_synthesizer_error!(crate::ssml::SsmlError, Ssml);
 

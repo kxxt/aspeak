@@ -9,10 +9,6 @@ use strum::AsRefStr;
 
 use crate::{interpolate_ssml, SsmlError, TextOptions};
 
-use super::{
-    RestSynthesizer, RestSynthesizerError, WebsocketSynthesizer, WebsocketSynthesizerError,
-};
-
 #[async_trait]
 pub trait UnifiedSynthesizer {
     async fn process_ssml(&mut self, ssml: &str) -> Result<Vec<u8>, UnifiedSynthesizerError>;
@@ -64,6 +60,7 @@ impl From<UnifiedSynthesizerError> for pyo3::PyErr {
 }
 
 #[derive(Debug, PartialEq, Clone, AsRefStr)]
+#[allow(unused)]
 #[non_exhaustive]
 #[strum(serialize_all = "title_case")]
 pub enum UnifiedSynthesizerErrorKind {
@@ -90,8 +87,9 @@ macro_rules! impl_from_for_unified_synthesizer_error {
 
 impl_from_for_unified_synthesizer_error!(SsmlError, Ssml);
 
-impl From<RestSynthesizerError> for UnifiedSynthesizerError {
-    fn from(value: RestSynthesizerError) -> Self {
+#[cfg(feature = "rest-synthesizer")]
+impl From<super::RestSynthesizerError> for UnifiedSynthesizerError {
+    fn from(value: super::RestSynthesizerError) -> Self {
         use crate::synthesizer::RestSynthesizerErrorKind as RestKind;
         use UnifiedSynthesizerErrorKind::*;
         match &value.kind {
@@ -122,8 +120,9 @@ impl From<RestSynthesizerError> for UnifiedSynthesizerError {
     }
 }
 
-impl From<WebsocketSynthesizerError> for UnifiedSynthesizerError {
-    fn from(value: WebsocketSynthesizerError) -> Self {
+#[cfg(feature = "websocket-synthesizer")]
+impl From<super::WebsocketSynthesizerError> for UnifiedSynthesizerError {
+    fn from(value: super::WebsocketSynthesizerError) -> Self {
         use crate::synthesizer::WebsocketSynthesizerErrorKind as WsKind;
         use UnifiedSynthesizerErrorKind::*;
         match &value.kind {
@@ -155,15 +154,17 @@ impl From<WebsocketSynthesizerError> for UnifiedSynthesizerError {
     }
 }
 
+#[cfg(feature = "rest-synthesizer")]
 #[async_trait]
-impl UnifiedSynthesizer for RestSynthesizer {
+impl UnifiedSynthesizer for super::RestSynthesizer {
     async fn process_ssml(&mut self, ssml: &str) -> Result<Vec<u8>, UnifiedSynthesizerError> {
         Ok(self.synthesize_ssml(ssml).await?)
     }
 }
 
+#[cfg(feature = "websocket-synthesizer")]
 #[async_trait]
-impl UnifiedSynthesizer for WebsocketSynthesizer {
+impl UnifiedSynthesizer for super::WebsocketSynthesizer {
     async fn process_ssml(&mut self, ssml: &str) -> Result<Vec<u8>, UnifiedSynthesizerError> {
         Ok(self.synthesize_ssml(ssml).await?)
     }
