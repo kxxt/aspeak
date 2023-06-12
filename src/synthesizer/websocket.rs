@@ -1,7 +1,6 @@
 use std::error::Error;
 use std::fmt::{self, Display, Formatter};
 
-
 use crate::msg;
 use crate::net::{self, WsStream};
 use crate::{interpolate_ssml, msg::WebSocketMessage, AudioFormat, TextOptions};
