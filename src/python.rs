@@ -3,17 +3,18 @@ use std::cell::RefCell;
 use std::fs::File;
 use std::io::Write;
 
-use pyo3::exceptions::{PyOSError, PyValueError};
+use pyo3::exceptions::PyValueError;
 use pyo3::types::{PyBytes, PySequence};
 use pyo3::{prelude::*, types::PyDict};
 use reqwest::header::{HeaderName, HeaderValue};
 use tokio::runtime::Runtime;
 
 use crate::audio::play_owned_audio_blocking;
+use crate::get_rest_endpoint_by_region;
 use crate::parse::{parse_pitch, parse_rate, parse_style_degree};
+use crate::synthesizer::UnifiedSynthesizer;
 use crate::{
-    get_default_voice_by_locale, get_websocket_endpoint_by_region,
-    synthesizer::{SynthesizerConfig, WebsocketSynthesizer},
+    get_default_voice_by_locale, get_websocket_endpoint_by_region, synthesizer::SynthesizerConfig,
     AudioFormat, AuthOptions, TextOptions,
 };
 
@@ -31,13 +32,7 @@ fn aspeak(py: Python, m: &PyModule) -> PyResult<()> {
 
 #[pyclass]
 struct SpeechService {
-    audio_format: AudioFormat,
-    endpoint: String,
-    key: Option<String>,
-    auth_token: Option<String>,
-    proxy: Option<String>,
-    headers: Vec<(HeaderName, HeaderValue)>,
-    synthesizer: RefCell<Option<WebsocketSynthesizer>>,
+    synthesizer: RefCell<Box<dyn UnifiedSynthesizer>>,
     runtime: Runtime,
 }
 
@@ -115,6 +110,20 @@ impl SpeechService {
             .enable_io()
             .enable_time()
             .build()?;
+
+        let mode = options
+            .and_then(|dict| dict.get_item("mode"))
+            .map(|e| e.extract::<&str>())
+            .transpose()?
+            .unwrap_or("rest");
+
+        if mode != "rest" && mode != "websocket" {
+            return Err(PyValueError::new_err(format!(
+                "Invalid synthesizer mode: {}",
+                mode
+            )));
+        }
+
         let endpoint = if let Some(endpoint) = options
             .and_then(|dict| dict.get_item("endpoint"))
             .map(|e| e.extract::<&str>())
@@ -126,7 +135,11 @@ impl SpeechService {
                 .and_then(|dict| dict.get_item("region"))
                 .map(|e| e.extract::<&str>())
                 .transpose()?
-                .map(get_websocket_endpoint_by_region)
+                .map(|r| match mode {
+                    "rest" => get_rest_endpoint_by_region(r),
+                    "websocket" => get_websocket_endpoint_by_region(r),
+                    _ => unreachable!(),
+                })
                 .map(Cow::Owned)
                 .ok_or_else(|| PyValueError::new_err("No endpoint is specified!".to_string()))?
         };
@@ -169,44 +182,32 @@ impl SpeechService {
             Vec::new()
         };
         Ok(Self {
-            audio_format,
-            endpoint: endpoint.into_owned(),
-            key,
-            auth_token: token,
-            headers,
-            proxy,
-            synthesizer: RefCell::new(None),
+            synthesizer: RefCell::new(runtime.block_on(async {
+                let conf = SynthesizerConfig::new(
+                    AuthOptions {
+                        endpoint: Cow::Borrowed(&endpoint),
+                        key: key.as_deref().map(Cow::Borrowed),
+                        headers: Cow::Borrowed(headers.as_slice()),
+                        token: token.as_deref().map(Cow::Borrowed),
+                        proxy: proxy.as_deref().map(Cow::Borrowed),
+                    },
+                    audio_format,
+                );
+                let boxed: Box<dyn UnifiedSynthesizer> = match mode {
+                    "rest" => Box::new(conf.rest_synthesizer()?),
+                    "websocket" => Box::new(conf.connect_websocket().await?),
+                    _ => unreachable!(),
+                };
+                Ok::<Box<dyn UnifiedSynthesizer>, PyErr>(boxed)
+            })?),
             runtime,
         })
     }
 
-    fn connect(&self) -> PyResult<()> {
-        self.synthesizer.borrow_mut().replace(
-            self.runtime.block_on(
-                SynthesizerConfig::new(
-                    AuthOptions {
-                        endpoint: Cow::Borrowed(&self.endpoint),
-                        key: self.key.as_deref().map(Cow::Borrowed),
-                        headers: Cow::Borrowed(self.headers.as_slice()),
-                        token: self.auth_token.as_deref().map(Cow::Borrowed),
-                        proxy: self.proxy.as_deref().map(Cow::Borrowed),
-                    },
-                    self.audio_format,
-                )
-                .connect_websocket(),
-            )?,
-        );
-        Ok(())
-    }
-
     fn speak_ssml(&self, ssml: &str) -> PyResult<()> {
-        let buffer = self.runtime.block_on(
-            self.synthesizer
-                .borrow_mut()
-                .as_mut()
-                .ok_or(PyOSError::new_err("Synthesizer not connected"))?
-                .synthesize_ssml(ssml),
-        )?;
+        let buffer = self
+            .runtime
+            .block_on(self.synthesizer.borrow_mut().as_mut().process_ssml(ssml))?;
         play_owned_audio_blocking(buffer)?;
         Ok(())
     }
@@ -218,13 +219,9 @@ impl SpeechService {
         options: Option<&PyDict>,
         py: Python<'a>,
     ) -> PyResult<Option<&'a PyBytes>> {
-        let data = self.runtime.block_on(
-            self.synthesizer
-                .borrow_mut()
-                .as_mut()
-                .ok_or(PyOSError::new_err("Synthesizer not connected"))?
-                .synthesize_ssml(ssml),
-        )?;
+        let data = self
+            .runtime
+            .block_on(self.synthesizer.borrow_mut().as_mut().process_ssml(ssml))?;
         if let Some(output) = options
             .and_then(|d| d.get_item("output").map(|f| f.extract::<&str>()))
             .transpose()?
@@ -239,16 +236,12 @@ impl SpeechService {
 
     #[pyo3(signature = (text, **options))]
     fn speak_text(&self, text: &str, options: Option<&PyDict>) -> PyResult<()> {
-        let buffer = self.runtime.block_on(
-            self.synthesizer
-                .borrow_mut()
-                .as_mut()
-                .ok_or(PyOSError::new_err("Synthesizer not connected"))?
-                .synthesize_text(
-                    text,
-                    &Self::parse_text_options(options)?.unwrap_or_default(),
-                ),
-        )?;
+        let buffer = self
+            .runtime
+            .block_on(self.synthesizer.borrow_mut().as_mut().process_text(
+                text,
+                &Self::parse_text_options(options)?.unwrap_or_default(),
+            ))?;
         play_owned_audio_blocking(buffer)?;
         Ok(())
     }
@@ -260,16 +253,12 @@ impl SpeechService {
         options: Option<&PyDict>,
         py: Python<'a>,
     ) -> PyResult<Option<&'a PyBytes>> {
-        let data = self.runtime.block_on(
-            self.synthesizer
-                .borrow_mut()
-                .as_mut()
-                .ok_or(PyOSError::new_err("Synthesizer not connected"))?
-                .synthesize_text(
-                    text,
-                    &Self::parse_text_options(options)?.unwrap_or_default(),
-                ),
-        )?;
+        let data = self
+            .runtime
+            .block_on(self.synthesizer.borrow_mut().as_mut().process_text(
+                text,
+                &Self::parse_text_options(options)?.unwrap_or_default(),
+            ))?;
         if let Some(output) = options
             .and_then(|d| d.get_item("output").map(|f| f.extract::<&str>()))
             .transpose()?
