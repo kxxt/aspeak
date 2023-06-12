@@ -1,6 +1,11 @@
 mod cli;
 
-use std::{borrow::Cow, error::Error, path::PathBuf};
+use std::{
+    borrow::Cow,
+    error::Error,
+    fmt::{self, Display, Formatter},
+    path::PathBuf,
+};
 
 use cli::{commands::Command, Cli};
 
@@ -29,10 +34,24 @@ use crate::cli::{
     config::{Config, EndpointConfig},
 };
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug)]
+#[non_exhaustive]
 enum CliError {
-    #[error("No input text/SSML.")]
-    InputError,
+    Input,
+}
+
+impl Display for CliError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match &self {
+            CliError::Input => write!(f, "No input text/SSML."),
+        }
+    }
+}
+
+impl Error for CliError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
+    }
 }
 
 fn main() -> color_eyre::eyre::Result<()> {
@@ -72,7 +91,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 output_args,
             } => {
                 let ssml = ssml
-                    .ok_or(CliError::InputError)
+                    .ok_or(CliError::Input)
                     .or_else(|_| Cli::process_input_text(&input_args))?;
                 let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref()))?;
                 let callback = Cli::process_output(output_args.output, output_args.overwrite)?;
@@ -91,7 +110,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                     text_args
                         .text.as_deref()
                         .map(Cow::Borrowed)
-                        .ok_or(CliError::InputError)
+                        .ok_or(CliError::Input)
                         .or_else(|_| Cli::process_input_text(&input_args).map(Cow::Owned))
                         ?;
                 let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref()))?;

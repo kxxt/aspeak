@@ -149,7 +149,6 @@ dependencies = [
  "serde",
  "serde_json",
  "strum",
- "thiserror",
  "tokio",
  "tokio-socks",
  "tokio-tungstenite",
