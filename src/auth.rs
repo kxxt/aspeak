@@ -18,7 +18,7 @@ pub struct AuthOptions<'a> {
 }
 
 impl<'a> AuthOptions<'a> {
-    /// Endpoint of the service, typically a URL with `wss` protocol
+    /// Endpoint of the service
     pub fn endpoint(&self) -> &str {
         &self.endpoint
     }
@@ -88,7 +88,7 @@ impl<'a> AuthOptionsBuilder<'a> {
     ///
     /// # Arguments
     ///
-    /// * `endpoint` - Endpoint of the service, typically a URL with `wss` protocol
+    /// * `endpoint` - Endpoint of the service
     pub fn new(endpoint: impl Into<Cow<'a, str>>) -> Self {
         Self {
             endpoint: endpoint.into(),

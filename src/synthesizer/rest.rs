@@ -3,7 +3,7 @@ use std::{
     fmt::{self, Display, Formatter},
 };
 
-use hyper::header::{InvalidHeaderValue, InvalidHeaderName};
+use hyper::header::{InvalidHeaderName, InvalidHeaderValue};
 use log::debug;
 use reqwest::{Client, StatusCode};
 use strum::AsRefStr;

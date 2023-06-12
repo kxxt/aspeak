@@ -10,7 +10,6 @@ use reqwest::header::{HeaderName, HeaderValue};
 use tokio::runtime::Runtime;
 
 use crate::audio::play_owned_audio_blocking;
-use crate::constants::DEFAULT_ENDPOINT;
 use crate::parse::{parse_pitch, parse_rate, parse_style_degree};
 use crate::{
     get_default_voice_by_locale, get_websocket_endpoint_by_region,
@@ -129,7 +128,6 @@ impl SpeechService {
                 .transpose()?
                 .map(get_websocket_endpoint_by_region)
                 .map(Cow::Owned)
-                .or_else(|| DEFAULT_ENDPOINT.map(Cow::Borrowed))
                 .ok_or_else(|| PyValueError::new_err("No endpoint is specified!".to_string()))?
         };
         let key: Option<String> = options

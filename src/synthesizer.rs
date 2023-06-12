@@ -45,8 +45,6 @@ impl<'a> SynthesizerConfig<'a> {
         use tokio_tungstenite::tungstenite::client::IntoClientRequest;
         use uuid::Uuid;
 
-        use crate::{constants::ORIGIN, DEFAULT_ENDPOINT};
-
         let uuid = Uuid::new_v4();
         let request_id = uuid.as_simple().to_string();
         let uri = {
@@ -72,9 +70,6 @@ impl<'a> SynthesizerConfig<'a> {
         if !self.auth.headers.is_empty() {
             // TODO: I don't know if this could be further optimized
             headers.extend(self.auth.headers.iter().map(Clone::clone));
-        } else if Some(self.auth.endpoint.as_ref()) == DEFAULT_ENDPOINT {
-            // Trial endpoint
-            headers.append("Origin", HeaderValue::from_str(ORIGIN).unwrap());
         }
         debug!("The initial request is {request:?}");
         Ok(request)

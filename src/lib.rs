@@ -26,7 +26,6 @@ pub fn get_rest_endpoint_by_region(region: &str) -> String {
 
 pub use audio::{AudioFormat, AudioFormatParseError, QUALITY_MAP, QUALITY_RANGE_MAP};
 pub use auth::*;
-pub use constants::DEFAULT_ENDPOINT;
 use phf::phf_map;
 pub use ssml::*;
 pub use types::*;
