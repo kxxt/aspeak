@@ -6,7 +6,7 @@ use std::{
 #[cfg(feature = "binary")]
 use clap::ValueEnum;
 use phf::phf_map;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
 pub type QualityMap = phf::Map<i8, AudioFormat>;
@@ -139,7 +139,9 @@ pub static QUALITY_RANGE_MAP: phf::Map<&'static str, (i8, i8)> = phf_map! {
 ///
 /// Some endpoints only support a subset of these formats.
 #[cfg_attr(feature = "python", pyo3::pyclass)]
-#[derive(Debug, Clone, Copy, Default, IntoStaticStr, EnumString, EnumIter, Deserialize)]
+#[derive(
+    Debug, Clone, Copy, Default, IntoStaticStr, EnumString, EnumIter, Deserialize, Serialize,
+)]
 #[non_exhaustive]
 pub enum AudioFormat {
     // I don't know if there are better ways to do this.

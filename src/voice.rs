@@ -10,11 +10,11 @@ use crate::{
 };
 use colored::Colorize;
 use hyper::{header::InvalidHeaderValue, http::HeaderValue};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use strum::AsRefStr;
 
 /// Voice information
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct Voice {
     display_name: Option<String>,
