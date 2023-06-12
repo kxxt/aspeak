@@ -10,7 +10,7 @@ use strum::AsRefStr;
 use crate::{interpolate_ssml, SsmlError, TextOptions};
 
 #[async_trait]
-pub trait UnifiedSynthesizer {
+pub trait UnifiedSynthesizer: Send {
     async fn process_ssml(&mut self, ssml: &str) -> Result<Vec<u8>, UnifiedSynthesizerError>;
     /// This is a convenience method that interpolates the SSML for you.
     async fn process_text(
