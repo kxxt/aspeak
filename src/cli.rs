@@ -1,5 +1,5 @@
 use clap::{ArgAction, Parser};
-use log::{debug, info};
+use log::{debug, info, warn};
 use rodio::{Decoder, OutputStream, Sink};
 
 use self::{
@@ -129,6 +129,19 @@ impl Cli {
         } else {
             Box::new(|buffer| {
                 info!("Playing audio... ({} bytes)", buffer.len());
+                if buffer.is_empty()
+                    || (
+                        buffer.starts_with(b"RIFF")
+                            && buffer.len() >= 44
+                            && buffer[8..16] == *b"WAVEfmt "
+                            && buffer[24..28] == *b"\0\0\0\0"
+                        // Sample Rate is zero
+                    )
+                {
+                    // Empty buffer, do nothing
+                    warn!("Got empty audio buffer, nothing to play");
+                    return Ok(());
+                }
                 let (_stream, stream_handle) = OutputStream::try_default()?;
                 let sink = Sink::try_new(&stream_handle).unwrap();
                 let cursor = Cursor::new(Vec::from(buffer));
