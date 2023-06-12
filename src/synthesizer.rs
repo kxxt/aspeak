@@ -1,7 +1,8 @@
 use chrono::Utc;
 use futures_util::SinkExt;
-use hyper::http::HeaderValue;
+use hyper::{header, http::HeaderValue};
 use log::{debug, info};
+use reqwest::Proxy;
 use tokio_tungstenite::tungstenite::{
     client::IntoClientRequest, handshake::client::Request, Message,
 };
@@ -10,12 +11,15 @@ use uuid::Uuid;
 use crate::{
     constants::ORIGIN,
     net::{self, connect_directly, ConnectError},
+    utils::{transpose_tuple_option_result, ClientBuilderExt},
     AudioFormat, AuthOptions, DEFAULT_ENDPOINT,
 };
 
+mod rest;
 mod http;
 mod websocket;
 
+pub use rest::*;
 pub use websocket::*;
 
 /// Initialize a new [`Synthesizer`] by creating a new [`SynthesizerConfig`] and call [`SynthesizerConfig::connect`].
@@ -71,7 +75,9 @@ impl<'a> SynthesizerConfig<'a> {
     }
 
     /// Connect to the Azure Speech Service and return a [`Synthesizer`] on success.
-    pub async fn connect_websocket(self) -> Result<WebsocketSynthesizer, WebsocketSynthesizerError> {
+    pub async fn connect_websocket(
+        self,
+    ) -> Result<WebsocketSynthesizer, WebsocketSynthesizerError> {
         let request = self.generate_client_request()?;
         let proxy_url = self
             .auth
@@ -109,6 +115,57 @@ impl<'a> SynthesizerConfig<'a> {
         Ok(WebsocketSynthesizer {
             audio_format: self.audio_format,
             stream: wss,
+        })
+    }
+
+    pub fn http_synthesizer(&self) -> Result<RestSynthesizer, RestSynthesizerError> {
+        Ok(RestSynthesizer {
+            client: reqwest::Client::builder()
+                .user_agent("aspeak")
+                .default_headers(header::HeaderMap::from_iter(
+                    [
+                        Some((
+                            header::CONTENT_TYPE,
+                            HeaderValue::from_static("application/ssml+xml"),
+                        )),
+                        Some((
+                            header::HeaderName::from_static("X-Microsoft-OutputFormat"),
+                            HeaderValue::from_static(self.audio_format.into()),
+                        )),
+                        transpose_tuple_option_result(self.auth.key().map(|key| {
+                            (
+                                header::HeaderName::from_static("Ocp-Apim-Subscription-Key"),
+                                HeaderValue::from_str(key),
+                            )
+                        }))?,
+                        transpose_tuple_option_result(self.auth.token().map(|token| {
+                            (
+                                header::HeaderName::from_static("Authorization"),
+                                HeaderValue::from_str(token),
+                            )
+                        }))?,
+                    ]
+                    .into_iter()
+                    .flatten()
+                    .chain(self.auth.headers.iter().map(Clone::clone)),
+                ))
+                .optional_proxy(
+                    self.auth
+                        .proxy
+                        .as_deref()
+                        .map(Proxy::all)
+                        .transpose()
+                        .map_err(|e| RestSynthesizerError {
+                            kind: RestSynthesizerErrorKind::Connect,
+                            source: Some(e.into()),
+                        })?,
+                )
+                .build()
+                .map_err(|e| RestSynthesizerError {
+                    kind: RestSynthesizerErrorKind::Connect,
+                    source: Some(e.into()),
+                })?,
+            endpoint: self.auth.endpoint.to_string(),
         })
     }
 }
