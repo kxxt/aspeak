@@ -3,7 +3,7 @@ use std::{
     fmt::{self, Display, Formatter},
 };
 
-use hyper::header::InvalidHeaderValue;
+use hyper::header::{InvalidHeaderValue, InvalidHeaderName};
 use log::debug;
 use reqwest::{Client, StatusCode};
 use strum::AsRefStr;
@@ -132,4 +132,5 @@ macro_rules! impl_from_for_rest_synthesizer_error {
 }
 
 impl_from_for_rest_synthesizer_error!(InvalidHeaderValue, InvalidRequest);
+impl_from_for_rest_synthesizer_error!(InvalidHeaderName, InvalidRequest);
 impl_from_for_rest_synthesizer_error!(SsmlError, Ssml);

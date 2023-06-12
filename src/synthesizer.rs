@@ -148,12 +148,13 @@ impl<'a> SynthesizerConfig<'a> {
                             HeaderValue::from_static("application/ssml+xml"),
                         )),
                         Some((
-                            header::HeaderName::from_static("X-Microsoft-OutputFormat"),
+                            header::HeaderName::from_bytes(b"X-Microsoft-OutputFormat").unwrap(),
                             HeaderValue::from_static(self.audio_format.into()),
                         )),
                         transpose_tuple_option_result(self.auth.key().map(|key| {
                             (
-                                header::HeaderName::from_static("Ocp-Apim-Subscription-Key"),
+                                header::HeaderName::from_bytes(b"Ocp-Apim-Subscription-Key")
+                                    .unwrap(),
                                 HeaderValue::from_str(key),
                             )
                         }))?,
