@@ -11,9 +11,10 @@ mod websocket;
 
 #[cfg(feature = "rest-synthesizer")]
 pub use rest::*;
+#[cfg(feature = "unified-synthesizer")]
+pub use unified::*;
 #[cfg(feature = "websocket-synthesizer")]
 pub use websocket::*;
-
 /// Initialize a new [`Synthesizer`] by creating a new [`SynthesizerConfig`] and call [`SynthesizerConfig::connect`].
 #[derive(Debug, Clone)]
 #[allow(unused)]
