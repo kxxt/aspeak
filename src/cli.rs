@@ -3,9 +3,9 @@ use log::{debug, info};
 use rodio::{Decoder, OutputStream, Sink};
 
 use self::{
-    args::{AuthArgs, Color, InputArgs, ProfileArgs, TextArgs},
+    args::{AuthArgs, Color, InputArgs, ProfileArgs, SynthesizerMode, TextArgs},
     commands::Command,
-    config::TextConfig,
+    config::{Config, TextConfig},
 };
 use aspeak::{get_default_voice_by_locale, RichSsmlOptions, TextOptions};
 use std::{
@@ -58,6 +58,20 @@ impl Cli {
         }
     }
 
+    pub(crate) fn get_synthesizer_mode(
+        input_args: &InputArgs,
+        config: &Option<Config>,
+    ) -> SynthesizerMode {
+        input_args
+            .mode
+            .or_else(|| {
+                config
+                    .as_ref()
+                    .and_then(|c| c.auth.as_ref())
+                    .and_then(|a| a.mode)
+            })
+            .unwrap_or(SynthesizerMode::Rest)
+    }
     pub(crate) fn get_log_level(&self, verbosity_config: Option<u8>) -> log::LevelFilter {
         match self.verbose {
             0 => verbosity_config

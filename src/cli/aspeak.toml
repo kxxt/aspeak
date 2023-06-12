@@ -20,6 +20,9 @@ verbosity = 0
 # Alternatively, you can specify the region if you are using official endpoints
 # region = "eastus"
 
+# Synthesizer Mode, "rest" or "websocket"
+# mode = "rest"
+
 # Azure Subscription Key
 # key = "YOUR_KEY"
 

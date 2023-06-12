@@ -97,7 +97,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 input_args,
                 output_args,
             } => {
-                let mode = input_args.mode;
+                let mode = Cli::get_synthesizer_mode(&input_args, &config);
                 let auth_options = auth.to_auth_options(config.as_ref().and_then(|c| c.auth.as_ref()), mode)?;
                 debug!("Auth options: {auth_options:?}");
                 let ssml = ssml
@@ -115,7 +115,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 input_args,
                 output_args,
             } => {
-                let mode = input_args.mode;
+                let mode = Cli::get_synthesizer_mode(&input_args, &config);
                 let auth_options = auth.to_auth_options(config.as_ref().and_then(|c| c.auth.as_ref()), mode)?;
                 debug!("Auth options: {auth_options:?}");
                 let text =

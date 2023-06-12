@@ -173,8 +173,8 @@ pub(crate) struct InputArgs {
     pub file: Option<String>,
     #[arg(short, long, help = "Text/SSML file encoding")]
     pub encoding: Option<String>,
-    #[arg(short, long, default_value_t = SynthesizerMode::Rest, help = "Mode of synthesizer, default to `rest`")]
-    pub mode: SynthesizerMode,
+    #[arg(short, long, help = "Mode of synthesizer, default to `rest`")]
+    pub mode: Option<SynthesizerMode>,
 }
 
 #[derive(Args, Debug, Default)]
