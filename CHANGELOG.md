@@ -1,6 +1,6 @@
 # aspeak Changelog
 
-# v6.0.0-alpha.1
+# v6.0.0-alpha.2
 
 ## For CLI users
 
