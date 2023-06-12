@@ -15,10 +15,10 @@ pub trait UnifiedSynthesizer {
     /// This is a convenience method that interpolates the SSML for you.
     async fn process_text(
         &mut self,
-        text: impl AsRef<str> + Send,
+        text: &str,
         options: &TextOptions<'_>,
     ) -> Result<Vec<u8>, UnifiedSynthesizerError> {
-        debug!("Synthesizing text: {}", text.as_ref());
+        debug!("Synthesizing text: {}", text);
         let ssml = interpolate_ssml(text, options)?;
         self.process_ssml(&ssml).await
     }
