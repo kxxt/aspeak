@@ -16,7 +16,7 @@ use crate::{
 };
 
 mod rest;
-mod http;
+mod unified;
 mod websocket;
 
 pub use rest::*;
