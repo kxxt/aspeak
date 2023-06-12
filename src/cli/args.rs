@@ -3,12 +3,13 @@ use std::env;
 
 use super::config::{AuthConfig, Config, OutputConfig};
 use super::parse;
-use aspeak::DEFAULT_ENDPOINT;
-use aspeak::{get_websocket_endpoint_by_region, AudioFormat, AuthOptions, Role};
+use aspeak::{
+    get_rest_endpoint_by_region, get_websocket_endpoint_by_region, AudioFormat, AuthOptions, Role,
+};
 use clap::{ArgAction, Args, ValueEnum};
 use color_eyre::Help;
 use reqwest::header::{HeaderName, HeaderValue};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display};
 
 #[derive(Debug, Clone, Copy, ValueEnum, PartialEq, Display)]
@@ -81,6 +82,7 @@ impl AuthArgs {
     pub(crate) fn to_auth_options<'a>(
         &'a self,
         auth_config: Option<&'a AuthConfig>,
+        mode: SynthesizerMode,
     ) -> color_eyre::Result<AuthOptions<'a>> {
         Ok(AuthOptions::builder(
             self
@@ -90,11 +92,15 @@ impl AuthArgs {
                 .or_else(|| {
                     self.region
                         .as_deref()
-                        .map(get_websocket_endpoint_by_region)
+                        .map(|r| {
+                            match mode {
+                                SynthesizerMode::Rest => get_rest_endpoint_by_region(r),
+                                SynthesizerMode::Websocket => get_websocket_endpoint_by_region(r),
+                            }
+                        })
                         .map(Cow::Owned)
                 })
-                .or_else(|| auth_config.and_then(|c| c.endpoint_config.as_ref().map(Cow::from)))
-                .or_else(|| DEFAULT_ENDPOINT.map(Cow::Borrowed))
+                .or_else(|| auth_config.and_then(|c| c.endpoint_config.as_ref().map(|x| x.to_cow_str(mode))))
                 .ok_or_else(|| {
                     color_eyre::eyre::eyre!("No endpoint is specified!")
                     .with_note(|| "The default endpoint has been removed since aspeak v5.0 because Microsoft shutdown their trial service.")
@@ -152,12 +158,23 @@ impl AuthArgs {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, ValueEnum, Serialize, Deserialize, Display, Default)]
+#[serde(rename_all = "lowercase")]
+#[strum(serialize_all = "lowercase")]
+pub enum SynthesizerMode {
+    #[default]
+    Rest,
+    Websocket,
+}
+
 #[derive(Args, Debug, Default)]
 pub(crate) struct InputArgs {
     #[arg(short, long, help = "Text/SSML file to speak, default to `-`(stdin)")]
     pub file: Option<String>,
     #[arg(short, long, help = "Text/SSML file encoding")]
     pub encoding: Option<String>,
+    #[arg(short, long, default_value_t = SynthesizerMode::Rest, help = "Mode of synthesizer, default to `rest`")]
+    pub mode: SynthesizerMode,
 }
 
 #[derive(Args, Debug, Default)]

@@ -10,14 +10,14 @@ use std::{
 use cli::{commands::Command, Cli};
 
 use aspeak::{
-    synthesizer::{SynthesizerConfig, WebsocketSynthesizerError, WebsocketSynthesizerErrorKind},
+    synthesizer::{SynthesizerConfig, UnifiedSynthesizer},
     voice::{VoiceListAPIAuth, VoiceListAPIEndpoint, VoiceListAPIError, VoiceListAPIErrorKind},
     AudioFormat, Voice, QUALITY_MAP,
 };
 use clap::Parser;
 use color_eyre::{
     eyre::{anyhow, eyre},
-    Help,
+    Help, Report,
 };
 use colored::Colorize;
 
@@ -26,10 +26,9 @@ use log::debug;
 
 use reqwest::header::HeaderMap;
 use strum::IntoEnumIterator;
-use tokio_tungstenite::tungstenite::{error::ProtocolError, Error as TungsteniteError};
 
 use crate::cli::{
-    args::Color,
+    args::{Color, SynthesizerMode},
     commands::ConfigCommand,
     config::{Config, EndpointConfig},
 };
@@ -52,6 +51,16 @@ impl Error for CliError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         None
     }
+}
+
+async fn synthesizer_by_mode(
+    conf: SynthesizerConfig<'_>,
+    mode: SynthesizerMode,
+) -> color_eyre::eyre::Result<Box<dyn UnifiedSynthesizer>> {
+    Ok(match mode {
+        SynthesizerMode::Websocket => Box::new(conf.connect_websocket().await?),
+        SynthesizerMode::Rest => Box::new(conf.rest_synthesizer()?),
+    })
 }
 
 fn main() -> color_eyre::eyre::Result<()> {
@@ -77,8 +86,6 @@ fn main() -> color_eyre::eyre::Result<()> {
     debug!("Commandline args: {cli:?}");
     debug!("Profile: {config:?}");
     let Cli { command, auth, .. } = cli;
-    let auth_options = auth.to_auth_options(config.as_ref().and_then(|c| c.auth.as_ref()))?;
-    debug!("Auth options: {auth_options:?}");
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_io()
         .enable_time()
@@ -90,15 +97,17 @@ fn main() -> color_eyre::eyre::Result<()> {
                 input_args,
                 output_args,
             } => {
+                let mode = input_args.mode;
+                let auth_options = auth.to_auth_options(config.as_ref().and_then(|c| c.auth.as_ref()), mode)?;
+                debug!("Auth options: {auth_options:?}");
                 let ssml = ssml
                     .ok_or(CliError::Input)
                     .or_else(|_| Cli::process_input_text(&input_args))?;
                 let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref()))?;
                 let callback = Cli::process_output(output_args.output, output_args.overwrite)?;
-                let mut synthesizer = SynthesizerConfig::new(auth_options, audio_format)
-                    .connect_websocket()
-                    .await?;
-                let audio_data = synthesizer.synthesize_ssml(&ssml).await?;
+                let conf = SynthesizerConfig::new(auth_options, audio_format);
+                let mut synthesizer = synthesizer_by_mode(conf, mode).await?;
+                let audio_data = synthesizer.process_ssml(&ssml).await?;
                 callback(&audio_data)?;
             }
             Command::Text {
@@ -106,6 +115,9 @@ fn main() -> color_eyre::eyre::Result<()> {
                 input_args,
                 output_args,
             } => {
+                let mode = input_args.mode;
+                let auth_options = auth.to_auth_options(config.as_ref().and_then(|c| c.auth.as_ref()), mode)?;
+                debug!("Auth options: {auth_options:?}");
                 let text =
                     text_args
                         .text.as_deref()
@@ -115,36 +127,21 @@ fn main() -> color_eyre::eyre::Result<()> {
                         ?;
                 let audio_format = output_args.get_audio_format(config.as_ref().and_then(|c|c.output.as_ref()))?;
                 let callback = Cli::process_output(output_args.output, output_args.overwrite)?;
-                let mut synthesizer = SynthesizerConfig::new(auth_options,audio_format)
-                    .connect_websocket()
-                    .await?;
+                let conf = SynthesizerConfig::new(auth_options, audio_format);
+                let mut synthesizer = synthesizer_by_mode(conf, mode).await?;
                 let options = &Cli::process_text_options(&text_args, config.as_ref().and_then(|c|c.text.as_ref()))?;
-                let result = synthesizer.synthesize_text(&text, options).await;
-                if result.as_ref().err().and_then(
-                    |e| match e {
-                        WebsocketSynthesizerError {
-                            kind: WebsocketSynthesizerErrorKind::Websocket,
-                            ..
-                        } => e.source().and_then(|err| err.downcast_ref::<tokio_tungstenite::tungstenite::Error>()).map(
-                            |e| matches!(e, TungsteniteError::Protocol(ProtocolError::ResetWithoutClosingHandshake))
-                        ),
-                        _ => None,
-                    }
-                ).unwrap_or(false)
-                {
-                    return Err(result.err().unwrap()).with_note(|| "This error usually indicates a poor internet connection or that the remote API terminates your service.")
-                        .with_suggestion(|| "Retry if you are on a poor internet connection. \
-                                             If this error persists and you are using the trial service, please shorten your input.");
-                } else {
-                    let audio_data = result?;
-                    callback(&audio_data)?;
-                }
+                let result = synthesizer.process_text(&text, options).await;
+
+                let audio_data = result?;
+                callback(&audio_data)?;
             }
             Command::ListVoices {
                 ref voice,
                 ref locale,
                 ref url
             } => {
+                let auth_options = auth.to_auth_options(config.as_ref().and_then(|c| c.auth.as_ref()), SynthesizerMode::Rest)?;
+                debug!("Auth options: {auth_options:?}");
                 // Look for --url first,
                 // then look for auth.voice_list_api in profile,
                 // then try to determine the url by region
@@ -244,7 +241,7 @@ fn main() -> color_eyre::eyre::Result<()> {
                 }
             }
         }
-        Ok(())
+        Ok::<(), Report>(())
     })?;
     Ok(())
 }

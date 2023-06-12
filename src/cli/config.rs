@@ -4,12 +4,15 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use aspeak::{get_default_voice_by_locale, get_websocket_endpoint_by_region, AudioFormat, Role};
+use aspeak::{
+    get_default_voice_by_locale, get_rest_endpoint_by_region, get_websocket_endpoint_by_region,
+    AudioFormat, Role,
+};
 use color_eyre::eyre::{anyhow, bail};
 
 use serde::Deserialize;
 
-use super::args::ContainerFormat;
+use super::args::{ContainerFormat, SynthesizerMode};
 
 pub(crate) const CONFIG_TEMPLATE: &str = include_str!("aspeak.toml");
 pub(crate) const DEFAULT_PROFILE_NAME: &str = ".aspeak.toml";
@@ -83,13 +86,14 @@ pub(crate) enum EndpointConfig {
     Region { region: String },
 }
 
-impl<'a> From<&'a EndpointConfig> for Cow<'a, str> {
-    fn from(endpoint: &'a EndpointConfig) -> Self {
-        match endpoint {
+impl EndpointConfig {
+    pub(crate) fn to_cow_str(&self, mode: SynthesizerMode) -> Cow<str> {
+        match self {
             EndpointConfig::Endpoint { endpoint } => Cow::Borrowed(endpoint),
-            EndpointConfig::Region { region } => {
-                Cow::Owned(get_websocket_endpoint_by_region(region.as_str()))
-            }
+            EndpointConfig::Region { region } => Cow::Owned(match mode {
+                SynthesizerMode::Websocket => get_websocket_endpoint_by_region(region.as_str()),
+                SynthesizerMode::Rest => get_rest_endpoint_by_region(region.as_str()),
+            }),
         }
     }
 }
