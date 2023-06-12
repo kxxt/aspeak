@@ -1,5 +1,49 @@
 # aspeak Changelog
 
+# v6.0.0-alpha.1
+
+## For CLI users
+
+There are no breaking changes. But there are some differences.
+
+### Changes
+
+- Now the CLI uses the REST API instead of the WebSocket API by default.
+  - You can use the `--mode websocket` flag to use the WebSocket API.
+  - You can also set the `mode` field to `websocket` in the auth section in your profile to use the WebSocket API by default.
+
+### Bug Fixes
+
+- When the TTS API returns empty audio, aspeak no longer reports an cryptic "Unrecognized format" error.
+  - It will now report a warning in this case: "Got empty audio buffer, nothing to play"
+- Now the voice listing command no longer fails with this API endpoint: https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/voices/list
+
+## For Rust crate users
+
+There are lots of breaking changes.
+
+- Some fields of the `Voice` struct is now optional.
+- We now uses an [modular approach for error handling](https://sabrinajewson.org/blog/errors) instead of using a big enum for all errors.
+- Now there are two synthesizers: `RestSynthesizer` for the REST API and `WebSocketSynthesizer` for the WebSocket API.
+- There is a `UnifiedSynthesizer` trait that provides a unified interface for both synthesizers.
+- Some methods are renamed. For example, `Synthesizer::connect` is now `Synthesizer::connect_websocket`.
+- Three new features of this crate:
+  - `rest-synthesizer`: Enable the `RestSynthesizer` struct.
+  - `websocket-synthesizer`: Enable the `WebSocketSynthesizer` struct.
+  - `unified-synthesizer`: Enable the `UnifiedSynthesizer` trait.
+  - The above three features are enabled by default.
+  - Disabling `websocket-synthesizer` feature will save you a bunch of dependencies. (`aspeak.rlib` is ~0.8MB smaller in release mode)
+- Other minor changes.
+
+## For Python binding users
+
+One breaking change:
+
+- The `SpeechService` now automatically connect when it is constructed. The `connect` method is removed.
+- It now uses the REST API by default.
+- New keyword argument for the constructor of `SpeechService`:
+  - mode: `rest` or `websocket`. Default is `rest`.
+
 # v5.2.0
 
 ## CLI
