@@ -67,6 +67,13 @@ mod internal {
 
     #[derive(Debug)]
     #[non_exhaustive]
+    /// An error that can occur when trying to play audio
+    ///
+    /// Possible reasons include:
+    /// - The audio decoder failed to decode the audio
+    ///     - Bad audio data (e.g. not a valid audio file)
+    ///     - Unsupported audio format
+    /// - Audio stream error
     pub struct AudioError {
         pub kind: AudioErrorKind,
         source: Option<anyhow::Error>,
@@ -258,6 +265,10 @@ pub enum AudioFormat {
 }
 
 impl AudioFormat {
+    /// Convert a container format and quality level into an [`AudioFormat`].
+    ///
+    /// If `use_closest` is `true`, then if the quality level is not supported
+    /// by the container, the closest supported quality level will be used.
     pub fn from_container_and_quality(
         container: &str,
         quality: i8,
@@ -318,6 +329,7 @@ impl ValueEnum for AudioFormat {
 
 #[derive(Debug)]
 #[non_exhaustive]
+/// An error that can occur in [`AudioFormat::from_container_and_quality`].
 pub struct AudioFormatParseError {
     pub kind: AudioFormatParseErrorKind,
 }

@@ -6,6 +6,8 @@ use hyper::{header::HeaderName, http::HeaderValue};
 #[derive(Debug, Clone)]
 pub struct AuthOptions<'a> {
     /// Endpoint of the service
+    /// It is usually a https url if you are using [`crate::synthesizer::RestSynthesizer`] or
+    /// a wss url if you are using [`crate::synthesizer::WebsocketSynthesizer`].
     pub(crate) endpoint: Cow<'a, str>,
     /// Authentication token
     pub(crate) token: Option<Cow<'a, str>>,
@@ -19,11 +21,15 @@ pub struct AuthOptions<'a> {
 
 impl<'a> AuthOptions<'a> {
     /// Endpoint of the service
+    /// It is usually a https url if you are using [`crate::synthesizer::RestSynthesizer`] or
+    /// a wss url if you are using [`crate::synthesizer::WebsocketSynthesizer`].
     pub fn endpoint(&self) -> &str {
         &self.endpoint
     }
 
-    /// Endpoint of the service, typically a URL with `wss` protocol
+    /// Endpoint of the service
+    /// It is usually a https url if you are using [`crate::synthesizer::RestSynthesizer`] or
+    /// a wss url if you are using [`crate::synthesizer::WebsocketSynthesizer`].
     pub fn endpoint_mut(&mut self) -> &mut Cow<'a, str> {
         &mut self.endpoint
     }
@@ -88,7 +94,9 @@ impl<'a> AuthOptionsBuilder<'a> {
     ///
     /// # Arguments
     ///
-    /// * `endpoint` - Endpoint of the service
+    /// * `endpoint` - Endpoint of the service.
+    /// It is usually a https url if you are using [`crate::synthesizer::RestSynthesizer`] or
+    /// a wss url if you are using [`crate::synthesizer::WebsocketSynthesizer`].
     pub fn new(endpoint: impl Into<Cow<'a, str>>) -> Self {
         Self {
             endpoint: endpoint.into(),

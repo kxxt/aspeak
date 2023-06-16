@@ -35,6 +35,7 @@ pub struct Voice {
 }
 
 #[non_exhaustive]
+/// Specify the voice list API endpoint by region or URL
 pub enum VoiceListAPIEndpoint<'a> {
     Region(&'a str),
     Url(&'a str),
@@ -52,12 +53,16 @@ impl<'a> VoiceListAPIEndpoint<'a> {
 }
 
 #[non_exhaustive]
+/// Auth details for the voice list API
 pub enum VoiceListAPIAuth<'a> {
+    /// Azure subscription key
     SubscriptionKey(&'a str),
+    /// Auth token
     AuthToken(&'a str),
 }
 
 impl Voice {
+    /// Query available voices from the voice list API
     pub async fn request_available_voices(
         endpoint: VoiceListAPIEndpoint<'_>,
         auth: Option<VoiceListAPIAuth<'_>>,
@@ -272,6 +277,7 @@ impl Error for VoiceListAPIResponseStatusError {
 
 #[derive(Debug)]
 #[non_exhaustive]
+/// Error that can occur while retrieving voice information from the voice list API
 pub struct VoiceListAPIError {
     pub kind: VoiceListAPIErrorKind,
     source: Option<anyhow::Error>,
@@ -297,8 +303,12 @@ impl Error for VoiceListAPIError {
 #[strum(serialize_all = "title_case")]
 #[non_exhaustive]
 pub enum VoiceListAPIErrorKind {
+    /// Proxy error
     Proxy,
+    /// Failed to construct the request
     Request,
+    /// Error while parsing the response from the voice list API
     Parse,
+    /// A response was received from the voice list API, but it is not successful
     Response,
 }

@@ -100,6 +100,7 @@ pub fn interpolate_ssml(text: impl AsRef<str>, options: &TextOptions) -> Result<
 
 #[derive(Debug)]
 #[non_exhaustive]
+/// An error that occurred while interpolating SSML
 pub struct SsmlError {
     pub kind: SsmlErrorKind,
     pub(crate) source: Option<anyhow::Error>,

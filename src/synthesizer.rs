@@ -75,7 +75,7 @@ impl<'a> SynthesizerConfig<'a> {
         Ok(request)
     }
 
-    /// Connect to the Azure Speech Service and return a [`Synthesizer`] on success.
+    /// Connect to the Azure Speech Service and return a [`WebsocketSynthesizer`] on success.
     #[cfg(feature = "websocket-synthesizer")]
     pub async fn connect_websocket(
         self,
@@ -128,6 +128,7 @@ impl<'a> SynthesizerConfig<'a> {
     }
 
     #[cfg(feature = "rest-synthesizer")]
+    /// Construct a [`RestSynthesizer`] from this [`SynthesizerConfig`].
     pub fn rest_synthesizer(&self) -> Result<RestSynthesizer, RestSynthesizerError> {
         use crate::utils::{transpose_tuple_option_result, ClientBuilderExt};
         use hyper::{header, http::HeaderValue};

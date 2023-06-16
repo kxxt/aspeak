@@ -7,6 +7,13 @@ use strum::AsRefStr;
 
 #[derive(Debug)]
 #[non_exhaustive]
+/// Errors that can occur while connecting to the service
+///
+/// Possible reasons are
+/// - A bad request is constructed somehow
+/// - Proxy related errors
+/// - Network related errors
+/// - Bad response from the service
 pub struct ConnectError {
     pub kind: ConnectErrorKind,
     pub(crate) source: Option<anyhow::Error>,
