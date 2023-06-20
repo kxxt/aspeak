@@ -20,9 +20,7 @@ python = [
     "dep:pyo3",
     "dep:env_logger",
     "dep:color-eyre",
-    "rest-synthesizer",
-    "websocket-synthesizer",
-    "unified-synthesizer",
+    "synthesizers"
 ]
 rest-synthesizer = []
 websocket-synthesizer = [
@@ -34,17 +32,15 @@ websocket-synthesizer = [
     "dep:uuid",
 ]
 unified-synthesizer = ["dep:async-trait"]
-default = [
+synthesizers = [
     "unified-synthesizer",
     "rest-synthesizer",
     "websocket-synthesizer",
-    "default-tls",
 ]
+default = ["default-tls", "synthesizers"]
 binary = [
     "audio",
-    "rest-synthesizer",
-    "websocket-synthesizer",
-    "unified-synthesizer",
+    "synthesizers",
     "dep:tokio",
     "dep:clap",
     "dep:env_logger",
