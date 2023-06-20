@@ -1,5 +1,14 @@
 # aspeak Changelog
 
+# v6.0.0-alpha.3
+
+Changes after v6.0.0-alpha.2:
+
+- Improve doc comments.
+- Bump `strum` to 0.25 by @attila-lin
+- crate: support TLS feature flags
+- crate: add `synthesizers` feature that enables all synthesizers
+
 # v6.0.0-alpha.2
 
 ## For CLI users
