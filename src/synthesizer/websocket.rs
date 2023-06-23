@@ -41,10 +41,8 @@ impl WebsocketSynthesizer {
         self.stream.send(Message::Text(format!(
             "Path: ssml\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}\r\nContent-Type: application/ssml+xml\r\n\r\n{ssml}"
         ))).await?;
-        const HEADER_SIZE: usize = 44;
-        let mut buffer = Vec::with_capacity(HEADER_SIZE);
-        while let Some(raw_msg) = self.stream.next().await {
-            let raw_msg = raw_msg?;
+        let mut buffer = Vec::new();
+        while let Some(raw_msg) = self.stream.next().await.transpose()? {
             let msg = WebSocketMessage::try_from(&raw_msg)?;
             match msg {
                 WebSocketMessage::TurnStart | WebSocketMessage::Response { body: _ } => continue,
