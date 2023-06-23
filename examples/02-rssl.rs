@@ -43,7 +43,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 sink.sleep_until_end();
             }
             Err(ReadlineError::Eof) => {
-                println!("Interrupted");
+                println!("Bye!");
                 break;
             }
             err => {
