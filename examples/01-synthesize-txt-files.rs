@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     );
     let syn = config.rest_synthesizer()?; // Get the synthesizer from the config
     let options = TextOptionsBuilder::new() // Adjusting text options like rate, pitch and voice
-        .rate("120%")
+        .rate("fast")
         .voice("en-US-JennyNeural")
         .pitch("low")
         .build();
