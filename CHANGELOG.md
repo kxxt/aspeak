@@ -1,5 +1,16 @@
 # aspeak Changelog
 
+# v6.0.0-beta.1
+
+Changes after v6.0.0-alpha.3:
+
+- Feature: Add two methods to `RestSynthesizer` that returns `Bytes` instead of `Vec<u8>`.
+- Upgrade openssl dependency (Solves security alert #77)
+- Add two examples for the rust crate
+  - 01-synthesize-txt-files.rs: Synthesize speech from \*.txt files in a directory.
+  - 02-rssl.rs: RSSL, Read-Synthesize-Speak-Loop (Something similar to a REPL). Read text from stdin line by line, synthesize speech and play it.
+- Internal refactor
+
 # v6.0.0-alpha.3
 
 Changes after v6.0.0-alpha.2:
