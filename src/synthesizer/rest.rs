@@ -3,6 +3,7 @@ use std::{
     fmt::{self, Display, Formatter},
 };
 
+use bytes::Bytes;
 use hyper::header::{InvalidHeaderName, InvalidHeaderValue};
 use log::debug;
 use reqwest::{Client, StatusCode};
@@ -16,8 +17,16 @@ pub struct RestSynthesizer {
 }
 
 impl RestSynthesizer {
-    /// Synthesize the given SSML into audio(bytes).
+    /// Synthesize the given SSML into audio(vector of u8).
     pub async fn synthesize_ssml(&self, ssml: &str) -> Result<Vec<u8>, RestSynthesizerError> {
+        Ok(self.synthesize_ssml_to_bytes(ssml).await?.to_vec())
+    }
+
+    /// Synthesize the given SSML into audio(bytes::Bytes).
+    pub async fn synthesize_ssml_to_bytes(
+        &self,
+        ssml: &str,
+    ) -> Result<Bytes, RestSynthesizerError> {
         let res = self
             .client
             .post(&self.endpoint)
@@ -50,7 +59,7 @@ impl RestSynthesizer {
             kind: RestSynthesizerErrorKind::Connection,
             source: Some(e.into()),
         })?;
-        Ok(bytes.to_vec())
+        Ok(bytes)
     }
 
     /// This is a convenience method that interpolates the SSML for you.
@@ -62,6 +71,17 @@ impl RestSynthesizer {
         debug!("Synthesizing text: {}", text.as_ref());
         let ssml = interpolate_ssml(text, options)?;
         self.synthesize_ssml(&ssml).await
+    }
+
+    /// This is a convenience method that interpolates the SSML for you.
+    pub async fn synthesize_text_to_bytes(
+        &self,
+        text: impl AsRef<str>,
+        options: &TextOptions<'_>,
+    ) -> Result<Bytes, RestSynthesizerError> {
+        debug!("Synthesizing text: {}", text.as_ref());
+        let ssml = interpolate_ssml(text, options)?;
+        self.synthesize_ssml_to_bytes(&ssml).await
     }
 }
 

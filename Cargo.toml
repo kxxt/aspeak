@@ -16,7 +16,7 @@ crate-type = ["cdylib", "rlib"]
 [features]
 audio = ["dep:rodio"]
 python = ["audio", "dep:pyo3", "dep:env_logger", "dep:color-eyre", "synthesizers"]
-rest-synthesizer = []
+rest-synthesizer = ["dep:bytes"]
 websocket-synthesizer = ["dep:tokio-tungstenite", "dep:tokio", "dep:futures-util", "dep:tokio-socks", "dep:chrono", "dep:uuid"]
 unified-synthesizer = ["dep:async-trait"]
 synthesizers = ["unified-synthesizer", "rest-synthesizer", "websocket-synthesizer"]
@@ -85,6 +85,7 @@ hyper = { version = "0.14.25" }
 tokio-socks = { version = "0.5.1", optional = true }
 anyhow = "1.0.70"
 async-trait = { version = "0.1.68", optional = true }
+bytes = { version = "1.4.0", optional = true }
 
 [dev-dependencies]
 futures = "0.3.28"
