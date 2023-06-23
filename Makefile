@@ -5,3 +5,4 @@ README.md:
 
 clean:
 	rm -f README.md
+	rm -f examples/sample-files/*.mp3
