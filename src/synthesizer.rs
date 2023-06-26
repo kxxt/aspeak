@@ -15,7 +15,7 @@ pub use rest::*;
 pub use unified::*;
 #[cfg(feature = "websocket-synthesizer")]
 pub use websocket::*;
-/// Initialize a new [`Synthesizer`] by creating a new [`SynthesizerConfig`] and call [`SynthesizerConfig::connect`].
+/// Synthesizer configuration that can be used to create a [`RestSynthesizer`] or [`WebsocketSynthesizer`] .
 #[derive(Debug, Clone)]
 #[allow(unused)]
 pub struct SynthesizerConfig<'a> {

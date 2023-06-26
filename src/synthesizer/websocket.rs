@@ -21,7 +21,7 @@ pub struct WebsocketSynthesizer {
 }
 
 impl WebsocketSynthesizer {
-    /// Synthesize the given SSML into audio(Vec<u8>).
+    /// Synthesize the given SSML into audio([`Vec<u8>`]).
     pub async fn synthesize_ssml(
         &mut self,
         ssml: &str,
@@ -74,7 +74,7 @@ impl WebsocketSynthesizer {
         Ok(buffer)
     }
 
-    /// Synthesize the given text into audio(Vec<u8>).
+    /// Synthesize the given text into audio([`Vec<u8>`]).
     /// This is a convenience method that interpolates the SSML for you.
     pub async fn synthesize_text(
         &mut self,

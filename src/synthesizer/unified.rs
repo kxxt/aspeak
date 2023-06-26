@@ -11,7 +11,7 @@ use crate::{interpolate_ssml, SsmlError, TextOptions};
 
 #[async_trait]
 pub trait UnifiedSynthesizer: Send {
-    /// Synthesize the given SSML into audio(Vec<u8>).
+    /// Synthesize the given SSML into audio([`Vec<u8>`]).
     async fn process_ssml(&mut self, ssml: &str) -> Result<Vec<u8>, UnifiedSynthesizerError>;
     /// This is a convenience method that interpolates the SSML for you.
     async fn process_text(
