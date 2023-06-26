@@ -46,7 +46,7 @@ pub(crate) struct Cli {
     pub auth: AuthArgs,
 }
 
-type OutputProcessor = Box<dyn FnOnce(&[u8]) -> color_eyre::Result<()> + Send>;
+type OutputProcessor = Box<dyn FnOnce(Vec<u8>) -> color_eyre::Result<()> + Send>;
 
 impl Cli {
     fn log_level_by_verbosity(verbosity: u8) -> log::LevelFilter {
@@ -123,7 +123,7 @@ impl Cli {
                 }
             };
             Box::new(move |buffer| {
-                file.write_all(buffer)?;
+                file.write_all(&buffer)?;
                 Ok(())
             })
         } else {
@@ -144,7 +144,7 @@ impl Cli {
                 }
                 let (_stream, stream_handle) = OutputStream::try_default()?;
                 let sink = Sink::try_new(&stream_handle).unwrap();
-                let cursor = Cursor::new(Vec::from(buffer));
+                let cursor = Cursor::new(buffer);
                 let source = Decoder::new(cursor)?;
                 sink.append(source);
                 sink.sleep_until_end();

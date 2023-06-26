@@ -106,7 +106,7 @@ async fn main() -> color_eyre::eyre::Result<()> {
             let conf = SynthesizerConfig::new(auth_options, audio_format);
             let mut synthesizer = synthesizer_by_mode(conf, mode).await?;
             let audio_data = synthesizer.process_ssml(&ssml).await?;
-            callback(&audio_data)?;
+            callback(audio_data)?;
         }
         Command::Text {
             text_args,
@@ -134,7 +134,7 @@ async fn main() -> color_eyre::eyre::Result<()> {
             )?;
             let result = synthesizer.process_text(&text, options).await;
             let audio_data = result?;
-            callback(&audio_data)?;
+            callback(audio_data)?;
         }
         Command::ListVoices {
             ref voice,
