@@ -1,5 +1,13 @@
 # aspeak Changelog
 
+# v6.0.0-beta.2
+
+Changes after v6.0.0-beta.1:
+
+- CLI: performance improvement: eliminate unnecessary memory copy
+- Docs(crate): Add two more examples
+- Docs(crate): Add more doc comments
+
 # v6.0.0-beta.1
 
 Changes after v6.0.0-alpha.3:
