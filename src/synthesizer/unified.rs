@@ -11,6 +11,7 @@ use crate::{interpolate_ssml, SsmlError, TextOptions};
 
 #[async_trait]
 pub trait UnifiedSynthesizer: Send {
+    /// Synthesize the given SSML into audio(Vec<u8>).
     async fn process_ssml(&mut self, ssml: &str) -> Result<Vec<u8>, UnifiedSynthesizerError>;
     /// This is a convenience method that interpolates the SSML for you.
     async fn process_text(
@@ -24,6 +25,7 @@ pub trait UnifiedSynthesizer: Send {
     }
 }
 
+/// Errors that can occur when creating and using a [`UnifiedSynthesizer`].
 #[derive(Debug)]
 #[non_exhaustive]
 pub struct UnifiedSynthesizerError {
@@ -64,11 +66,17 @@ impl From<UnifiedSynthesizerError> for pyo3::PyErr {
 #[non_exhaustive]
 #[strum(serialize_all = "title_case")]
 pub enum UnifiedSynthesizerErrorKind {
+    /// Failed to connect to the endpoint.
     Connect,
+    /// The request was invalid, either caught early by us or indicated by a BadRequest response from the server.
     InvalidRequest,
+    /// Http errors.
     Http,
+    /// Connection errors.
     Connection,
+    /// Invalid message received from the server.
     InvalidMessage,
+    /// Errors that occur while processing SSML.
     Ssml,
 }
 

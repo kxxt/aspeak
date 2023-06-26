@@ -11,6 +11,7 @@ use strum::AsRefStr;
 
 use crate::{interpolate_ssml, SsmlError, TextOptions};
 
+/// The synthesizer that uses the RESTful API.
 pub struct RestSynthesizer {
     pub(super) client: Client,
     pub(super) endpoint: String,
@@ -128,13 +129,21 @@ impl From<RestSynthesizerError> for pyo3::PyErr {
 #[non_exhaustive]
 #[strum(serialize_all = "title_case")]
 pub enum RestSynthesizerErrorKind {
+    /// Failed to connect to the endpoint.
     Connect,
+    /// The request was invalid, either caught early by us or indicated by a BadRequest response from the server.
     InvalidRequest,
+    /// You are unauthorized. Did you set up the correct auth key/token?
     Unauthorized,
+    /// The server returned a 415 Unsupported Media Type response.
     UnsupportedMediaType,
+    /// The server returned a 429 Too Many Requests response.
     TooManyRequests,
+    /// Other HTTP errors.
     OtherHttp,
+    /// Connection errors.
     Connection,
+    /// Errors when interpolating SSML.
     Ssml,
 }
 

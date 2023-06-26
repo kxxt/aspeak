@@ -21,7 +21,7 @@ pub struct WebsocketSynthesizer {
 }
 
 impl WebsocketSynthesizer {
-    /// Synthesize the given SSML into audio(bytes).
+    /// Synthesize the given SSML into audio(Vec<u8>).
     pub async fn synthesize_ssml(
         &mut self,
         ssml: &str,
@@ -74,7 +74,7 @@ impl WebsocketSynthesizer {
         Ok(buffer)
     }
 
-    /// Synthesize the given text into audio(bytes).
+    /// Synthesize the given text into audio(Vec<u8>).
     /// This is a convenience method that interpolates the SSML for you.
     pub async fn synthesize_text(
         &mut self,
@@ -87,6 +87,7 @@ impl WebsocketSynthesizer {
     }
 }
 
+/// Errors that can occur when creating and using a [`WebsocketSynthesizer`].
 #[derive(Debug)]
 #[non_exhaustive]
 pub struct WebsocketSynthesizerError {
@@ -138,11 +139,17 @@ impl From<WebsocketSynthesizerError> for pyo3::PyErr {
 #[non_exhaustive]
 #[strum(serialize_all = "title_case")]
 pub enum WebsocketSynthesizerErrorKind {
+    /// Failed to connect to the endpoint.
     Connect,
+    /// The websocket connection was closed.
     WebsocketConnectionClosed { code: String, reason: String },
+    /// Other websocket errors.
     Websocket,
+    /// The request was invalid, either caught early by us or indicated by a BadRequest response from the server.
     InvalidRequest,
+    /// An invalid websocket message was received.
     InvalidMessage,
+    /// Errors that occur when interpolating SSML.
     Ssml,
 }
 
