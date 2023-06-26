@@ -18,7 +18,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let rest_syn = config.rest_synthesizer()?;
     let ssml = r#"<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US"><voice name="en-US-JennyNeural">Hello, world!</voice></speak>"#;
     let audio_data = rest_syn.synthesize_ssml(ssml).await?;
-    let mut file = File::create("examples/ssml-output.wav").await?;
+    let mut file = File::create("ssml-output.wav").await?;
     file.write_all(&audio_data).await?;
     let text = "Hello, world!";
     let options = TextOptionsBuilder::new()
@@ -27,7 +27,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .pitch("high")
         .build();
     let audio_data = rest_syn.synthesize_text(text, &options).await?;
-    let mut file = File::create("examples/text-output.wav").await?;
+    let mut file = File::create("text-output.wav").await?;
     file.write_all(&audio_data).await?;
     Ok(())
 }
