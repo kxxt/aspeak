@@ -16,8 +16,6 @@ rm -rf "$DIST_DIR"
 # maturin build -F python --release --bindings pyo3 -o "$DIST_DIR/dist-pyo3" $@
 # maturin build -F python --release --bindings bin  -o "$DIST_DIR/dist-bin" $@
 
-ls -lah dist-pyo3
-
 # Grab Info
 file_name=$(basename $(/bin/ls dist-pyo3/*.whl))
 
