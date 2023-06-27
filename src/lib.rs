@@ -108,9 +108,11 @@ mod net;
 mod parse;
 mod ssml;
 pub mod synthesizer;
+pub use synthesizer::*;
 mod types;
 mod utils;
 pub mod voice;
+pub use voice::*;
 
 /// Get the official websocket endpoint by its region (e.g. `eastus`)
 pub fn get_websocket_endpoint_by_region(region: &str) -> String {
@@ -127,7 +129,6 @@ pub use auth::*;
 use phf::phf_map;
 pub use ssml::*;
 pub use types::*;
-pub use voice::Voice;
 
 #[cfg(feature = "python")]
 pub mod python;

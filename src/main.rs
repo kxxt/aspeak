@@ -10,9 +10,8 @@ use std::{
 use cli::{commands::Command, Cli};
 
 use aspeak::{
-    synthesizer::{SynthesizerConfig, UnifiedSynthesizer},
-    voice::{VoiceListAPIAuth, VoiceListAPIEndpoint, VoiceListAPIError, VoiceListAPIErrorKind},
-    AudioFormat, Voice, QUALITY_MAP,
+    AudioFormat, SynthesizerConfig, UnifiedSynthesizer, Voice, VoiceListAPIAuth,
+    VoiceListAPIEndpoint, VoiceListAPIError, VoiceListAPIErrorKind, QUALITY_MAP,
 };
 use clap::Parser;
 use color_eyre::{

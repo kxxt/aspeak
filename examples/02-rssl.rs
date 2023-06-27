@@ -1,8 +1,7 @@
 use std::{env, error::Error};
 
 use aspeak::{
-    synthesizer::SynthesizerConfig, AudioFormat, AuthOptionsBuilder, RichSsmlOptionsBuilder,
-    TextOptionsBuilder,
+    AudioFormat, AuthOptionsBuilder, RichSsmlOptionsBuilder, SynthesizerConfig, TextOptionsBuilder,
 };
 use rodio::{Decoder, OutputStream, Sink};
 use rustyline::error::ReadlineError;

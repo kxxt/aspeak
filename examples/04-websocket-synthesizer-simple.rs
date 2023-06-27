@@ -1,5 +1,5 @@
 use aspeak::{
-    get_websocket_endpoint_by_region, synthesizer::SynthesizerConfig, AudioFormat, AuthOptionsBuilder,
+    get_websocket_endpoint_by_region, AudioFormat, AuthOptionsBuilder, SynthesizerConfig,
     TextOptionsBuilder,
 };
 

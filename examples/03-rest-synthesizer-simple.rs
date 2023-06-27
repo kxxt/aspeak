@@ -1,5 +1,5 @@
 use aspeak::{
-    get_rest_endpoint_by_region, synthesizer::SynthesizerConfig, AudioFormat, AuthOptionsBuilder,
+    get_rest_endpoint_by_region, AudioFormat, AuthOptionsBuilder, SynthesizerConfig,
     TextOptionsBuilder,
 };
 

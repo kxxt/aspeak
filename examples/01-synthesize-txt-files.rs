@@ -7,8 +7,8 @@ use tokio::{
 };
 
 use aspeak::{
-    synthesizer::{RestSynthesizer, SynthesizerConfig},
-    AudioFormat, AuthOptionsBuilder, TextOptions, TextOptionsBuilder,
+    AudioFormat, AuthOptionsBuilder, RestSynthesizer, SynthesizerConfig, TextOptions,
+    TextOptionsBuilder,
 };
 
 #[tokio::main(flavor = "current_thread")]
