@@ -141,7 +141,7 @@ impl SpeechService {
                     _ => unreachable!(),
                 })
                 .map(Cow::Owned)
-                .ok_or_else(|| PyValueError::new_err("No endpoint is specified!".to_string()))?
+                .ok_or_else(|| PyValueError::new_err("No endpoint or region is specified!".to_string()))?
         };
         let key: Option<String> = options
             .and_then(|dict| dict.get_item("key"))
