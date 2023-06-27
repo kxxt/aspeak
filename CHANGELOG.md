@@ -1,5 +1,12 @@
 # aspeak Changelog
 
+# v6.0.0-beta.3
+
+Changes after v6.0.0-beta.2:
+
+- Improve an error message of the python binding
+- Enable abi3 wheels so that we do not need to build for every python version.
+
 # v6.0.0-beta.2
 
 Changes after v6.0.0-beta.1:
