@@ -46,7 +46,7 @@
 //! let audio_data = rest_syn.synthesize_text(text, &options).await?;
 //! ```
 //!
-//! The full code can be found in [examples/03-rest-synthesizer-simple.rs](https://github.com/kxxt/aspeak/blob/main/examples/03-rest-synthesizer-simple.rs)
+//! The full code can be found in [examples/03-rest-synthesizer-simple.rs](https://github.com/kxxt/aspeak/blob/v6/examples/03-rest-synthesizer-simple.rs)
 //!
 //! ## Websocket Synthesizer
 //!
@@ -72,7 +72,7 @@
 //! let audio_data = ws_syn.synthesize_text(text, &options).await?;
 //! ```
 //!
-//! The full code can be found in [examples/04-websocket-synthesizer-simple.rs](https://github.com/kxxt/aspeak/blob/main/examples/04-websocket-synthesizer-simple.rs)
+//! The full code can be found in [examples/04-websocket-synthesizer-simple.rs](https://github.com/kxxt/aspeak/blob/v6/examples/04-websocket-synthesizer-simple.rs)
 //!
 //! # Unified synthesizer trait
 //!
