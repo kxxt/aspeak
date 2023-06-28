@@ -126,7 +126,7 @@ checksum = "96d30a06541fbafbc7f82ed10c06164cfbd2c401138f6addd8404629c4b16711"
 
 [[package]]
 name = "aspeak"
-version = "6.0.0-beta.3"
+version = "6.0.0-rc.1"
 dependencies = [
  "anyhow",
  "async-trait",

@@ -1,5 +1,13 @@
 # aspeak Changelog
 
+# v6.0.0-rc.1
+
+Changes after v6.0.0-beta.3:
+
+- Rust crate: make all items visible in the root module (Flat is better than nested).
+- GitHub branches: The main branch has been deleted. The default branch is now `v5` and it will change to `v6` when v6 is released.
+- Python binding: Now type hints are provided. You will get better completion in your IDE.
+
 # v6.0.0-beta.3
 
 Changes after v6.0.0-beta.2:
