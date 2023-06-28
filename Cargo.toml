@@ -6,7 +6,7 @@ authors = ["kxxt <rsworktech@outlook.com>"]
 description = "A simple text-to-speech client for Azure TTS API."
 homepage = "https://github.com/kxxt/aspeak"
 repository = "https://github.com/kxxt/aspeak"
-keywords = ["speech-synthesis", "aspeak", "tts", "text-to-speech"]
+keywords = ["speech-synthesis", "aspeak", "tts", "text-to-speech", "audio"]
 license = "MIT"
 
 [lib]
