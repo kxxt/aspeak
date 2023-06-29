@@ -1,5 +1,63 @@
 # aspeak Changelog
 
+# v6.0.0
+
+aspeak v6.0 is finally released🎉🎉🎉! This is a major release with some breaking changes. Please read the following carefully.
+
+## Generic
+
+- GitHub branches: The main branch has been deleted. The default branch is now `v5` and it will change to `v6` when v6 is released.
+- Upgrade dependencies (Solves security alert #77)
+- Internal refactor
+
+## For CLI users
+
+- Now the CLI uses the REST API instead of the WebSocket API by default.
+  - You can use the `--mode websocket` flag to use the WebSocket API.
+  - You can also set the `mode` field to `websocket` in the auth section in your profile to use the WebSocket API by default.
+- When the TTS API returns empty audio, aspeak no longer reports an cryptic "Unrecognized format" error.
+  - It will now report a warning in this case: "Got empty audio buffer, nothing to play"
+- Now the voice listing command no longer fails with this API endpoint: https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/voices/list
+- Performance improvement: eliminate unnecessary memory copy
+
+## For Rust crate users
+
+There are a lots of breaking changes:
+
+- Some fields of the `Voice` struct is now optional.
+- We now uses an [modular approach for error handling](https://sabrinajewson.org/blog/errors) instead of using a big enum for all errors. (#66)
+- Now there are two synthesizers: `RestSynthesizer` for the REST API and `WebSocketSynthesizer` for the WebSocket API. (#71)
+  - The REST synthesizer has two extra methods that returns the underlying `Bytes` object instead of `Vec<u8>`.
+- There is a `UnifiedSynthesizer` trait that provides a unified interface for both synthesizers.
+- Some methods are renamed. For example, `Synthesizer::connect` is now `Synthesizer::connect_websocket`.
+- Four new feature flags of this crate:
+  - `rest-synthesizer`: Enable the `RestSynthesizer` struct.
+  - `websocket-synthesizer`: Enable the `WebSocketSynthesizer` struct.
+  - `unified-synthesizer`: Enable the `UnifiedSynthesizer` trait.
+  - `synthesizers`: Enable all synthesizers.
+  - `synthesizers` feature are enabled by default.
+  - Disabling `websocket-synthesizer` feature will save you a bunch of dependencies. (`aspeak.rlib` is ~0.8MB smaller in release mode)
+- Improved doc comments.
+- Support TLS feature flags: By default, this crate uses `native-tls`. To use other TLS implementations, you can use the following feature flags:
+  - `native-tls-vendored`: Use the vendored version of `native-tls`.
+  - `rustls-tls-native-roots`
+  - `rustls-tls-webpki-roots`
+- Add 4 examples for quick reference:
+  - [Simple usage of RestSynthesizer](https://github.com/kxxt/aspeak/blob/v6/examples/03-rest-synthesizer-simple.rs)
+  - [Simple usage of WebsocketSynthesizer](https://github.com/kxxt/aspeak/blob/v6/examples/04-websocket-synthesizer-simple.rs)
+  - [Synthesize all txt files in a given directory](https://github.com/kxxt/aspeak/blob/v6/examples/01-synthesize-txt-files.rs)
+  - [Read-Synthesize-Speak-Loop: Read text from stdin line by line and speak it](https://github.com/kxxt/aspeak/blob/v6/examples/02-rssl.rs)
+
+## For Python binding users
+
+- The `SpeechService` now automatically connect when it is constructed and it is using the websocket API. The `connect` method is removed.
+- It now uses the REST API by default.
+- New keyword argument for the constructor of `SpeechService`:
+  - mode: `rest` or `websocket`. Default is `rest`.
+- Improved error messages of the python binding
+- Enable abi3 wheels so that we do not need to build for every python version.
+- Now type hints are provided. You will get better completion in your IDE. (#78)
+
 # v6.0.0-rc.1
 
 Changes after v6.0.0-beta.3:

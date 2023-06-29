@@ -3,7 +3,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/kxxt/aspeak)](https://github.com/kxxt/aspeak/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/kxxt/aspeak)](https://github.com/kxxt/aspeak/issues)
 [![GitHub forks](https://img.shields.io/github/forks/kxxt/aspeak)](https://github.com/kxxt/aspeak/network)
-[![GitHub license](https://img.shields.io/github/license/kxxt/aspeak)](https://github.com/kxxt/aspeak/blob/main/LICENSE)
+[![GitHub license](https://img.shields.io/github/license/kxxt/aspeak)](https://github.com/kxxt/aspeak/blob/v6/LICENSE)
 
 <a href="https://github.com/kxxt/aspeak/graphs/contributors" alt="Contributors">
     <img src="https://img.shields.io/github/contributors/kxxt/aspeak" />
@@ -15,6 +15,9 @@
 A simple text-to-speech client for Azure TTS API. :laughing:
 
 ## Note
+
+Starting from version 6.0.0, `aspeak` by default uses the RESTful API of Azure TTS. If you want to use the WebSocket API,
+you can specify `--mode websocket` when invoking `aspeak` or set `mode = "websocket"` in the `auth` section of your profile.
 
 Starting from version 4.0.0, `aspeak` is rewritten in rust. The old python version is available at the `python` branch.
 
@@ -43,7 +46,7 @@ From v4.1.0, You can install `aspeak-bin` from AUR.
 Installing from PyPI will also install the python binding of `aspeak` for you. Check [Library Usage#Python](#Python) for more information on using the python binding.
 
 ```bash
-pip install -U aspeak==5.2.0
+pip install -U aspeak==6.0.0
 ```
 
 Now the prebuilt wheels are only available for x86_64 architecture.
@@ -98,7 +101,7 @@ an official endpoint designated by a region,
 run the following command:
 
 ```sh
-$ aspeak --region <YOUR_REGION> --key <YOUR_SUBSCRIPTION_KEY>  text "Hello World"
+$ aspeak --region <YOUR_REGION> --key <YOUR_SUBSCRIPTION_KEY> text "Hello World"
 ```
 
 If you are using a custom endpoint, you can use the `--endpoint` option instead of `--region`.
@@ -175,6 +178,9 @@ verbosity = 0
 
 # Alternatively, you can specify the region if you are using official endpoints
 # region = "eastus"
+
+# Synthesizer Mode, "rest" or "websocket"
+# mode = "rest"
 
 # Azure Subscription Key
 # key = "YOUR_KEY"
@@ -565,3 +571,10 @@ $ cargo add aspeak
 ```
 
 Then follow the [documentation](https://docs.rs/aspeak) of `aspeak` crate.
+
+There are 4 examples for quick reference:
+
+- [Simple usage of RestSynthesizer](https://github.com/kxxt/aspeak/blob/v6/examples/03-rest-synthesizer-simple.rs)
+- [Simple usage of WebsocketSynthesizer](https://github.com/kxxt/aspeak/blob/v6/examples/04-websocket-synthesizer-simple.rs)
+- [Synthesize all txt files in a given directory](https://github.com/kxxt/aspeak/blob/v6/examples/01-synthesize-txt-files.rs)
+- [Read-Synthesize-Speak-Loop: Read text from stdin line by line and speak it](https://github.com/kxxt/aspeak/blob/v6/examples/02-rssl.rs)
