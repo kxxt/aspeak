@@ -16,6 +16,9 @@ A simple text-to-speech client for Azure TTS API. :laughing:
 
 ## Note
 
+Starting from version 6.0.0, `aspeak` by default uses the RESTful API of Azure TTS. If you want to use the WebSocket API,
+you can specify `--mode websocket` when invoking `aspeak` or set `mode = "websocket"` in the `auth` section of your profile.
+
 Starting from version 4.0.0, `aspeak` is rewritten in rust. The old python version is available at the `python` branch.
 
 You can sign up for an Azure account and then
@@ -98,7 +101,7 @@ an official endpoint designated by a region,
 run the following command:
 
 ```sh
-$ aspeak --region <YOUR_REGION> --key <YOUR_SUBSCRIPTION_KEY>  text "Hello World"
+$ aspeak --region <YOUR_REGION> --key <YOUR_SUBSCRIPTION_KEY> text "Hello World"
 ```
 
 If you are using a custom endpoint, you can use the `--endpoint` option instead of `--region`.
@@ -494,3 +497,10 @@ $ cargo add aspeak
 ```
 
 Then follow the [documentation](https://docs.rs/aspeak) of `aspeak` crate.
+
+There are 4 examples for quick reference:
+
+- [Simple usage of RestSynthesizer](https://github.com/kxxt/aspeak/blob/v6/examples/03-rest-synthesizer-simple.rs)
+- [Simple usage of WebsocketSynthesizer](https://github.com/kxxt/aspeak/blob/v6/examples/04-websocket-synthesizer-simple.rs)
+- [Synthesize all txt files in a given directory](https://github.com/kxxt/aspeak/blob/v6/examples/01-synthesize-txt-files.rs)
+- [Read-Synthesize-Speak-Loop: Read text from stdin line by line and speak it](https://github.com/kxxt/aspeak/blob/v6/examples/02-rssl.rs)
