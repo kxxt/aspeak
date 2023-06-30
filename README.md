@@ -523,11 +523,11 @@ First you need to create a `SpeechService` instance.
 
 When creating a `SpeechService` instance, you can specify the following parameters:
 
-- `audio_format`: The audio format of the output audio. Default is `AudioFormat.Riff24KHz16BitMonoPcm`.
+- `audio_format`(Positional argument): The audio format of the output audio. Default is `AudioFormat.Riff24KHz16BitMonoPcm`.
   - You can get an audio format by providing a container format and a quality level: `AudioFormat("mp3", 2)`.
 - `endpoint`: The endpoint of the speech service.
 - `region`: Alternatively, you can specify the region of the speech service instead of typing the boring endpoint url.
-- `subscription_key`: The subscription key of the speech service.
+- `key`: The subscription key of the speech service.
 - `token`: The auth token for the speech service. If you provide a token, the subscription key will be ignored.
 - `headers`: Additional HTTP headers for the speech service.
 - `mode`: Choose the synthesizer to use. Either `rest` or `websocket`.
