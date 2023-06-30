@@ -515,8 +515,7 @@ Here is a simple example:
 ```python
 from aspeak import SpeechService
 
-service = SpeechService()
-service.connect()
+service =  SpeechService(region="eastus", key="YOUR_AZURE_SUBSCRIPTION_KEY")
 service.speak_text("Hello, world")
 ```
 
@@ -531,8 +530,8 @@ When creating a `SpeechService` instance, you can specify the following paramete
 - `subscription_key`: The subscription key of the speech service.
 - `token`: The auth token for the speech service. If you provide a token, the subscription key will be ignored.
 - `headers`: Additional HTTP headers for the speech service.
-
-Then you need to call `connect()` to connect to the speech service.
+- `mode`: Choose the synthesizer to use. Either `rest` or `websocket`.
+  - In websocket mode, the synthesizer will connect to the endpoint when the `SpeechService` instance is created.
 
 After that, you can call `speak_text()` to speak the text or `speak_ssml()` to speak the SSML.
 Or you can call `synthesize_text()` or `synthesize_ssml()` to get the audio data.
