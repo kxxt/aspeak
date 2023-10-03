@@ -1,5 +1,9 @@
 # aspeak Changelog
 
+# v6.0.1
+
+Update dependencies, which solves security alerts.
+
 # v6.0.0
 
 aspeak v6.0 is finally released🎉🎉🎉! This is a major release with some breaking changes. Please read the following carefully.
