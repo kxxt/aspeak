@@ -145,9 +145,18 @@ pub static QUALITY_RANGE_MAP: phf::Map<&'static str, (i8, i8)> = phf_map! {
 /// All possible audio formats
 ///
 /// Some endpoints only support a subset of these formats.
-#[cfg_attr(feature = "python", pyo3::pyclass)]
+#[cfg_attr(feature = "python", pyo3::pyclass(eq, eq_int))]
 #[derive(
-    Debug, Clone, Copy, Default, IntoStaticStr, EnumString, EnumIter, Deserialize, Serialize,
+    Debug,
+    Clone,
+    Copy,
+    Default,
+    IntoStaticStr,
+    EnumString,
+    EnumIter,
+    Deserialize,
+    Serialize,
+    PartialEq,
 )]
 #[non_exhaustive]
 pub enum AudioFormat {

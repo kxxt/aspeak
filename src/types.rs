@@ -6,14 +6,14 @@ use strum::IntoStaticStr;
 use crate::get_default_voice_by_locale;
 
 /// Speech role
-#[cfg_attr(feature = "python", pyo3::pyclass)]
+#[cfg_attr(feature = "python", pyo3::pyclass(eq, eq_int))]
 #[non_exhaustive]
 #[cfg_attr(
     feature = "binary",
     derive(clap::ValueEnum),
     clap(rename_all = "verbatim")
 )]
-#[derive(Debug, Clone, Copy, IntoStaticStr, Deserialize)]
+#[derive(Debug, Clone, Copy, IntoStaticStr, Deserialize, PartialEq)]
 pub enum Role {
     Girl,
     Boy,
