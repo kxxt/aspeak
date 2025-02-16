@@ -289,9 +289,9 @@ impl<'a> TextOptionsBuilder<'a> {
 }
 
 #[cfg(feature = "python")]
-pub(crate) fn register_python_items(
+pub(crate) fn register_python_items<'a>(
     _py: pyo3::Python<'_>,
-    m: &pyo3::types::PyModule,
+    m: &impl pyo3::types::PyModuleMethods<'a>,
 ) -> pyo3::PyResult<()> {
     m.add_class::<Role>()?;
     Ok(())
