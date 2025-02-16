@@ -20,7 +20,7 @@ pub(crate) enum WebSocketMessage<'a> {
     Audio {
         data: &'a [u8],
     },
-    Close(Option<&'a CloseFrame<'a>>),
+    Close(Option<&'a CloseFrame>),
     Ping,
     Pong,
 }

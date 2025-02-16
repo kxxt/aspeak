@@ -35,12 +35,12 @@ impl WebsocketSynthesizer {
         );
         self.stream.send(Message::Text(format!(
             "Path: synthesis.context\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{synthesis_context}", 
-            request_id = &request_id)),
+            request_id = &request_id).into()),
         ).await?;
         info!("Before sending the SSML to the server");
         self.stream.send(Message::Text(format!(
             "Path: ssml\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}\r\nContent-Type: application/ssml+xml\r\n\r\n{ssml}"
-        ))).await?;
+        ).into())).await?;
         let mut buffer = Vec::new();
         while let Some(raw_msg) = self.stream.next().await.transpose()? {
             let msg = WebSocketMessage::try_from(&raw_msg)?;
