@@ -19,7 +19,7 @@ use crate::{
 };
 
 #[pymodule]
-fn aspeak(py: Python, m: &PyModule) -> PyResult<()> {
+fn aspeak(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     #[cfg(debug_assertions)]
     env_logger::builder()
         .filter_level(log::LevelFilter::Trace)
@@ -37,31 +37,39 @@ struct SpeechService {
 }
 
 impl SpeechService {
-    fn parse_text_options(options: Option<&PyDict>) -> PyResult<Option<TextOptions>> {
+    fn parse_text_options<'a>(
+        options: Option<&'a Bound<PyDict>>,
+    ) -> PyResult<Option<TextOptions<'a>>> {
         options
             .map(|opts| {
                 Ok::<TextOptions, PyErr>(TextOptions {
                     pitch: opts
                         .get_item("pitch")?
+                        .as_ref()
                         .map(|p| p.extract())
                         .transpose()?
                         .map(parse_pitch)
                         .transpose()?,
                     rate: opts
                         .get_item("rate")?
+                        .as_ref()
                         .map(|r| r.extract())
                         .transpose()?
                         .map(parse_rate)
                         .transpose()?,
                     voice: {
-                        if let Some(voice) =
-                            opts.get_item("voice")?.map(|p| p.extract()).transpose()?
+                        if let Some(voice) = opts
+                            .get_item("voice")?
+                            .as_ref()
+                            .map(|p| p.extract::<&str>())
+                            .transpose()?
                         {
-                            Cow::Borrowed(voice)
+                            Cow::Owned(voice.to_string())
                         } else {
-                            let locale = opts
-                                .get_item("locale")?
-                                .map(|l| l.extract())
+                            let v = opts.get_item("locale")?;
+                            let locale = v
+                                .as_ref()
+                                .map(|v| v.extract())
                                 .transpose()?
                                 .unwrap_or("en-US");
                             Cow::Borrowed(get_default_voice_by_locale(locale).ok_or_else(|| {
@@ -75,11 +83,13 @@ impl SpeechService {
                     rich_ssml_options: {
                         let style = opts
                             .get_item("style")?
+                            .as_ref()
                             .map(|s| s.extract())
                             .transpose()?
-                            .map(Cow::Borrowed);
+                            .map(|s: &str| s.to_string().into());
                         let style_degree = opts
                             .get_item("style_degree")?
+                            .as_ref()
                             .map(|l| l.extract())
                             .transpose()?
                             .map(parse_style_degree)
@@ -105,7 +115,7 @@ impl SpeechService {
 impl SpeechService {
     #[new]
     #[pyo3(signature = (audio_format = AudioFormat::Riff24Khz16BitMonoPcm, **options))]
-    fn new(audio_format: AudioFormat, options: Option<&PyDict>) -> PyResult<Self> {
+    fn new(audio_format: AudioFormat, options: Option<&Bound<PyDict>>) -> PyResult<Self> {
         let runtime = tokio::runtime::Builder::new_current_thread()
             .enable_io()
             .enable_time()
@@ -114,7 +124,9 @@ impl SpeechService {
         let mode = options
             .map(|dict| dict.get_item("mode"))
             .transpose()?
-            .flatten()
+            .flatten();
+        let mode = mode
+            .as_ref()
             .map(|e| e.extract::<&str>())
             .transpose()?
             .unwrap_or("rest");
@@ -126,31 +138,31 @@ impl SpeechService {
             )));
         }
 
-        let endpoint = if let Some(endpoint) = options
+        let endpoint = options
             .map(|dict| dict.get_item("endpoint"))
             .transpose()?
-            .flatten()
-            .map(|e| e.extract::<&str>())
-            .transpose()?
-        {
-            Cow::Borrowed(endpoint)
-        } else {
-            options
-                .map(|dict| dict.get_item("region"))
-                .transpose()?
-                .flatten()
-                .map(|e| e.extract::<&str>())
-                .transpose()?
-                .map(|r| match mode {
-                    "rest" => get_rest_endpoint_by_region(r),
-                    "websocket" => get_websocket_endpoint_by_region(r),
-                    _ => unreachable!(),
-                })
-                .map(Cow::Owned)
-                .ok_or_else(|| {
-                    PyValueError::new_err("No endpoint or region is specified!".to_string())
-                })?
-        };
+            .flatten();
+        let endpoint =
+            if let Some(endpoint) = endpoint.as_ref().map(|e| e.extract::<&str>()).transpose()? {
+                Cow::Borrowed(endpoint)
+            } else {
+                options
+                    .map(|dict| dict.get_item("region"))
+                    .transpose()?
+                    .flatten()
+                    .as_ref()
+                    .map(|e| e.extract::<&str>())
+                    .transpose()?
+                    .map(|r| match mode {
+                        "rest" => get_rest_endpoint_by_region(r),
+                        "websocket" => get_websocket_endpoint_by_region(r),
+                        _ => unreachable!(),
+                    })
+                    .map(Cow::Owned)
+                    .ok_or_else(|| {
+                        PyValueError::new_err("No endpoint or region is specified!".to_string())
+                    })?
+            };
         let key: Option<String> = options
             .map(|dict| dict.get_item("key"))
             .transpose()?
@@ -172,7 +184,9 @@ impl SpeechService {
         let headers = options
             .map(|dict| dict.get_item("headers"))
             .transpose()?
-            .flatten()
+            .flatten();
+        let headers = headers
+            .as_ref()
             .map(|h| h.downcast::<PySequence>())
             .transpose()?;
         let headers = if let Some(headers) = headers {
@@ -181,8 +195,10 @@ impl SpeechService {
                 .map(|header| {
                     header.and_then(|header| {
                         let header = header.downcast::<PySequence>()?;
-                        let name = header.get_item(0)?.extract::<&str>()?;
-                        let value = header.get_item(1)?.extract::<&str>()?;
+                        let name = header.get_item(0)?;
+                        let name = name.as_ref().extract::<&str>()?;
+                        let value = header.get_item(1)?;
+                        let value = value.as_ref().extract::<&str>()?;
                         Ok((
                             HeaderName::from_bytes(name.as_bytes()).map_err(|e| {
                                 PyValueError::new_err(format!("Invalid header name: {e}"))
@@ -232,9 +248,9 @@ impl SpeechService {
     fn synthesize_ssml<'a>(
         &self,
         ssml: &str,
-        options: Option<&PyDict>,
+        options: Option<Bound<PyDict>>,
         py: Python<'a>,
-    ) -> PyResult<Option<&'a PyBytes>> {
+    ) -> PyResult<Option<Bound<'a, PyBytes>>> {
         let data = self
             .runtime
             .block_on(self.synthesizer.borrow_mut().as_mut().process_ssml(ssml))?;
@@ -242,6 +258,7 @@ impl SpeechService {
             .map(|d| d.get_item("output"))
             .transpose()?
             .flatten()
+            .as_ref()
             .map(|f| f.extract::<&str>())
             .transpose()?
         {
@@ -249,17 +266,17 @@ impl SpeechService {
             file.write_all(&data)?;
             Ok(None)
         } else {
-            Ok(Some(PyBytes::new(py, &data)))
+            Ok(Some(PyBytes::new_bound(py, &data)))
         }
     }
 
     #[pyo3(signature = (text, **options))]
-    fn speak_text(&self, text: &str, options: Option<&PyDict>) -> PyResult<()> {
+    fn speak_text(&self, text: &str, options: Option<Bound<PyDict>>) -> PyResult<()> {
         let buffer = self
             .runtime
             .block_on(self.synthesizer.borrow_mut().as_mut().process_text(
                 text,
-                &Self::parse_text_options(options)?.unwrap_or_default(),
+                &Self::parse_text_options(options.as_ref())?.unwrap_or_default(),
             ))?;
         play_owned_audio_blocking(buffer)?;
         Ok(())
@@ -269,19 +286,20 @@ impl SpeechService {
     fn synthesize_text<'a>(
         &self,
         text: &str,
-        options: Option<&PyDict>,
+        options: Option<Bound<PyDict>>,
         py: Python<'a>,
-    ) -> PyResult<Option<&'a PyBytes>> {
+    ) -> PyResult<Option<Bound<'a, PyBytes>>> {
         let data = self
             .runtime
             .block_on(self.synthesizer.borrow_mut().as_mut().process_text(
                 text,
-                &Self::parse_text_options(options)?.unwrap_or_default(),
+                &Self::parse_text_options(options.as_ref())?.unwrap_or_default(),
             ))?;
         if let Some(output) = options
             .map(|d| d.get_item("output"))
             .transpose()?
             .flatten()
+            .as_ref()
             .map(|f| f.extract::<&str>())
             .transpose()?
         {
@@ -289,7 +307,7 @@ impl SpeechService {
             file.write_all(&data)?;
             Ok(None)
         } else {
-            Ok(Some(PyBytes::new(py, &data)))
+            Ok(Some(PyBytes::new_bound(py, &data)))
         }
     }
 }
