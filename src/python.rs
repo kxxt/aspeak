@@ -1,7 +1,7 @@
 use std::borrow::Cow;
-use std::cell::RefCell;
 use std::fs::File;
 use std::io::Write;
+use std::sync::RwLock;
 
 use pyo3::exceptions::PyValueError;
 use pyo3::types::{PyBytes, PySequence};
@@ -32,7 +32,7 @@ fn aspeak(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
 
 #[pyclass]
 struct SpeechService {
-    synthesizer: RefCell<Box<dyn UnifiedSynthesizer>>,
+    synthesizer: RwLock<Box<dyn UnifiedSynthesizer + Sync>>,
     runtime: Runtime,
 }
 
@@ -191,7 +191,7 @@ impl SpeechService {
             .transpose()?;
         let headers = if let Some(headers) = headers {
             headers
-                .iter()?
+                .try_iter()?
                 .map(|header| {
                     header.and_then(|header| {
                         let header = header.downcast::<PySequence>()?;
@@ -214,7 +214,7 @@ impl SpeechService {
             Vec::new()
         };
         Ok(Self {
-            synthesizer: RefCell::new(runtime.block_on(async {
+            synthesizer: RwLock::new(runtime.block_on(async {
                 let conf = SynthesizerConfig::new(
                     AuthOptions {
                         endpoint: Cow::Borrowed(&endpoint),
@@ -225,21 +225,25 @@ impl SpeechService {
                     },
                     audio_format,
                 );
-                let boxed: Box<dyn UnifiedSynthesizer> = match mode {
+                let boxed: Box<dyn UnifiedSynthesizer + Sync> = match mode {
                     "rest" => Box::new(conf.rest_synthesizer()?),
                     "websocket" => Box::new(conf.connect_websocket().await?),
                     _ => unreachable!(),
                 };
-                Ok::<Box<dyn UnifiedSynthesizer>, PyErr>(boxed)
+                Ok::<Box<dyn UnifiedSynthesizer + Sync>, PyErr>(boxed)
             })?),
             runtime,
         })
     }
 
     fn speak_ssml(&self, ssml: &str) -> PyResult<()> {
-        let buffer = self
-            .runtime
-            .block_on(self.synthesizer.borrow_mut().as_mut().process_ssml(ssml))?;
+        let buffer = self.runtime.block_on(
+            self.synthesizer
+                .write()
+                .unwrap()
+                .as_mut()
+                .process_ssml(ssml),
+        )?;
         play_owned_audio_blocking(buffer)?;
         Ok(())
     }
@@ -251,9 +255,13 @@ impl SpeechService {
         options: Option<Bound<PyDict>>,
         py: Python<'a>,
     ) -> PyResult<Option<Bound<'a, PyBytes>>> {
-        let data = self
-            .runtime
-            .block_on(self.synthesizer.borrow_mut().as_mut().process_ssml(ssml))?;
+        let data = self.runtime.block_on(
+            self.synthesizer
+                .write()
+                .unwrap()
+                .as_mut()
+                .process_ssml(ssml),
+        )?;
         if let Some(output) = options
             .map(|d| d.get_item("output"))
             .transpose()?
@@ -266,18 +274,18 @@ impl SpeechService {
             file.write_all(&data)?;
             Ok(None)
         } else {
-            Ok(Some(PyBytes::new_bound(py, &data)))
+            Ok(Some(PyBytes::new(py, &data)))
         }
     }
 
     #[pyo3(signature = (text, **options))]
     fn speak_text(&self, text: &str, options: Option<Bound<PyDict>>) -> PyResult<()> {
-        let buffer = self
-            .runtime
-            .block_on(self.synthesizer.borrow_mut().as_mut().process_text(
-                text,
-                &Self::parse_text_options(options.as_ref())?.unwrap_or_default(),
-            ))?;
+        let buffer =
+            self.runtime
+                .block_on(self.synthesizer.write().unwrap().as_mut().process_text(
+                    text,
+                    &Self::parse_text_options(options.as_ref())?.unwrap_or_default(),
+                ))?;
         play_owned_audio_blocking(buffer)?;
         Ok(())
     }
@@ -289,12 +297,12 @@ impl SpeechService {
         options: Option<Bound<PyDict>>,
         py: Python<'a>,
     ) -> PyResult<Option<Bound<'a, PyBytes>>> {
-        let data = self
-            .runtime
-            .block_on(self.synthesizer.borrow_mut().as_mut().process_text(
-                text,
-                &Self::parse_text_options(options.as_ref())?.unwrap_or_default(),
-            ))?;
+        let data =
+            self.runtime
+                .block_on(self.synthesizer.write().unwrap().as_mut().process_text(
+                    text,
+                    &Self::parse_text_options(options.as_ref())?.unwrap_or_default(),
+                ))?;
         if let Some(output) = options
             .map(|d| d.get_item("output"))
             .transpose()?
@@ -307,7 +315,7 @@ impl SpeechService {
             file.write_all(&data)?;
             Ok(None)
         } else {
-            Ok(Some(PyBytes::new_bound(py, &data)))
+            Ok(Some(PyBytes::new(py, &data)))
         }
     }
 }
