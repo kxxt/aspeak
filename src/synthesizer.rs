@@ -119,7 +119,7 @@ impl<'a> SynthesizerConfig<'a> {
         let now = Utc::now();
         wss.send(Message::Text(format!(
             "Path: speech.config\r\nX-RequestId: {request_id}\r\nX-Timestamp: {now:?}Content-Type: application/json\r\n\r\n{CLIENT_INFO_PAYLOAD}"
-        ))).await?;
+        ).into())).await?;
         info!("Successfully created Synthesizer");
         Ok(WebsocketSynthesizer {
             audio_format: self.audio_format,
