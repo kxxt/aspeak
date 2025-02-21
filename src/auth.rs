@@ -95,8 +95,8 @@ impl<'a> AuthOptionsBuilder<'a> {
     /// # Arguments
     ///
     /// * `endpoint` - Endpoint of the service.
-    /// It is usually a https url if you are using [`crate::synthesizer::RestSynthesizer`] or
-    /// a wss url if you are using [`crate::synthesizer::WebsocketSynthesizer`].
+    ///     It is usually a https url if you are using [`crate::synthesizer::RestSynthesizer`] or
+    ///     a wss url if you are using [`crate::synthesizer::WebsocketSynthesizer`].
     pub fn new(endpoint: impl Into<Cow<'a, str>>) -> Self {
         Self {
             endpoint: endpoint.into(),
