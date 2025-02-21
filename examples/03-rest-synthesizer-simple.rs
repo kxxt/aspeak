@@ -1,6 +1,6 @@
 use aspeak::{
-    get_rest_endpoint_by_region, AudioFormat, AuthOptionsBuilder, SynthesizerConfig,
-    TextOptionsBuilder,
+    AudioFormat, AuthOptionsBuilder, SynthesizerConfig, TextOptionsBuilder,
+    get_rest_endpoint_by_region,
 };
 
 use std::error::Error;

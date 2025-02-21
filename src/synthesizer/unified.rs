@@ -7,7 +7,7 @@ use async_trait::async_trait;
 use log::debug;
 use strum::AsRefStr;
 
-use crate::{interpolate_ssml, SsmlError, TextOptions};
+use crate::{SsmlError, TextOptions, interpolate_ssml};
 
 #[async_trait]
 pub trait UnifiedSynthesizer: Send {

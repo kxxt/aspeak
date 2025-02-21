@@ -4,7 +4,7 @@ use std::fmt::{self, Display, Formatter};
 use crate::errors::ConnectError;
 use crate::msg;
 use crate::net::WsStream;
-use crate::{interpolate_ssml, msg::WebSocketMessage, AudioFormat, TextOptions};
+use crate::{AudioFormat, TextOptions, interpolate_ssml, msg::WebSocketMessage};
 use chrono::Utc;
 use futures_util::{SinkExt, StreamExt};
 use hyper::header::InvalidHeaderValue;
@@ -116,7 +116,10 @@ impl Display for WebsocketSynthesizerError {
                     code, reason
                 )
             }
-            InvalidMessage => write!(f, "aspeak cannot handle this message. Please report this bug to https://github.com/kxxt/aspeak/issues."),
+            InvalidMessage => write!(
+                f,
+                "aspeak cannot handle this message. Please report this bug to https://github.com/kxxt/aspeak/issues."
+            ),
             _ => write!(f, "{} error", self.kind.as_ref()),
         }
     }

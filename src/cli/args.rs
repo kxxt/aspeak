@@ -4,7 +4,7 @@ use std::env;
 use super::config::{AuthConfig, Config, OutputConfig};
 use super::parse;
 use aspeak::{
-    get_rest_endpoint_by_region, get_websocket_endpoint_by_region, AudioFormat, AuthOptions, Role,
+    AudioFormat, AuthOptions, Role, get_rest_endpoint_by_region, get_websocket_endpoint_by_region,
 };
 use clap::{ArgAction, Args, ValueEnum};
 use color_eyre::Help;

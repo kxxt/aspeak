@@ -9,7 +9,7 @@ use log::debug;
 use reqwest::{Client, StatusCode};
 use strum::AsRefStr;
 
-use crate::{interpolate_ssml, SsmlError, TextOptions};
+use crate::{SsmlError, TextOptions, interpolate_ssml};
 
 /// The synthesizer that uses the RESTful API.
 pub struct RestSynthesizer {

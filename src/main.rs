@@ -7,16 +7,16 @@ use std::{
     path::PathBuf,
 };
 
-use cli::{commands::Command, Cli};
+use cli::{Cli, commands::Command};
 
 use aspeak::{
-    AudioFormat, SynthesizerConfig, UnifiedSynthesizer, Voice, VoiceListAPIAuth,
-    VoiceListAPIEndpoint, VoiceListAPIError, VoiceListAPIErrorKind, QUALITY_MAP,
+    AudioFormat, QUALITY_MAP, SynthesizerConfig, UnifiedSynthesizer, Voice, VoiceListAPIAuth,
+    VoiceListAPIEndpoint, VoiceListAPIError, VoiceListAPIErrorKind,
 };
 use clap::Parser;
 use color_eyre::{
-    eyre::{anyhow, eyre},
     Help,
+    eyre::{anyhow, eyre},
 };
 use colored::Colorize;
 

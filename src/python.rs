@@ -14,8 +14,8 @@ use crate::get_rest_endpoint_by_region;
 use crate::parse::{parse_pitch, parse_rate, parse_style_degree};
 use crate::synthesizer::UnifiedSynthesizer;
 use crate::{
-    get_default_voice_by_locale, get_websocket_endpoint_by_region, synthesizer::SynthesizerConfig,
-    AudioFormat, AuthOptions, TextOptions,
+    AudioFormat, AuthOptions, TextOptions, get_default_voice_by_locale,
+    get_websocket_endpoint_by_region, synthesizer::SynthesizerConfig,
 };
 
 #[pymodule]

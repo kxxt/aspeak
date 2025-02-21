@@ -5,8 +5,8 @@ use std::{
 };
 
 use crate::{
-    constants::{ORIGIN, TRIAL_VOICE_LIST_URL},
     AudioFormat,
+    constants::{ORIGIN, TRIAL_VOICE_LIST_URL},
 };
 use colored::Colorize;
 use hyper::{header::InvalidHeaderValue, http::HeaderValue};

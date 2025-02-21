@@ -46,8 +46,8 @@ mod internal {
     use std::error::Error;
     use std::fmt::{self, Display, Formatter};
 
-    use rodio::{decoder::DecoderError, PlayError, StreamError};
     use rodio::{Decoder, OutputStream, Sink};
+    use rodio::{PlayError, StreamError, decoder::DecoderError};
     #[allow(unused)]
     pub fn play_borrowed_audio_blocking(buffer: &[u8]) -> Result<(), AudioError> {
         play_owned_audio_blocking(buffer.to_vec())

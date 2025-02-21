@@ -7,7 +7,7 @@ use self::{
     commands::Command,
     config::{Config, TextConfig},
 };
-use aspeak::{get_default_voice_by_locale, RichSsmlOptions, TextOptions};
+use aspeak::{RichSsmlOptions, TextOptions, get_default_voice_by_locale};
 use std::{
     borrow::Cow,
     fs::{File, OpenOptions},
@@ -16,8 +16,8 @@ use std::{
 };
 
 use color_eyre::{
-    eyre::{anyhow, eyre},
     Help,
+    eyre::{anyhow, eyre},
 };
 use encoding_rs_io::{DecodeReaderBytes, DecodeReaderBytesBuilder};
 
@@ -119,7 +119,7 @@ impl Cli {
                     .open(file)?,
                 (true, false) => {
                     return Err(anyhow!("File {} already exists!", file.display())
-                        .suggestion("You can use --overwrite to overwrite this file."))
+                        .suggestion("You can use --overwrite to overwrite this file."));
                 }
             };
             Box::new(move |buffer| {

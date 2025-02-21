@@ -24,7 +24,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
             RichSsmlOptionsBuilder::new().style("newscast"), // Set speech style to newscast
         )
         .build();
-    println!("Welcome to the speech synthesizer RSSL (Read-Synthesize-Speak-Loop)! I will speak whatever you type in. Send EOF (Ctrl+D on Unix, Ctrl+Z on Windows) to exit.");
+    println!(
+        "Welcome to the speech synthesizer RSSL (Read-Synthesize-Speak-Loop)! I will speak whatever you type in. Send EOF (Ctrl+D on Unix, Ctrl+Z on Windows) to exit."
+    );
     let (_stream, stream_handle) = OutputStream::try_default()?;
     let sink = Sink::try_new(&stream_handle).unwrap();
     let mut rl = rustyline::DefaultEditor::new()?;
