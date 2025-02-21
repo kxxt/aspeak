@@ -24,7 +24,7 @@ impl Display for ConnectError {
         write!(f, "connect error: ")?;
         match self.kind {
             ConnectErrorKind::UnsupportedScheme(ref scheme) => {
-                if let Some(ref scheme) = scheme {
+                if let Some(scheme) = scheme {
                     write!(f, "unsupported proxy scheme: {}", scheme)
                 } else {
                     write!(f, "no proxy scheme found in url")

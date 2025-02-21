@@ -32,7 +32,7 @@ impl<S: AsyncRead + AsyncWrite + Unpin> AsyncRead for MaybeSocks5Stream<S> {
         buf: &mut ReadBuf<'_>,
     ) -> Poll<std::io::Result<()>> {
         match self.get_mut() {
-            MaybeSocks5Stream::Plain(ref mut s) => Pin::new(s).poll_read(cx, buf),
+            MaybeSocks5Stream::Plain(s) => Pin::new(s).poll_read(cx, buf),
             MaybeSocks5Stream::Socks5Stream(s) => Pin::new(s).poll_read(cx, buf),
         }
     }
@@ -45,7 +45,7 @@ impl<S: AsyncRead + AsyncWrite + Unpin> AsyncWrite for MaybeSocks5Stream<S> {
         buf: &[u8],
     ) -> Poll<std::result::Result<usize, std::io::Error>> {
         match self.get_mut() {
-            MaybeSocks5Stream::Plain(ref mut s) => Pin::new(s).poll_write(cx, buf),
+            MaybeSocks5Stream::Plain(s) => Pin::new(s).poll_write(cx, buf),
             MaybeSocks5Stream::Socks5Stream(s) => Pin::new(s).poll_write(cx, buf),
         }
     }
@@ -55,7 +55,7 @@ impl<S: AsyncRead + AsyncWrite + Unpin> AsyncWrite for MaybeSocks5Stream<S> {
         cx: &mut Context<'_>,
     ) -> Poll<std::result::Result<(), std::io::Error>> {
         match self.get_mut() {
-            MaybeSocks5Stream::Plain(ref mut s) => Pin::new(s).poll_flush(cx),
+            MaybeSocks5Stream::Plain(s) => Pin::new(s).poll_flush(cx),
             MaybeSocks5Stream::Socks5Stream(s) => Pin::new(s).poll_flush(cx),
         }
     }
@@ -65,7 +65,7 @@ impl<S: AsyncRead + AsyncWrite + Unpin> AsyncWrite for MaybeSocks5Stream<S> {
         cx: &mut Context<'_>,
     ) -> Poll<std::result::Result<(), std::io::Error>> {
         match self.get_mut() {
-            MaybeSocks5Stream::Plain(ref mut s) => Pin::new(s).poll_shutdown(cx),
+            MaybeSocks5Stream::Plain(s) => Pin::new(s).poll_shutdown(cx),
             MaybeSocks5Stream::Socks5Stream(s) => Pin::new(s).poll_shutdown(cx),
         }
     }

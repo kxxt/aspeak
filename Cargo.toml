@@ -1,13 +1,14 @@
 [package]
 name = "aspeak"
 version = "6.0.1"
-edition = "2021"
+edition = "2024"
 authors = ["kxxt <rsworktech@outlook.com>"]
 description = "A simple text-to-speech client for Azure TTS API."
 homepage = "https://github.com/kxxt/aspeak"
 repository = "https://github.com/kxxt/aspeak"
 keywords = ["speech-synthesis", "aspeak", "tts", "text-to-speech", "audio"]
 license = "MIT"
+rust-version = "1.85"
 
 [lib]
 name = "aspeak"
