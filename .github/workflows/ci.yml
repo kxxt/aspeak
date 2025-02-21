@@ -32,9 +32,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
+          targets: ${{ matrix.target }}
+          components: clippy,rustfmt
       - uses: Swatinem/rust-cache@v2
         with:
           prefix-key: ${{ matrix.os }}-${{ matrix.target }}-rust

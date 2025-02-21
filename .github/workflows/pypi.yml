@@ -13,11 +13,8 @@ jobs:
     runs-on: "windows-latest"
     steps:
       - uses: actions/checkout@v3
-      - name: Install latests stable Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.pyversion }}
@@ -52,11 +49,8 @@ jobs:
     runs-on: "macos-latest"
     steps:
       - uses: actions/checkout@v3
-      - name: Install latests stable Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.pyversion }}
