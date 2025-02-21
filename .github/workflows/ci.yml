@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - v6
+  pull_request:
+  merge_group:
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+          # - os: ubuntu-22.04
+          #   target: x86_64-unknown-linux-musl
+          # - os: ubuntu-22.04
+          #   target: aarch64-unknown-linux-gnu
+          # - os: ubuntu-22.04
+          #   target: aarch64-unknown-linux-musl
+          - os: macos-12
+            target: x86_64-apple-darwin
+          - os: macos-12
+            target: aarch64-apple-darwin
+          - os: windows-2022
+            target: x86_64-pc-windows-msvc
+          - os: windows-2022
+            target: x86_64-pc-windows-gnu
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: ${{ matrix.os }}-${{ matrix.target }}-rust
+          cache-targets: true
+          cache-on-failure: false
+      - name: Install native dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt update -y && sudo apt install -y libasound2-dev binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu
+      - run: cargo test --verbose --target ${{ matrix.target }}
