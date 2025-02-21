@@ -15,7 +15,7 @@ use tokio::{
 use crate::errors::{ConnectError, ConnectErrorKind};
 
 use tokio_socks::tcp::Socks5Stream;
-use tokio_tungstenite::{tungstenite::client::IntoClientRequest, MaybeTlsStream, WebSocketStream};
+use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, tungstenite::client::IntoClientRequest};
 
 pub(crate) type WsStream = WebSocketStream<MaybeTlsStream<MaybeSocks5Stream<TcpStream>>>;
 

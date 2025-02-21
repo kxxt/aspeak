@@ -5,8 +5,8 @@ use std::{
 };
 
 use aspeak::{
-    get_default_voice_by_locale, get_rest_endpoint_by_region, get_websocket_endpoint_by_region,
-    AudioFormat, Role,
+    AudioFormat, Role, get_default_voice_by_locale, get_rest_endpoint_by_region,
+    get_websocket_endpoint_by_region,
 };
 use color_eyre::eyre::{anyhow, bail};
 

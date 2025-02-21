@@ -111,7 +111,7 @@ impl<'a> SynthesizerConfig<'a> {
                     kind: ConnectErrorKind::UnsupportedScheme(Some(other_scheme.to_string())),
                     source: None,
                 }
-                .into())
+                .into());
             }
         };
         let uuid = Uuid::new_v4();
@@ -130,7 +130,7 @@ impl<'a> SynthesizerConfig<'a> {
     #[cfg(feature = "rest-synthesizer")]
     /// Construct a [`RestSynthesizer`] from this [`SynthesizerConfig`].
     pub fn rest_synthesizer(&self) -> Result<RestSynthesizer, RestSynthesizerError> {
-        use crate::utils::{transpose_tuple_option_result, ClientBuilderExt};
+        use crate::utils::{ClientBuilderExt, transpose_tuple_option_result};
         use hyper::{header, http::HeaderValue};
         use reqwest::Proxy;
 

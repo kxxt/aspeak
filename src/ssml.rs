@@ -8,8 +8,8 @@ use crate::TextOptions;
 
 use log::info;
 use xml::{
-    writer::{events::StartElementBuilder, XmlEvent},
     EventWriter,
+    writer::{XmlEvent, events::StartElementBuilder},
 };
 
 trait StartElementBuilderExt<'a> {
@@ -28,11 +28,7 @@ impl<'a> StartElementBuilderExt<'a> for StartElementBuilder<'a> {
         })
     }
     fn optional_ns(self, cond: bool, ns: &'a str, uri: &'a str) -> Self {
-        if cond {
-            self.ns(ns, uri)
-        } else {
-            self
-        }
+        if cond { self.ns(ns, uri) } else { self }
     }
 }
 

@@ -7,7 +7,7 @@ use std::{
 
 use log::trace;
 
-use tokio_tungstenite::{tungstenite::protocol::CloseFrame, tungstenite::Message};
+use tokio_tungstenite::{tungstenite::Message, tungstenite::protocol::CloseFrame};
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum WebSocketMessage<'a> {
@@ -79,7 +79,7 @@ impl<'a> TryFrom<&'a Message> for WebSocketMessage<'a> {
                     reason: "Neither binary nor text",
                     msg: format!("{:?}", msg),
                     source: None,
-                })
+                });
             }
         })
     }

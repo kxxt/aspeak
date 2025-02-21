@@ -1,6 +1,6 @@
 use std::{env, error::Error, path::PathBuf};
 
-use futures_util::{stream::FuturesUnordered, StreamExt};
+use futures_util::{StreamExt, stream::FuturesUnordered};
 use tokio::{
     fs::{self, File},
     io::AsyncWriteExt,
