@@ -156,7 +156,7 @@ async fn main() -> color_eyre::eyre::Result<()> {
                         config.as_ref().and_then(
                             |c| c.auth.as_ref().and_then(
                                 |a| a.endpoint_config.as_ref().and_then(
-                                    |e| if let EndpointConfig::Region { ref region } =  e {
+                                    |e| if let EndpointConfig::Region { region } =  e {
                                         Some(region.as_str())
                                     } else {
                                         None
