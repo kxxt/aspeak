@@ -10,7 +10,7 @@ pub(super) fn parse_header(
         .find('=')
         .ok_or_else(|| format!("invalid KEY=value: no `=` found in `{s}`"))?;
     Ok((
-        HeaderName::from_bytes(s[..pos].as_bytes())?,
+        HeaderName::from_bytes(&s.as_bytes()[..pos])?,
         HeaderValue::from_str(&s[pos + 1..])?,
     ))
 }
