@@ -54,5 +54,5 @@ jobs:
       - name: Build aspeak
         run: cargo build -F binary -F python --target ${{ matrix.target }}
       - name: Test
-        run: cargo test -F binary -F python --verbose --target ${{ matrix.target }} -- --test-threads=4
+        run: cargo test -F binary -F python --verbose --target ${{ matrix.target }} -- --test-threads=1
 
