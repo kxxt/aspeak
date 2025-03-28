@@ -90,3 +90,5 @@ tokio = { version = "1.25.0", features = ["rt", "macros", "fs"] }
 rodio = { version = "0.20.1" }
 rustyline = "15.0.0"
 rstest = "0.25.0"
+assert_cmd = "2.0.16"
+predicates = "3.1.3"
