@@ -15,6 +15,7 @@ use tokio_tungstenite::tungstenite::protocol::Message;
 use uuid::Uuid;
 
 /// The main struct for interacting with the Azure Speech Service.
+#[derive(Debug)]
 pub struct WebsocketSynthesizer {
     pub(super) audio_format: AudioFormat,
     pub(super) stream: WsStream,
@@ -180,6 +181,83 @@ impl From<msg::ParseError> for WebsocketSynthesizerError {
         Self {
             kind: WebsocketSynthesizerErrorKind::InvalidMessage,
             source: Some(e.into()),
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::{
+        AudioFormat, AuthOptionsBuilder, SynthesizerConfig, TextOptionsBuilder,
+        get_websocket_endpoint_by_region,
+        test::{Creds, creds},
+    };
+    use rstest::rstest;
+
+    #[tokio::test]
+    #[rstest]
+    async fn test_invalid_key(creds: Creds) {
+        let endpoint = get_websocket_endpoint_by_region(&creds.region);
+        let auth = AuthOptionsBuilder::new(endpoint).key("invalid_key").build();
+        let config = SynthesizerConfig::new(auth, AudioFormat::Riff16Khz16BitMonoPcm);
+
+        // Try to connect to the Websocket synthesizer.
+        config
+            .connect_websocket()
+            .await
+            .expect_err("Connect using an invalid_key should fail");
+    }
+
+    #[tokio::test]
+    #[rstest]
+    async fn test_text(creds: Creds) {
+        let endpoint = get_websocket_endpoint_by_region(&creds.region);
+        let auth = AuthOptionsBuilder::new(endpoint).key(&creds.key).build();
+        let config = SynthesizerConfig::new(auth, AudioFormat::Riff16Khz16BitMonoPcm);
+
+        // Try to connect to the Websocket synthesizer.
+        let mut syn = config
+            .connect_websocket()
+            .await
+            .expect("Connect should succeed");
+
+        let text = "Hello, world!";
+        let options = TextOptionsBuilder::new().voice("en-US-JennyNeural").build();
+        let result = syn.synthesize_text(text, &options).await;
+        assert!(
+            result.is_ok(),
+            "Synthesis via websocket should succeed with a valid key"
+        );
+        let audio_data = result.unwrap();
+        assert!(!audio_data.is_empty(), "Audio data should not be empty");
+    }
+
+    #[tokio::test]
+    #[rstest]
+    #[case(
+        true,
+        "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'><voice name='en-US-JennyNeural'>Hello, world!</voice></speak>"
+    )]
+    #[case(false, "")]
+    async fn test_ssml(creds: Creds, #[case] valid: bool, #[case] ssml: &str) {
+        let endpoint = get_websocket_endpoint_by_region(&creds.region);
+        let auth = AuthOptionsBuilder::new(endpoint).key(&creds.key).build();
+        let config = SynthesizerConfig::new(auth, AudioFormat::Riff16Khz16BitMonoPcm);
+        let mut syn = config
+            .connect_websocket()
+            .await
+            .expect("Connect should succeed");
+        let result = syn.synthesize_ssml(ssml).await;
+        assert_eq!(
+            result.is_ok(),
+            valid,
+            "SSML is {} but request {}",
+            if valid { "valid" } else { "invalid" },
+            if result.is_ok() { "succeeds" } else { "fails" }
+        );
+        if result.is_ok() {
+            let audio_data = result.unwrap();
+            assert!(!audio_data.is_empty(), "Audio data should not be empty");
         }
     }
 }

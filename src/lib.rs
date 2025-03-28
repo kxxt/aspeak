@@ -113,6 +113,8 @@ mod types;
 mod utils;
 pub mod voice;
 pub use voice::*;
+#[cfg(test)]
+mod test;
 
 /// Get the official websocket endpoint by its region (e.g. `eastus`)
 pub fn get_websocket_endpoint_by_region(region: &str) -> String {
