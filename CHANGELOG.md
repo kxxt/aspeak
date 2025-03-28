@@ -1,5 +1,22 @@
 # aspeak Changelog
 
+# v6.1.0-rc.1
+
+## New Features
+
+- aspeak now supports outputing raw audio bytes into stdout if `--output` is set to `-`.
+- Wheels are now published for Apple Silicon Macs.
+
+## Fixes
+
+- Update dependencies, which solves security alerts.
+- Fix typos.
+
+## Internal
+
+- Run tests in GitHub CI.
+- Refactor: Migrate to Rust edition 2024.
+
 # v6.0.1
 
 Update dependencies, which solves security alerts.
