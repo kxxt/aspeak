@@ -10,6 +10,9 @@ on:
 
 jobs:
   test:
+    env:
+      ASPEAK_TEST_KEY: ${{ secrets.ASPEAK_TEST_KEY }}
+      ASPEAK_TEST_REGION: ${{ secrets.ASPEAK_TEST_REGION }}
     strategy:
       matrix:
         include:

@@ -8,7 +8,7 @@ fn setup() -> (String, String) {
         "An azure subscription key is required to be set as ASPEAK_TEST_KEY to run the tests.",
     );
     let region = env::var("ASPEAK_TEST_REGION").expect("An azure subscription region is required to be set as ASPEAK_TEST_REGION to run the tests.");
-    return (key, region);
+    (key, region)
 }
 
 fn aspeak_command() -> Command {
