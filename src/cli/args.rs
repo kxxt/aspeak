@@ -179,7 +179,7 @@ pub(crate) struct InputArgs {
 
 #[derive(Args, Debug, Default)]
 pub(crate) struct OutputArgs {
-    #[arg(short, long, help = "Output file path")]
+    #[arg(short, long, help = "Output file path. Use `-` for stdout")]
     pub output: Option<String>,
     #[arg(
         short,

@@ -109,18 +109,22 @@ impl Cli {
         overwrite: bool,
     ) -> color_eyre::Result<OutputProcessor> {
         Ok(if let Some(file) = output.as_deref() {
-            let file = Path::new(file);
-            let mut file = match (file.exists(), overwrite) {
-                (_, true) => File::create(file)?,
-                (false, false) => OpenOptions::new()
-                    .read(true)
-                    .write(true)
-                    .create_new(true)
-                    .open(file)?,
-                (true, false) => {
-                    return Err(anyhow!("File {} already exists!", file.display())
-                        .suggestion("You can use --overwrite to overwrite this file."));
-                }
+            let file_path = Path::new(file);
+            let mut file: Box<dyn Write + Send> = if file == "-" {
+                Box::new(std::io::stdout())
+            } else {
+                Box::new(match (file_path.exists(), overwrite) {
+                    (_, true) => File::create(file_path)?,
+                    (false, false) => OpenOptions::new()
+                        .read(true)
+                        .write(true)
+                        .create_new(true)
+                        .open(file_path)?,
+                    (true, false) => {
+                        return Err(anyhow!("File {} already exists!", file_path.display())
+                            .suggestion("You can use --overwrite to overwrite this file."));
+                    }
+                })
             };
             Box::new(move |buffer| {
                 file.write_all(&buffer)?;
