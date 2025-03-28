@@ -1,6 +1,10 @@
 # aspeak Changelog
 
-# v6.1.0-rc.1
+# v6.1.0
+
+## Notice
+
+Minimium supported pytho version has been raised to 3.10 from 3.8.
 
 ## New Features
 
