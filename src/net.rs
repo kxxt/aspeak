@@ -206,3 +206,63 @@ pub(crate) async fn connect_via_http_proxy(
     let (ws_stream, _) = tokio_tungstenite::client_async_tls(ws_req, tcp).await?;
     Ok(ws_stream)
 }
+
+#[cfg(test)]
+mod test {
+    use std::str::FromStr;
+
+    use hyper::Uri;
+    use url::Url;
+
+    use crate::net::UriExt;
+
+    #[test]
+    fn test_http_uri() {
+        let uri = Uri::from_str("http://proxy.example.com").unwrap();
+        let (host, port) = uri.host_and_port().unwrap();
+        assert_eq!(host, "proxy.example.com");
+        assert_eq!(port, 80);
+        let host_colon_port = uri.host_colon_port().unwrap();
+        assert_eq!(host_colon_port, "proxy.example.com:80");
+    }
+
+    #[test]
+    fn test_https_uri() {
+        let uri = Uri::from_str("https://proxy.example.com").unwrap();
+        let (host, port) = uri.host_and_port().unwrap();
+        assert_eq!(host, "proxy.example.com");
+        assert_eq!(port, 443);
+        let host_colon_port = uri.host_colon_port().unwrap();
+        assert_eq!(host_colon_port, "proxy.example.com:443");
+    }
+
+    #[test]
+    fn test_wss_url() {
+        let uri = Url::from_str("wss://syn.example.com").unwrap();
+        let (host, port) = uri.host_and_port().unwrap();
+        assert_eq!(host, "syn.example.com");
+        assert_eq!(port, 443);
+        let host_colon_port = uri.host_colon_port().unwrap();
+        assert_eq!(host_colon_port, "syn.example.com:443");
+    }
+
+    #[test]
+    fn test_ws_url() {
+        let uri = Url::from_str("ws://syn.example.com").unwrap();
+        let (host, port) = uri.host_and_port().unwrap();
+        assert_eq!(host, "syn.example.com");
+        assert_eq!(port, 80);
+        let host_colon_port = uri.host_colon_port().unwrap();
+        assert_eq!(host_colon_port, "syn.example.com:80");
+    }
+
+    #[test]
+    fn test_explicit_port() {
+        let uri = Url::from_str("wss://syn.example.com:9999").unwrap();
+        let (host, port) = uri.host_and_port().unwrap();
+        assert_eq!(host, "syn.example.com");
+        assert_eq!(port, 9999);
+        let host_colon_port = uri.host_colon_port().unwrap();
+        assert_eq!(host_colon_port, "syn.example.com:9999");
+    }
+}
