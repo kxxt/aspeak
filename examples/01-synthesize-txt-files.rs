@@ -56,10 +56,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-async fn process_file<'a>(
+async fn process_file(
     mut path: PathBuf,
     syn: &RestSynthesizer,
-    options: &TextOptions<'a>,
+    options: &TextOptions<'_>,
 ) -> Result<(), Box<dyn Error>> {
     let text = fs::read_to_string(&path).await?; // Read the text file
     path.set_extension("mp3"); // Change the extension to mp3
