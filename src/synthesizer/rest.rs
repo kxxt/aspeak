@@ -28,6 +28,8 @@ impl RestSynthesizer {
         &self,
         ssml: &str,
     ) -> Result<Bytes, RestSynthesizerError> {
+        #[cfg(test)]
+        std::thread::sleep(std::time::Duration::from_millis(500));
         let res = self
             .client
             .post(&self.endpoint)
