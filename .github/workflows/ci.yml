@@ -48,4 +48,6 @@ jobs:
       - name: Install native dependencies
         if: runner.os == 'Linux'
         run: sudo apt update -y && sudo apt install -y libasound2-dev binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu
-      - run: cargo test --verbose --target ${{ matrix.target }}
+      - name: Build aspeak
+        run: cargo build -F binary -F python --target ${{ matrix.target }}
+      - run: cargo test -F binary -F python --verbose --target ${{ matrix.target }}
