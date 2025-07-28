@@ -16,18 +16,57 @@ crate-type = ["cdylib", "rlib"]
 
 [features]
 audio = ["dep:rodio"]
-python = ["audio", "dep:pyo3", "dep:env_logger", "dep:color-eyre", "synthesizers"]
+python = [
+    "audio",
+    "dep:pyo3",
+    "dep:env_logger",
+    "dep:color-eyre",
+    "synthesizers",
+]
 rest-synthesizer = ["dep:bytes"]
-websocket-synthesizer = ["dep:tokio-tungstenite", "dep:tokio", "dep:futures-util", "dep:tokio-socks", "dep:chrono", "dep:uuid"]
+websocket-synthesizer = [
+    "dep:tokio-tungstenite",
+    "dep:tokio",
+    "dep:futures-util",
+    "dep:tokio-socks",
+    "dep:chrono",
+    "dep:uuid",
+]
 unified-synthesizer = ["dep:async-trait"]
-synthesizers = ["unified-synthesizer", "rest-synthesizer", "websocket-synthesizer"]
+synthesizers = [
+    "unified-synthesizer",
+    "rest-synthesizer",
+    "websocket-synthesizer",
+]
 default = ["default-tls", "synthesizers"]
-binary = ["audio", "synthesizers", "dep:tokio", "dep:clap", "dep:env_logger", "dep:toml", "dep:dirs", "dep:color-eyre", "dep:serde_json", "dep:open", "dep:encoding_rs", "dep:encoding_rs_io"]
+binary = [
+    "audio",
+    "synthesizers",
+    "dep:tokio",
+    "dep:clap",
+    "dep:env_logger",
+    "dep:toml",
+    "dep:dirs",
+    "dep:color-eyre",
+    "dep:serde_json",
+    "dep:open",
+    "dep:encoding_rs",
+    "dep:encoding_rs_io",
+]
 default-tls = ["native-tls"]
 native-tls = ["reqwest/native-tls", "tokio-tungstenite?/native-tls"]
-native-tls-vendored = ["reqwest/native-tls-vendored", "tokio-tungstenite?/native-tls-vendored"]
-rustls-tls-native-roots = ["reqwest/rustls-tls-native-roots", "tokio-tungstenite?/rustls-tls-native-roots"]
-rustls-tls-webpki-roots = ["reqwest/rustls-tls-webpki-roots", "tokio-tungstenite?/rustls-tls-webpki-roots"]
+native-tls-vendored = [
+    "reqwest/native-tls-vendored",
+    "tokio-tungstenite?/native-tls-vendored",
+]
+rustls-tls-native-roots = [
+    "reqwest/rustls-tls-native-roots",
+    "tokio-tungstenite?/rustls-tls-native-roots",
+]
+rustls-tls-webpki-roots = [
+    "reqwest/rustls-tls-webpki-roots",
+    "tokio-tungstenite?/rustls-tls-webpki-roots",
+]
 
 [[bin]]
 name = "aspeak"
@@ -63,14 +102,20 @@ uuid = { version = "1.3.0", features = [
     "macro-diagnostics",
 ], optional = true }
 xml-rs = "0.8.4"
-pyo3 = { version = "0.23", features = ["extension-module", "abi3", "abi3-py310"], optional = true }
+pyo3 = { version = "0.25", features = [
+    "extension-module",
+    "abi3",
+    "abi3-py310",
+], optional = true }
 color-eyre = { version = "0.6.2", optional = true }
-tokio-tungstenite = { version = "0.26", optional = true, default-features = false, features = ["url"] }
+tokio-tungstenite = { version = "0.27", optional = true, default-features = false, features = [
+    "url",
+] }
 tokio = { version = "1.25.0", features = ["rt", "macros"], optional = true }
 futures-util = { version = "0.3.26", default-features = false, optional = true }
 encoding_rs_io = { version = "0.1.7", optional = true }
 encoding_rs = { version = "0.8.32", optional = true }
-toml = { version = "0.8.2", default-features = false, features = [
+toml = { version = "0.9", default-features = false, features = [
     "parse",
 ], optional = true }
 dirs = { version = "6", optional = true }
