@@ -183,7 +183,7 @@ impl<'a> TextOptions<'a> {
     }
 
     /// Rich SSML options
-    pub fn rich_ssml_options(&self) -> &Option<RichSsmlOptions> {
+    pub fn rich_ssml_options(&self) -> &Option<RichSsmlOptions<'_>> {
         &self.rich_ssml_options
     }
 
